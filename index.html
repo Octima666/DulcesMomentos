@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dulces Momentos | Pastelería Artesanal Boutique</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fdf4f5',
+              100: '#fbe8eb',
+              200: '#f7d5d9',
+              300: '#f0b3bc',
+              400: '#e58595',
+              500: '#d75a71',
+              600: '#c03d57',
+              700: '#a12d44',
+              800: '#86283c',
+              900: '#712536',
+              950: '#3f0f1b',
+            }
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"Space Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 font-sans antialiased selection:bg-brand-500 selection:text-white transition-colors duration-300">
+
+  <!-- ======================================================== -->
+  <!-- BARRA DE ANUNCIOS / SUB-HEADER (MEJORA DE CONTRASTE WCAG) -->
+  <!-- ======================================================== -->
+  <div class="bg-pink-200 dark:bg-pink-950/60 border-b border-pink-300 dark:border-pink-900/50 py-2 px-4 text-center text-xs sm:text-sm font-semibold text-pink-950 dark:text-pink-200 transition-colors">
+    <p class="flex items-center justify-center gap-2">
+      <span>✨ Pastelería Artesanal en Puerto Iguazú</span>
+      <span class="hidden sm:inline">•</span>
+      <span class="hidden sm:inline">Envíos exclusivos en Puerto Iguazú o Retiro en Boutique</span>
+      <span class="inline-block animate-pulse">🍓</span>
+    </p>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- NAVBAR PRINCIPAL                                         -->
+  <!-- ======================================================== -->
+  <header class="sticky top-0 z-40 bg-white/85 dark:bg-stone-900/85 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-pink-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-serif text-2xl font-bold tracking-tight text-stone-900 dark:text-white block">Dulces Momentos</span>
+          <span class="text-xs uppercase tracking-widest text-brand-600 dark:text-brand-400 font-semibold">Pastelería Boutique</span>
+        </div>
+      </a>
+
+      <!-- Acciones de Navegación -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <!-- Selector Modo Oscuro -->
+        <button id="btn-dark-mode" aria-label="Cambiar modo oscuro" class="p-2.5 rounded-xl text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 transition">
+          <svg id="icon-sun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <svg id="icon-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
+        <!-- Botón Acceso KDS (Cocina) -->
+        <button id="btn-abrir-auth-kds" class="flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
+          <svg class="w-4 h-4 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span>Panel Cocina (KDS)</span>
+        </button>
+
+        <!-- Botón Carrito Flotante/Header -->
+        <button id="btn-abrir-carrito" class="relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium shadow-md shadow-brand-600/30 transition transform active:scale-95">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <span class="hidden sm:inline text-sm">Mi Carrito</span>
+          <span id="badge-carrito" class="bg-white text-brand-700 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- HERO SECTION                                             -->
+  <!-- ======================================================== -->
+  <section class="relative overflow-hidden py-16 lg:py-24 bg-gradient-to-b from-brand-50/50 via-stone-50 to-stone-50 dark:from-stone-900 dark:via-stone-950 dark:to-stone-950 border-b border-stone-200 dark:border-stone-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <span class="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 mb-4">
+        Creaciones Gourmet & Recetas de Autor
+      </span>
+      <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-stone-900 dark:text-white max-w-3xl mx-auto leading-tight">
+        Momentos dulces convertidos en <span class="text-brand-600 dark:text-brand-400 italic">arte pastelero</span>
+      </h1>
+      <p class="mt-4 text-base sm:text-lg text-stone-600 dark:text-stone-300 max-w-2xl mx-auto">
+        Elaboración diaria con ingredientes premium. Personalizá tus tortas con toppings exclusivos y hacé tu pedido por WhatsApp con entrega en Puerto Iguazú.
+      </p>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- CATÁLOGO DINÁMICO (V2.0)                                 -->
+  <!-- ======================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Filtros de Categorías -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b border-stone-200 dark:border-stone-800">
+      <div>
+        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">Nuestra Colección</h2>
+        <p class="text-sm text-stone-500 dark:text-stone-400">Seleccioná tus delicias favoritas y personalizalas a tu gusto</p>
+      </div>
+      <div id="filtros-categoria" class="flex flex-wrap gap-2">
+        <button data-categoria="todos" class="btn-filtro active px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-brand-600 text-white shadow-sm transition">Todos</button>
+        <button data-categoria="Tortas" class="btn-filtro px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 transition">Tortas</button>
+        <button data-categoria="Postres" class="btn-filtro px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 transition">Postres</button>
+        <button data-categoria="Especialidades" class="btn-filtro px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 transition">Especialidades</button>
+      </div>
+    </div>
+
+    <!-- Contenedor dinámico del catálogo -->
+    <div id="catalogo-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Se inyecta dinámicamente con JavaScript (.map()) -->
+    </div>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: AUTENTICACIÓN SEGURA KDS (SIN PROMPT NATIVO)      -->
+  <!-- ======================================================== -->
+  <div id="modal-auth-kds" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm transition-opacity">
+    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl transform transition-all">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center mb-4">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+      <h3 class="font-serif text-2xl font-bold text-center text-stone-900 dark:text-white mb-2">Acceso a Cocina (KDS)</h3>
+      <p class="text-xs text-stone-500 dark:text-stone-400 text-center mb-6">Ingresá el PIN de seguridad de la pastelería para gestionar las comandas en tiempo real.</p>
+      
+      <form id="form-auth-kds" class="space-y-4">
+        <div>
+          <label for="input-kds-pin" class="block text-xs font-semibold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">PIN / Clave de Cocina</label>
+          <input 
+            type="password" 
+            id="input-kds-pin" 
+            placeholder="••••" 
+            maxlength="10"
+            required
+            class="w-full px-4 py-3 text-center text-xl tracking-widest rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition"
+          >
+          <p id="error-kds-pin" class="hidden text-xs text-red-500 mt-2 text-center font-medium">Clave incorrecta. Probá con "1234".</p>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" id="btn-cancelar-kds" class="flex-1 px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 text-sm font-semibold hover:bg-stone-100 dark:hover:bg-stone-800 transition">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 px-4 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-md shadow-brand-600/30 transition">
+            Desbloquear
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: CARRITO Y CHECKOUT ("TU PEDIDO")                  -->
+  <!-- ======================================================== -->
+  <div id="drawer-carrito" class="modal-carrito-backdrop hidden">
+    <div id="overlay-carrito" class="fixed inset-0 bg-stone-950/60 backdrop-blur-xs -z-10"></div>
+    
+    <div class="modal-carrito-card">
+      <!-- Header Modal Carrito -->
+      <div class="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-900/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-xl shadow-xs">
+            🛒
+          </div>
+          <div>
+            <h3 class="font-serif text-lg sm:text-xl font-bold text-stone-900 dark:text-white">Tu Pedido</h3>
+            <p id="total-items-carrito" class="text-xs text-stone-500 dark:text-stone-400">0 productos seleccionados</p>
+          </div>
+        </div>
+        <button id="btn-cerrar-carrito" class="p-2 rounded-xl text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Lista de Items en Carrito (Scrollable con cabecera de producto 70x70) -->
+      <div id="lista-carrito" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
+        <!-- Renderizado dinámico -->
+      </div>
+
+      <!-- Formulario Checkout y Resumen (Apilado Vertical Responsive) -->
+      <div class="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50/90 dark:bg-stone-900/80 space-y-3.5 overflow-y-auto max-h-[50vh]">
+        
+        <!-- Método de Entrega -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1.5">Método de Entrega</label>
+          <div class="metodos-entrega-grid grid grid-cols-2 gap-2.5">
+            <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition">
+              <input type="radio" name="tipo-entrega" value="takeaway" checked class="text-brand-600 focus:ring-brand-500">
+              <span>🛍️ Retiro en Local</span>
+            </label>
+            <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition">
+              <input type="radio" name="tipo-entrega" value="delivery" class="text-brand-600 focus:ring-brand-500">
+              <span>🛵 Delivery ($ 1.500)</span>
+            </label>
+          </div>
+          <p class="text-[11px] text-brand-700 dark:text-brand-400 mt-1 font-medium">📍 Envíos exclusivos en Puerto Iguazú, Misiones.</p>
+        </div>
+
+        <!-- Datos del Cliente -->
+        <div class="space-y-2.5">
+          <div>
+            <label for="input-nombre" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Nombre Completo *</label>
+            <input type="text" id="input-nombre" placeholder="Ej. Camila Benítez" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label for="input-telefono" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Teléfono WhatsApp * (mínimo 8 dígitos)</label>
+            <input type="tel" id="input-telefono" placeholder="Ej. 3757 571985" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <p id="error-telefono" class="hidden text-xs text-red-500 mt-1 font-medium">Ingresá un número válido (mínimo 8 dígitos).</p>
+          </div>
+
+          <div id="campo-direccion" class="hidden space-y-1">
+            <div class="flex flex-wrap items-center justify-between gap-1">
+              <label for="input-direccion" class="block text-xs font-semibold text-stone-700 dark:text-stone-300">Dirección en Puerto Iguazú *</label>
+              <button type="button" id="btn-geolocalizar" class="text-xs text-brand-600 dark:text-brand-400 hover:underline font-bold flex items-center gap-1">
+                🎯 Validar mi Ubicación
+              </button>
+            </div>
+            <input type="text" id="input-direccion" placeholder="Ej. Av. Victoria Aguirre 450, Puerto Iguazú" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+            <p id="info-geolocalizacion" class="text-[11px] text-stone-500 dark:text-stone-400"></p>
+          </div>
+
+          <div>
+            <label for="input-notas" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Dedicatoria o Notas Especiales</label>
+            <input type="text" id="input-notas" placeholder="Ej. Placa de chocolate con dedicatoria" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Desglose de Totales -->
+        <div class="border-t border-stone-200 dark:border-stone-800 pt-2.5 space-y-1 text-xs sm:text-sm">
+          <div class="flex justify-between text-stone-600 dark:text-stone-400">
+            <span>Subtotal</span>
+            <span id="subtotal-carrito" class="font-mono font-medium">$ 0</span>
+          </div>
+          <div class="flex justify-between text-stone-600 dark:text-stone-400">
+            <span>Envío (Puerto Iguazú)</span>
+            <span id="costo-envio" class="font-mono font-medium">$ 0</span>
+          </div>
+          <div class="flex justify-between font-bold text-base sm:text-lg text-stone-900 dark:text-white pt-1.5 border-t border-dashed border-stone-300 dark:border-stone-700">
+            <span>Total a Pagar</span>
+            <span id="total-carrito" class="text-brand-600 dark:text-brand-400">$ 0</span>
+          </div>
+        </div>
+
+        <!-- Botón WhatsApp -->
+        <button id="btn-checkout-whatsapp" class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/25 transition transform active:scale-98">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          <span>Confirmar Pedido vía WhatsApp</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- PANEL KDS (KITCHEN DISPLAY SYSTEM)                       -->
+  <!-- ======================================================== -->
+  <section id="seccion-kds" class="hidden fixed inset-0 z-50 bg-stone-900 text-stone-100 overflow-y-auto p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto space-y-6">
+      
+      <!-- Barra Superior KDS -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-stone-800/90 border border-stone-700 shadow-xl">
+        <div class="flex items-center gap-3">
+          <span class="p-2 rounded-xl bg-brand-600 text-white font-bold">👩‍🍳</span>
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              KDS - Control de Comandas de Cocina
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            </h2>
+            <p class="text-xs text-stone-400">Dulces Momentos • Puerto Iguazú</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="btn-limpiar-comandas" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-stone-700 hover:bg-stone-600 text-stone-200 transition">
+            Limpiar Entregadas
+          </button>
+          <button id="btn-cerrar-kds" class="px-4 py-2 text-xs font-bold rounded-xl bg-red-600 hover:bg-red-700 text-white transition">
+            Salir del KDS
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtro y Contadores KDS -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-4 rounded-2xl bg-stone-800/50 border border-stone-700">
+          <p class="text-xs uppercase text-amber-400 font-bold">Pendientes</p>
+          <p id="kds-count-pendiente" class="text-3xl font-bold text-white mt-1">0</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-stone-800/50 border border-stone-700">
+          <p class="text-xs uppercase text-blue-400 font-bold">En Preparación</p>
+          <p id="kds-count-preparacion" class="text-3xl font-bold text-white mt-1">0</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-stone-800/50 border border-stone-700">
+          <p class="text-xs uppercase text-emerald-400 font-bold">Listas / Entregadas</p>
+          <p id="kds-count-listo" class="text-3xl font-bold text-white mt-1">0</p>
+        </div>
+      </div>
+
+      <!-- Grid de Comandas -->
+      <div id="grid-comandas-kds" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Tarjetas de comanda generadas dinámicamente -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- PLANTILLA IMPRESIÓN TÉRMICA (PRINT TICKETS KDS)          -->
+  <!-- ======================================================== -->
+  <div id="ticket-termico-impresion" class="ticket-termico hidden">
+    <!-- Contenido inyectado al imprimir ticket de comanda -->
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- CONTENEDOR DE TOAST NOTIFICATIONS                        -->
+  <!-- ======================================================== -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- Script Principal -->
+  <script src="app.js"></script>
+</body>
+</html>
