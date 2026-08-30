@@ -162,16 +162,16 @@
       
       <form id="form-auth-kds" class="space-y-4">
         <div>
-          <label for="input-kds-pin" class="block text-xs font-semibold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">PIN / Clave de Cocina</label>
+          <label for="input-kds-pin" class="block text-xs font-semibold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">Clave de Cocina</label>
           <input 
             type="password" 
             id="input-kds-pin" 
-            placeholder="••••" 
-            maxlength="10"
+            placeholder="Ingresá la clave..." 
+            autocomplete="current-password"
             required
-            class="w-full px-4 py-3 text-center text-xl tracking-widest rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition"
+            class="w-full px-4 py-3 text-center text-lg rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition"
           >
-          <p id="error-kds-pin" class="hidden text-xs text-red-500 mt-2 text-center font-medium">Clave incorrecta. Probá con "1234".</p>
+          <p id="error-kds-pin" class="hidden text-xs text-red-500 dark:text-red-400 mt-2 text-center font-semibold">Clave incorrecta. Intentá nuevamente.</p>
         </div>
 
         <div class="flex gap-3 pt-2">

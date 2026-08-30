@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const CONFIG = {
     // Número Oficial WhatsApp para Checkout: +54 9 3757 57-1985
     telefonoWhatsApp: '5493757571985',
-    claveCocinaKDS: '1234',
+    // Clave de Seguridad de Cocina (KDS)
+    claveCocinaKDS: 'niledlajo',
     costoEnvioFijo: 1500, // Costo de envío en Puerto Iguazú ($ ARS)
     
     // Coordenadas de Referencia: Centro de Puerto Iguazú, Misiones, Argentina
@@ -1054,29 +1055,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCerrarKDS = document.getElementById('btn-cerrar-kds');
     const btnLimpiarComandas = document.getElementById('btn-limpiar-comandas');
 
-    btnAbrirAuthKDS?.addEventListener('click', () => {
+    const resetearModalKDS = () => {
       if (inputKdsPin) inputKdsPin.value = '';
-      errorKdsPin?.classList.add('hidden');
+      if (errorKdsPin) {
+        errorKdsPin.classList.add('hidden');
+        errorKdsPin.textContent = 'Clave incorrecta. Intentá nuevamente.';
+      }
+    };
+
+    btnAbrirAuthKDS?.addEventListener('click', () => {
+      resetearModalKDS();
       modalAuthKDS?.classList.remove('hidden');
       inputKdsPin?.focus();
     });
 
     btnCancelarKDS?.addEventListener('click', () => {
+      resetearModalKDS();
       modalAuthKDS?.classList.add('hidden');
     });
 
     formAuthKDS?.addEventListener('submit', (e) => {
       e.preventDefault();
-      const pinIngresado = inputKdsPin?.value.trim();
+      const pinIngresado = (inputKdsPin?.value || '').trim();
 
       if (pinIngresado === CONFIG.claveCocinaKDS) {
+        resetearModalKDS();
         modalAuthKDS?.classList.add('hidden');
         seccionKDS?.classList.remove('hidden');
         renderizarKDS();
         mostrarToast('Acceso autorizado al Panel de Cocina (KDS).', 'success');
       } else {
-        errorKdsPin?.classList.remove('hidden');
-        inputKdsPin?.focus();
+        if (errorKdsPin) {
+          errorKdsPin.textContent = 'Clave incorrecta. Intentá nuevamente.';
+          errorKdsPin.classList.remove('hidden');
+        }
+        if (inputKdsPin) {
+          inputKdsPin.value = '';
+          inputKdsPin.focus();
+        }
       }
     });
 
