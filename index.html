@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<html lang="es" class="scroll-smooth overflow-x-hidden w-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,7 +41,7 @@
   </script>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 font-sans antialiased selection:bg-brand-500 selection:text-white transition-colors duration-300">
+<body class="overflow-x-hidden w-full bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 font-sans antialiased selection:bg-brand-500 selection:text-white transition-colors duration-300">
 
   <!-- ======================================================== -->
   <!-- BARRA DE ANUNCIOS / SUB-HEADER (MEJORA DE CONTRASTE WCAG) -->
@@ -56,81 +56,82 @@
   </div>
 
   <!-- ======================================================== -->
-  <!-- NAVBAR PRINCIPAL                                         -->
+  <!-- NAVBAR PRINCIPAL (RESPONSIVE FLEX-WRAP & GAP)            -->
   <!-- ======================================================== -->
-  <header class="sticky top-0 z-40 bg-white/85 dark:bg-stone-900/85 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-0 min-h-16 sm:h-20 flex flex-wrap items-center justify-between gap-3">
       <!-- Logo -->
-      <a href="#" class="flex items-center gap-3 group">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-pink-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <a href="#" class="flex items-center gap-2.5 sm:gap-3 group">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-pink-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform shrink-0">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
           </svg>
         </div>
         <div>
-          <span class="font-serif text-2xl font-bold tracking-tight text-stone-900 dark:text-white block">Dulces Momentos</span>
-          <span class="text-xs uppercase tracking-widest text-brand-600 dark:text-brand-400 font-semibold">Pastelería Boutique</span>
+          <span class="font-serif text-lg sm:text-2xl font-bold tracking-tight text-stone-900 dark:text-white block leading-tight">Dulces Momentos</span>
+          <span class="text-[10px] sm:text-xs uppercase tracking-widest text-brand-600 dark:text-brand-400 font-semibold">Pastelería Boutique</span>
         </div>
       </a>
 
       <!-- Acciones de Navegación -->
-      <div class="flex items-center gap-3 sm:gap-4">
+      <div class="flex items-center flex-wrap gap-2 sm:gap-3">
         <!-- Selector Modo Oscuro -->
-        <button id="btn-dark-mode" aria-label="Cambiar modo oscuro" class="p-2.5 rounded-xl text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 transition">
-          <svg id="icon-sun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button id="btn-dark-mode" aria-label="Cambiar modo oscuro" class="p-2 sm:p-2.5 rounded-xl text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 transition">
+          <svg id="icon-sun" class="w-4 h-4 sm:w-5 sm:h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
-          <svg id="icon-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg id="icon-moon" class="w-4 h-4 sm:w-5 sm:h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
           </svg>
         </button>
 
         <!-- Botón Acceso KDS (Cocina) -->
-        <button id="btn-abrir-auth-kds" class="flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
-          <svg class="w-4 h-4 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button id="btn-abrir-auth-kds" class="flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
+          <svg class="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          <span>Panel Cocina (KDS)</span>
+          <span class="hidden sm:inline">Panel Cocina (KDS)</span>
+          <span class="sm:hidden">Cocina</span>
         </button>
 
-        <!-- Botón Carrito Flotante/Header -->
-        <button id="btn-abrir-carrito" class="relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium shadow-md shadow-brand-600/30 transition transform active:scale-95">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Botón Carrito Header -->
+        <button id="btn-abrir-carrito" class="relative flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium shadow-md shadow-brand-600/30 transition transform active:scale-95">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
           </svg>
-          <span class="hidden sm:inline text-sm">Mi Carrito</span>
-          <span id="badge-carrito" class="bg-white text-brand-700 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">0</span>
+          <span class="hidden md:inline text-xs sm:text-sm">Mi Carrito</span>
+          <span id="badge-carrito" class="bg-white text-brand-700 text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full shadow-sm">0</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- ======================================================== -->
-  <!-- HERO SECTION                                             -->
+  <!-- HERO SECTION (PROGRESIÓN RESPONSIVE text-3xl A sm:text-5xl) -->
   <!-- ======================================================== -->
-  <section class="relative overflow-hidden py-16 lg:py-24 bg-gradient-to-b from-brand-50/50 via-stone-50 to-stone-50 dark:from-stone-900 dark:via-stone-950 dark:to-stone-950 border-b border-stone-200 dark:border-stone-800">
+  <section class="relative overflow-hidden py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-brand-50/50 via-stone-50 to-stone-50 dark:from-stone-900 dark:via-stone-950 dark:to-stone-950 border-b border-stone-200 dark:border-stone-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
       <span class="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 mb-4">
         Creaciones Gourmet & Recetas de Autor
       </span>
-      <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-stone-900 dark:text-white max-w-3xl mx-auto leading-tight">
+      <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-stone-900 dark:text-white max-w-3xl mx-auto leading-tight">
         Momentos dulces convertidos en <span class="text-brand-600 dark:text-brand-400 italic">arte pastelero</span>
       </h1>
-      <p class="mt-4 text-base sm:text-lg text-stone-600 dark:text-stone-300 max-w-2xl mx-auto">
+      <p class="mt-4 text-sm sm:text-lg text-stone-600 dark:text-stone-300 max-w-2xl mx-auto">
         Elaboración diaria con ingredientes premium. Personalizá tus tortas con toppings exclusivos y hacé tu pedido por WhatsApp con entrega en Puerto Iguazú.
       </p>
     </div>
   </section>
 
   <!-- ======================================================== -->
-  <!-- CATÁLOGO DINÁMICO (V2.0)                                 -->
+  <!-- CATÁLOGO DINÁMICO                                        -->
   <!-- ======================================================== -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <!-- Filtros de Categorías -->
     <div class="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b border-stone-200 dark:border-stone-800">
       <div>
         <h2 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">Nuestra Colección</h2>
-        <p class="text-sm text-stone-500 dark:text-stone-400">Seleccioná tus delicias favoritas y personalizalas a tu gusto</p>
+        <p class="text-xs sm:text-sm text-stone-500 dark:text-stone-400">Seleccioná tus delicias favoritas y personalizalas a tu gusto</p>
       </div>
       <div id="filtros-categoria" class="flex flex-wrap gap-2">
         <button data-categoria="todos" class="btn-filtro active px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-brand-600 text-white shadow-sm transition">Todos</button>
@@ -141,13 +142,13 @@
     </div>
 
     <!-- Contenedor dinámico del catálogo -->
-    <div id="catalogo-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div id="catalogo-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
       <!-- Se inyecta dinámicamente con JavaScript (.map()) -->
     </div>
   </main>
 
   <!-- ======================================================== -->
-  <!-- MODAL: AUTENTICACIÓN SEGURA KDS (SIN PROMPT NATIVO)      -->
+  <!-- MODAL: AUTENTICACIÓN SEGURA KDS (PIN DE COCINA)          -->
   <!-- ======================================================== -->
   <div id="modal-auth-kds" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm transition-opacity">
     <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl transform transition-all">
@@ -193,7 +194,7 @@
     
     <div class="modal-carrito-card">
       <!-- Header Modal Carrito -->
-      <div class="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-900/60">
+      <div class="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-900/60 shrink-0">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-xl shadow-xs">
             🛒
@@ -203,33 +204,97 @@
             <p id="total-items-carrito" class="text-xs text-stone-500 dark:text-stone-400">0 productos seleccionados</p>
           </div>
         </div>
-        <button id="btn-cerrar-carrito" class="p-2 rounded-xl text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800 transition">
+        <button id="btn-cerrar-carrito" aria-label="Cerrar carrito" class="p-2 rounded-xl text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800 transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <!-- Lista de Items en Carrito (Scrollable con cabecera de producto 70x70) -->
+      <!-- Lista de Items en Carrito (Scrollable) -->
       <div id="lista-carrito" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
         <!-- Renderizado dinámico -->
       </div>
 
-      <!-- Formulario Checkout y Resumen (Apilado Vertical Responsive) -->
+      <!-- Formulario Checkout y Resumen -->
       <div class="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50/90 dark:bg-stone-900/80 space-y-3.5 overflow-y-auto max-h-[50vh]">
         
         <!-- Método de Entrega -->
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1.5">Método de Entrega</label>
+          <label class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+            📦 Modalidad de Entrega *
+          </label>
           <div class="metodos-entrega-grid grid grid-cols-2 gap-2.5">
-            <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition">
+            <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition select-none">
               <input type="radio" name="tipo-entrega" value="takeaway" checked class="text-brand-600 focus:ring-brand-500">
               <span>🛍️ Retiro en Local</span>
             </label>
-            <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition">
+            <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition select-none">
               <input type="radio" name="tipo-entrega" value="delivery" class="text-brand-600 focus:ring-brand-500">
               <span>🛵 Delivery ($ 1.500)</span>
             </label>
           </div>
           <p class="text-[11px] text-brand-700 dark:text-brand-400 mt-1 font-medium">📍 Envíos exclusivos en Puerto Iguazú, Misiones.</p>
+        </div>
+
+        <!-- Método de Pago (SIN API Mercado Pago) -->
+        <div class="space-y-1.5 pt-1">
+          <label class="block text-xs font-semibold text-stone-700 dark:text-stone-300">
+            💳 Método de Pago *
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition select-none">
+              <input type="radio" name="metodo-pago" value="efectivo" checked class="text-brand-600 focus:ring-brand-500">
+              <span>💵 Efectivo (al recibir / retirar)</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition select-none">
+              <input type="radio" name="metodo-pago" value="transferencia" class="text-brand-600 focus:ring-brand-500">
+              <span>🏦 Transferencia / QR</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Bloque de Datos de Transferencia y Comprobante (Oculto por defecto) -->
+        <div id="bloque-transferencia" class="hidden p-3.5 rounded-2xl bg-amber-50/90 dark:bg-stone-800/90 border border-amber-300/80 dark:border-amber-800/60 space-y-3 transition-all">
+          <div class="flex items-start gap-3">
+            <div class="p-2 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-bold text-lg shrink-0">
+              🏦
+            </div>
+            <div class="flex-1 text-xs text-stone-700 dark:text-stone-200">
+              <p class="font-bold text-sm text-stone-900 dark:text-white flex items-center justify-between">
+                <span>Datos Bancarios / Mercado Pago</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-md bg-amber-200/80 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 font-semibold uppercase">Alias / QR</span>
+              </p>
+              <div class="mt-2 space-y-1 font-mono text-[11px] sm:text-xs">
+                <div class="flex justify-between items-center py-0.5 border-b border-amber-200/60 dark:border-stone-700/60">
+                  <span class="text-stone-500 dark:text-stone-400">Alias MP:</span>
+                  <span class="font-bold text-brand-700 dark:text-brand-400 select-all">dulcesmomentos.mp</span>
+                </div>
+                <div class="flex justify-between items-center py-0.5 border-b border-amber-200/60 dark:border-stone-700/60">
+                  <span class="text-stone-500 dark:text-stone-400">CVU / CBU:</span>
+                  <span class="font-bold text-stone-800 dark:text-stone-200 select-all">0000003100085472198532</span>
+                </div>
+                <div class="flex justify-between items-center py-0.5">
+                  <span class="text-stone-500 dark:text-stone-400">Titular:</span>
+                  <span class="font-semibold text-stone-800 dark:text-stone-200">Dulces Momentos Boutique</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Campo Número de Comprobante Obligatorio -->
+          <div class="pt-1 border-t border-amber-200/60 dark:border-stone-700/60">
+            <label for="input-comprobante" class="block text-xs font-bold text-amber-950 dark:text-amber-300 mb-1">
+              Número o Cód. de Comprobante * <span class="font-normal text-[11px] text-stone-500 dark:text-stone-400">(Obligatorio)</span>
+            </label>
+            <input 
+              type="text" 
+              id="input-comprobante" 
+              placeholder="Ej. Operación #8945231 o últimos 6 dígitos" 
+              class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-900 border border-amber-300 dark:border-amber-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-none transition"
+            >
+            <p id="aviso-bloqueo-comprobante" class="text-[11px] text-amber-800 dark:text-amber-300 font-semibold mt-1 flex items-center gap-1">
+              🔒 Botón bloqueado hasta ingresar el número de comprobante.
+            </p>
+          </div>
         </div>
 
         <!-- Datos del Cliente -->
@@ -287,6 +352,19 @@
 
     </div>
   </div>
+
+  <!-- ======================================================== -->
+  <!-- BOTÓN FLOTANTE DEL CARRITO (FIJO INFERIOR DERECHO Z-50)  -->
+  <!-- ======================================================== -->
+  <button id="btn-abrir-carrito-flotante" aria-label="Abrir Carrito de Compras" class="fixed bottom-5 right-5 z-50 flex items-center justify-center gap-2.5 px-4 py-3 sm:px-5 sm:py-3.5 rounded-full bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-bold shadow-2xl shadow-brand-600/50 transition-all transform hover:-translate-y-1 group">
+    <div class="relative flex items-center justify-center">
+      <svg class="w-6 h-6 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      </svg>
+      <span id="badge-carrito-flotante" class="absolute -top-2.5 -right-3.5 bg-white text-brand-700 text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center shadow-md ring-2 ring-brand-600">0</span>
+    </div>
+    <span class="hidden sm:inline text-sm font-semibold tracking-wide">Mi Carrito</span>
+  </button>
 
   <!-- ======================================================== -->
   <!-- PANEL KDS (KITCHEN DISPLAY SYSTEM)                       -->

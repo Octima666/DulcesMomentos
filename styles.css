@@ -3,6 +3,13 @@
 /* Pastelería Boutique Dulces Momentos                      */
 /* ======================================================== */
 
+html,
+body {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+}
+
 /* Scrollbars estilizados */
 ::-webkit-scrollbar {
   width: 7px;
@@ -20,7 +27,7 @@
 }
 
 /* ======================================================== */
-/* 1. MODAL RESPONSIVE (PROBLEMA 2)                         */
+/* 1. MODAL RESPONSIVE                                      */
 /* Escritorio: max-width 550px centrado                     */
 /* Móvil: 100% ancho con apilamiento vertical               */
 /* ======================================================== */
@@ -69,7 +76,7 @@
 }
 
 /* ======================================================== */
-/* 2. FILA DE PRODUCTO EN CARRITO (PROBLEMA 1)              */
+/* 2. FILA DE PRODUCTO EN CARRITO                           */
 /* Sin overflow hidden extraño, flexbox directo, 70x70px img */
 /* ======================================================== */
 .carrito-item-row {
@@ -190,13 +197,22 @@
   background: #292524;
 }
 
+/* Botón checkout estado bloqueado */
+#btn-checkout-whatsapp:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.85);
+  box-shadow: none !important;
+}
+
 /* ======================================================== */
 /* 3. MEDIA QUERIES PARA MÓVILES (APILAMIENTO VERTICAL)      */
 /* ======================================================== */
 @media (max-width: 640px) {
   .modal-carrito-backdrop {
     padding: 0.5rem;
-    align-items: flex-end; /* En móviles abre como bottom-sheet / pantalla completa */
+    align-items: flex-end; /* En móviles abre como bottom-sheet */
   }
 
   .modal-carrito-card {
@@ -208,7 +224,7 @@
   }
 
   .metodos-entrega-grid {
-    grid-template-columns: 1fr !important; /* Apilado vertical de métodos */
+    grid-template-columns: 1fr !important; /* Apilado vertical */
     gap: 0.5rem !important;
   }
 

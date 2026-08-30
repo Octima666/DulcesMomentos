@@ -4,10 +4,12 @@
  * 
  * Funcionalidades clave:
  * 1. UI de Carrito 100% Responsive con miniaturas ampliadas y tipografía legible
- * 2. Geolocalización y Geocodificación Inversa estricta para Puerto Iguazú, Misiones
- * 3. Checkout y redirección automatizada a WhatsApp (+54 9 3757 57-1985)
- * 4. Persistencia LocalStorage (Carrito & Comandas KDS)
- * 5. KDS y Soporte de Impresión Térmica
+ * 2. Método de Pago (Efectivo / Transferencia Alias QR) sin API externa
+ * 3. Bloqueo estricto del botón de confirmación hasta ingresar N° de comprobante
+ * 4. Envío estructurado a WhatsApp oficial (+54 9 3757 57-1985) con emojis y datos completos
+ * 5. Geolocalización y Geocodificación Inversa estricta para Puerto Iguazú, Misiones
+ * 6. Persistencia LocalStorage (Carrito & Comandas KDS)
+ * 7. Panel KDS y Soporte de Impresión Térmica
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -59,63 +61,62 @@ document.addEventListener('DOMContentLoaded', () => {
       badge: 'Más Vendido',
       stock: 8,
       toppings: [
-        { id: 'top-dl', nombre: 'Extra Dulce de Leche Repostero', precio: 800 },
-        { id: 'top-choc', nombre: 'Baño de Chocolate Belga', precio: 1200 },
-        { id: 'top-nueces', nombre: 'Nueces Pecán Tostadas', precio: 950 }
+        { id: 'top-arandanos', nombre: 'Extra Arándanos Frescos', precio: 1200 },
+        { id: 'top-choco-blanco', nombre: 'Rulos de Chocolate Blanco Belga', precio: 900 }
       ]
     },
     {
       id: 'prod-002',
       nombre: 'Cheesecake New York Clásico',
-      categoria: 'Tortas',
-      precio: 16200,
-      descripcion: 'Textura cremosa y densa horneada a baño maría sobre base de galletas caseras con compota de frambuesas.',
+      categoria: 'Postres',
+      precio: 15800,
+      descripcion: 'Textura ultra cremosa horneada a baño María con base de galletas Graham y coulis de frutos silvestres.',
       imagen: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=600&q=80',
-      badge: 'Recomendado',
+      badge: 'Favorito',
       stock: 5,
       toppings: [
-        { id: 'top-maracuya', nombre: 'Salsa Reducción de Maracuyá', precio: 1100 },
-        { id: 'top-frutilla', nombre: 'Frutillas Misioneras Frescas', precio: 900 }
+        { id: 'top-maracuya', nombre: 'Salsa Reducción de Maracuyá', precio: 1500 },
+        { id: 'top-frutillas', nombre: 'Frutillas maceradas', precio: 1100 }
       ]
     },
     {
       id: 'prod-003',
-      nombre: 'Marquise de Chocolate & Merengue',
+      nombre: 'Tarta Húmeda de Chocolate Belga',
       categoria: 'Tortas',
-      precio: 15800,
-      descripcion: 'Base húmeda de puro chocolate semi-amargo sin harinas, abundante dulce de leche y picos de merengue italiano flambeado.',
+      precio: 16200,
+      descripcion: 'Intenso bizcocho de cacao 70% con ganache de chocolate semiamargo y un toque de café espresso suave.',
       imagen: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80',
-      badge: 'Sin TACC',
+      badge: 'Gourmet',
       stock: 6,
       toppings: [
-        { id: 'top-almendras', nombre: 'Almendras Fileteadas', precio: 1000 },
-        { id: 'top-kinder', nombre: 'Cubos de Chocolate Kinder', precio: 1500 }
+        { id: 'top-avellanas', nombre: 'Praliné de Avellanas Tostadas', precio: 1400 },
+        { id: 'top-ddl', nombre: 'Corazón de Dulce de Leche Repostero', precio: 1000 }
       ]
     },
     {
       id: 'prod-004',
-      nombre: 'Box Degustación de Macarons (x6)',
-      categoria: 'Especialidades',
-      precio: 9200,
-      descripcion: 'Suaves tapitas de harina de almendras con ganache de pistacho, frutos rojos, chocolate blanco y maracuyá.',
-      imagen: 'https://images.unsplash.com/photo-1569864358642-9d1684040f43?auto=format&fit=crop&w=600&q=80',
-      badge: 'Boutique',
-      stock: 12,
+      nombre: 'Lemon Pie Merengado Suizo',
+      categoria: 'Postres',
+      precio: 13900,
+      descripcion: 'Curd de limón fresco con el balance perfecto de acidez, coronado con abundante merengue suizo dorado al soplete.',
+      imagen: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=600&q=80',
+      badge: 'Recomendado',
+      stock: 9,
       toppings: [
-        { id: 'top-cinta', nombre: 'Caja con Cinta de Seda y Tarjeta', precio: 600 }
+        { id: 'top-ralladura', nombre: 'Zeste de Limas y Flores Comestibles', precio: 600 }
       ]
     },
     {
       id: 'prod-005',
-      nombre: 'Lemon Pie Gourmet',
-      categoria: 'Postres',
-      precio: 12800,
-      descripcion: 'Curd de limones frescos con equilibrio perfecto entre acidez y dulzura, bajo una generosa capa de merengue suave.',
-      imagen: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=600&q=80',
-      badge: 'Clásico',
-      stock: 7,
+      nombre: 'Macarons Parisinos (Caja x6)',
+      categoria: 'Especialidades',
+      precio: 9800,
+      descripcion: 'Delicadas tapas de almendra con ganache surtido: Pistacho, Frambuesa, Chocolate Intenso y Maracuyá.',
+      imagen: 'https://images.unsplash.com/photo-1569864358642-9d1684040f43?auto=format&fit=crop&w=600&q=80',
+      badge: 'Boutique',
+      stock: 12,
       toppings: [
-        { id: 'top-zest', nombre: 'Zeste Caramelizado de Lima', precio: 500 }
+        { id: 'top-caja-regalo', nombre: 'Packaging de Regalo + Moño de Seda', precio: 800 }
       ]
     },
     {
@@ -142,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     comandasCocina: [],
     categoriaSeleccionada: 'todos',
     tipoEntrega: 'takeaway', // 'takeaway' | 'delivery'
+    metodoPago: 'efectivo',  // 'efectivo' | 'transferencia'
     ubicacionValidadaIguazu: false
   };
 
@@ -165,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
             telefono: '3757445566',
             tipoEntrega: 'delivery',
             direccion: 'Av. Victoria Aguirre 450, Puerto Iguazú',
+            metodoPago: 'transferencia',
+            comprobante: '94821034',
             notas: 'Sin cubiertos plásticos por favor',
             estado: 'en_preparacion',
             items: [
@@ -219,119 +223,112 @@ document.addEventListener('DOMContentLoaded', () => {
 
     toast.innerHTML = `
       <span class="text-base">${icono}</span>
-      <div class="flex-1 leading-snug">${mensaje}</div>
-      <button class="text-white/80 hover:text-white text-xs font-bold ml-2">✕</button>
+      <p class="flex-1">${mensaje}</p>
     `;
 
-    toast.querySelector('button').onclick = () => {
-      toast.classList.add('opacity-0', 'translate-y-2');
-      setTimeout(() => toast.remove(), 300);
-    };
-
     contenedor.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.remove('opacity-0', 'translate-y-2'));
+
+    requestAnimationFrame(() => {
+      toast.classList.remove('translate-y-2', 'opacity-0');
+    });
 
     setTimeout(() => {
-      if (toast.parentElement) {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }
-    }, 4500);
+      toast.classList.add('opacity-0', 'translate-y-2');
+      setTimeout(() => toast.remove(), 300);
+    }, 3800);
   };
 
   // ========================================================
-  // 7. RENDERIZADO DEL CATÁLOGO DINÁMICO (V2.0)
+  // 7. RENDERIZADO DEL CATÁLOGO (V2.0 CON TOPPINGS)
   // ========================================================
   const renderizarCatalogo = () => {
-    const contenedor = document.getElementById('catalogo-productos');
-    if (!contenedor) return;
+    const contenedorCatalogo = document.getElementById('catalogo-productos');
+    if (!contenedorCatalogo) return;
 
     const productosFiltrados = state.categoriaSeleccionada === 'todos'
       ? PRODUCTOS
       : PRODUCTOS.filter(p => p.categoria.toLowerCase() === state.categoriaSeleccionada.toLowerCase());
 
-    if (productosFiltrados.length === 0) {
-      contenedor.innerHTML = `
-        <div class="col-span-full py-12 text-center text-stone-500 dark:text-stone-400">
-          <p class="text-lg">No encontramos delicias en esta categoría.</p>
-        </div>
-      `;
-      return;
-    }
-
-    contenedor.innerHTML = productosFiltrados.map(prod => {
-      const opcionesToppings = prod.toppings && prod.toppings.length > 0
-        ? `
-          <div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800">
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-1.5">
-              Personalizá con Topping Especial:
-            </label>
-            <select id="select-topping-${prod.id}" class="w-full text-xs rounded-xl bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 py-2 px-3 focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-              <option value="">Sin topping adicional</option>
-              ${prod.toppings.map(t => `
-                <option value="${t.id}" data-precio="${t.precio}" data-nombre="${t.nombre}">
-                  + ${t.nombre} (${formatearMoneda(t.precio)})
-                </option>
-              `).join('')}
-            </select>
-          </div>
-        `
-        : '';
-
-      return `
-        <article class="group bg-white dark:bg-stone-900 rounded-3xl border border-stone-200/80 dark:border-stone-800 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-          <div>
-            <div class="relative h-60 w-full overflow-hidden bg-stone-100 dark:bg-stone-800">
-              <img 
-                src="${prod.imagen}" 
-                alt="${prod.nombre}" 
-                loading="lazy"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              >
-              <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                <span class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-white/90 dark:bg-stone-900/90 text-stone-800 dark:text-white backdrop-blur-md shadow-sm border border-stone-200 dark:border-stone-700">
-                  ${prod.categoria}
-                </span>
-                ${prod.badge ? `
-                  <span class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-brand-600 text-white shadow-sm">
-                    ${prod.badge}
-                  </span>
-                ` : ''}
-              </div>
-            </div>
-
-            <div class="p-6">
-              <div class="flex items-baseline justify-between gap-2 mb-2">
-                <h3 class="font-serif text-xl font-bold text-stone-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-                  ${prod.nombre}
-                </h3>
-                <span class="font-mono text-lg font-bold text-brand-700 dark:text-brand-400 whitespace-nowrap">
-                  ${formatearMoneda(prod.precio)}
-                </span>
-              </div>
-              <p class="text-xs sm:text-sm text-stone-600 dark:text-stone-300 line-clamp-3 leading-relaxed">
-                ${prod.descripcion}
-              </p>
-              ${opcionesToppings}
-            </div>
-          </div>
-
-          <div class="p-6 pt-0">
-            <button 
-              data-id="${prod.id}"
-              class="btn-agregar-carrito w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-stone-900 dark:bg-stone-100 hover:bg-brand-600 dark:hover:bg-brand-500 text-white dark:text-stone-900 hover:text-white dark:hover:text-white text-xs sm:text-sm font-bold shadow-md transition duration-200 transform active:scale-95"
+    contenedorCatalogo.innerHTML = productosFiltrados.map(producto => `
+      <article class="flex flex-col justify-between bg-white dark:bg-stone-900 rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-sm hover:shadow-xl hover:border-brand-300 dark:hover:border-brand-800 transition-all duration-300 group">
+        <div>
+          <!-- Imagen Producto -->
+          <div class="relative h-60 w-full overflow-hidden bg-stone-100 dark:bg-stone-800">
+            <img 
+              src="${producto.imagen}" 
+              alt="${producto.nombre}" 
+              loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-              <span>Agregar al Pedido</span>
-            </button>
+            <div class="absolute top-3 left-3 flex gap-2">
+              <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/90 dark:bg-stone-900/90 text-brand-700 dark:text-brand-300 backdrop-blur-xs shadow-xs border border-brand-200/50">
+                ${producto.categoria}
+              </span>
+              ${producto.badge ? `
+                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-600 text-white shadow-xs">
+                  ${producto.badge}
+                </span>
+              ` : ''}
+            </div>
+            <div class="absolute bottom-3 right-3 px-3 py-1 rounded-xl bg-stone-950/80 backdrop-blur-xs text-white font-mono font-bold text-sm">
+              Stock: ${producto.stock}u
+            </div>
           </div>
-        </article>
-      `;
-    }).join('');
 
-    contenedor.querySelectorAll('.btn-agregar-carrito').forEach(boton => {
-      boton.addEventListener('click', () => {
-        agregarProductoAlCarrito(boton.getAttribute('data-id'));
+          <!-- Contenido y Toppings -->
+          <div class="p-6">
+            <h3 class="font-serif text-xl font-bold text-stone-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+              ${producto.nombre}
+            </h3>
+            <p class="mt-2 text-sm text-stone-600 dark:text-stone-400 line-clamp-2">
+              ${producto.descripcion}
+            </p>
+
+            <!-- Selector de Toppings -->
+            ${producto.toppings && producto.toppings.length > 0 ? `
+              <div class="mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
+                <label for="select-topping-${producto.id}" class="block text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-1.5">
+                  Personalizá con Topping:
+                </label>
+                <select id="select-topping-${producto.id}" class="w-full text-xs sm:text-sm px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                  <option value="">Sin topping adicional</option>
+                  ${producto.toppings.map(t => `
+                    <option value="${t.id}">${t.nombre} (+${formatearMoneda(t.precio)})</option>
+                  `).join('')}
+                </select>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- Footer Card & Precio -->
+        <div class="p-6 pt-0 flex items-center justify-between border-t border-stone-100 dark:border-stone-800 mt-2">
+          <div>
+            <span class="block text-xs text-stone-400 font-medium">Precio base</span>
+            <span class="font-mono text-xl font-bold text-brand-700 dark:text-brand-400">
+              ${formatearMoneda(producto.precio)}
+            </span>
+          </div>
+          <button 
+            data-id="${producto.id}" 
+            class="btn-agregar-carrito flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-sm font-semibold shadow-md shadow-brand-600/30 transition duration-200"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Agregar</span>
+          </button>
+        </div>
+      </article>
+    `).join('');
+
+    // Listener para botones de agregar
+    contenedorCatalogo.querySelectorAll('.btn-agregar-carrito').forEach(boton => {
+      boton.addEventListener('click', (e) => {
+        const idProd = e.currentTarget.getAttribute('data-id');
+        const selectTopping = document.getElementById(`select-topping-${idProd}`);
+        const idTopping = selectTopping ? selectTopping.value : null;
+        agregarProductoAlCarrito(idProd, idTopping);
       });
     });
   };
@@ -340,98 +337,117 @@ document.addEventListener('DOMContentLoaded', () => {
     const contenedorFiltros = document.getElementById('filtros-categoria');
     if (!contenedorFiltros) return;
 
-    contenedorFiltros.addEventListener('click', (e) => {
-      const boton = e.target.closest('.btn-filtro');
-      if (!boton) return;
+    contenedorFiltros.querySelectorAll('.btn-filtro').forEach(boton => {
+      boton.addEventListener('click', () => {
+        contenedorFiltros.querySelectorAll('.btn-filtro').forEach(b => {
+          b.classList.remove('bg-brand-600', 'text-white');
+          b.classList.add('bg-stone-100', 'dark:bg-stone-800', 'text-stone-700', 'dark:text-stone-300');
+        });
 
-      contenedorFiltros.querySelectorAll('.btn-filtro').forEach(btn => {
-        btn.classList.remove('bg-brand-600', 'text-white', 'shadow-sm');
-        btn.classList.add('bg-stone-100', 'dark:bg-stone-800', 'text-stone-700', 'dark:text-stone-300');
+        boton.classList.add('bg-brand-600', 'text-white');
+        boton.classList.remove('bg-stone-100', 'dark:bg-stone-800', 'text-stone-700', 'dark:text-stone-300');
+
+        state.categoriaSeleccionada = boton.getAttribute('data-categoria');
+        renderizarCatalogo();
       });
-
-      boton.classList.remove('bg-stone-100', 'dark:bg-stone-800', 'text-stone-700', 'dark:text-stone-300');
-      boton.classList.add('bg-brand-600', 'text-white', 'shadow-sm');
-
-      state.categoriaSeleccionada = boton.getAttribute('data-categoria');
-      renderizarCatalogo();
     });
   };
 
   // ========================================================
-  // 8. GESTIÓN DEL CARRITO (UI RESPONSIVE & PRODUCT RESUME)
+  // 8. GESTIÓN DEL CARRITO (CON miniaturas 70x70 y flexbox)
   // ========================================================
-  const agregarProductoAlCarrito = (productoId) => {
+  const actualizarBadgeCarrito = () => {
+    const badge = document.getElementById('badge-carrito');
+    const badgeFlotante = document.getElementById('badge-carrito-flotante');
+    const totalCount = state.carrito.reduce((acc, item) => acc + item.cantidad, 0);
+    if (badge) badge.textContent = totalCount;
+    if (badgeFlotante) badgeFlotante.textContent = totalCount;
+  };
+
+  const agregarProductoAlCarrito = (productoId, toppingId = null) => {
     const producto = PRODUCTOS.find(p => p.id === productoId);
     if (!producto) return;
 
-    const selectTopping = document.getElementById(`select-topping-${productoId}`);
-    let toppingElegido = null;
-
-    if (selectTopping && selectTopping.value) {
-      const opcion = selectTopping.options[selectTopping.selectedIndex];
-      toppingElegido = {
-        id: opcion.value,
-        nombre: opcion.getAttribute('data-nombre'),
-        precio: parseFloat(opcion.getAttribute('data-precio') || 0)
-      };
+    let toppingSeleccionado = null;
+    if (toppingId && producto.toppings) {
+      toppingSeleccionado = producto.toppings.find(t => t.id === toppingId);
     }
 
-    const toppingIdKey = toppingElegido ? toppingElegido.id : 'sin-topping';
-    const itemIdUnico = `${producto.id}_${toppingIdKey}`;
+    const precioUnitario = producto.precio + (toppingSeleccionado ? toppingSeleccionado.precio : 0);
+    const itemIdUnico = `${producto.id}_${toppingSeleccionado ? toppingSeleccionado.id : 'base'}`;
+
     const itemExistente = state.carrito.find(item => item.itemKey === itemIdUnico);
 
     if (itemExistente) {
       itemExistente.cantidad += 1;
       itemExistente.subtotal = itemExistente.cantidad * itemExistente.precioUnitario;
     } else {
-      const precioUnitarioTotal = producto.precio + (toppingElegido ? toppingElegido.precio : 0);
       state.carrito.push({
         itemKey: itemIdUnico,
-        productoId: producto.id,
+        id: producto.id,
         nombre: producto.nombre,
-        precioBase: producto.precio,
-        topping: toppingElegido,
-        precioUnitario: precioUnitarioTotal,
+        precioUnitario: precioUnitario,
         cantidad: 1,
-        subtotal: precioUnitarioTotal,
-        imagen: producto.imagen
+        subtotal: precioUnitario,
+        imagen: producto.imagen,
+        topping: toppingSeleccionado ? { id: toppingSeleccionado.id, nombre: toppingSeleccionado.nombre, precio: toppingSeleccionado.precio } : null
       });
     }
 
     guardarCarritoEnStorage();
     renderizarCarrito();
-    mostrarToast(`"${producto.nombre}" añadido al carrito`, 'success');
+    mostrarToast(`Agregaste "${producto.nombre}" al carrito.`, 'success');
   };
 
   const modificarCantidadItem = (itemKey, cambio) => {
-    const item = state.carrito.find(i => i.itemKey === itemKey);
-    if (!item) return;
+    const index = state.carrito.findIndex(item => item.itemKey === itemKey);
+    if (index === -1) return;
 
-    item.cantidad += cambio;
+    state.carrito[index].cantidad += cambio;
 
-    if (item.cantidad <= 0) {
-      state.carrito = state.carrito.filter(i => i.itemKey !== itemKey);
-      mostrarToast('Producto eliminado del carrito', 'info');
+    if (state.carrito[index].cantidad <= 0) {
+      const nombreEliminado = state.carrito[index].nombre;
+      state.carrito.splice(index, 1);
+      mostrarToast(`Quitaste "${nombreEliminado}" del pedido.`, 'info');
     } else {
-      item.subtotal = item.cantidad * item.precioUnitario;
+      state.carrito[index].subtotal = state.carrito[index].cantidad * state.carrito[index].precioUnitario;
     }
 
     guardarCarritoEnStorage();
     renderizarCarrito();
   };
 
-  const actualizarBadgeCarrito = () => {
-    const badge = document.getElementById('badge-carrito');
-    const totalCount = state.carrito.reduce((acc, item) => acc + item.cantidad, 0);
-    if (badge) badge.textContent = totalCount;
+  /**
+   * Valida si el botón de checkout debe estar bloqueado o habilitado
+   */
+  const actualizarBloqueoBotonCheckout = () => {
+    const btnCheckout = document.getElementById('btn-checkout-whatsapp');
+    const inputComprobante = document.getElementById('input-comprobante');
+    const avisoBloqueo = document.getElementById('aviso-bloqueo-comprobante');
+    if (!btnCheckout) return;
+
+    if (state.metodoPago === 'transferencia') {
+      const comprobante = (inputComprobante?.value || '').trim();
+      if (comprobante.length === 0) {
+        btnCheckout.disabled = true;
+        btnCheckout.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'grayscale');
+        if (avisoBloqueo) avisoBloqueo.classList.remove('hidden');
+      } else {
+        btnCheckout.disabled = false;
+        btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'grayscale');
+        if (avisoBloqueo) avisoBloqueo.classList.add('hidden');
+      }
+    } else {
+      // Efectivo -> Habilitado
+      btnCheckout.disabled = false;
+      btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'grayscale');
+      if (avisoBloqueo) avisoBloqueo.classList.add('hidden');
+    }
   };
 
-  /**
-   * Renderiza el resumen de productos con miniaturas ampliadas y tipografía destacada
-   */
   const renderizarCarrito = () => {
     const contenedorLista = document.getElementById('lista-carrito');
-    const labelTotalItems = document.getElementById('total-items-carrito');
+    const totalItemsEl = document.getElementById('total-items-carrito');
     const subtotalEl = document.getElementById('subtotal-carrito');
     const envioEl = document.getElementById('costo-envio');
     const totalEl = document.getElementById('total-carrito');
@@ -439,62 +455,58 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!contenedorLista) return;
 
     const totalArticulos = state.carrito.reduce((acc, item) => acc + item.cantidad, 0);
-    if (labelTotalItems) {
-      labelTotalItems.textContent = `${totalArticulos} producto${totalArticulos === 1 ? '' : 's'} seleccionado${totalArticulos === 1 ? '' : 's'}`;
-    }
+    if (totalItemsEl) totalItemsEl.textContent = `${totalArticulos} producto${totalArticulos !== 1 ? 's' : ''} seleccionado${totalArticulos !== 1 ? 's' : ''}`;
 
     if (state.carrito.length === 0) {
       contenedorLista.innerHTML = `
-        <div class="py-16 text-center text-stone-500">
-          <div class="w-16 h-16 mx-auto rounded-full bg-pink-100 dark:bg-pink-950/60 text-brand-600 flex items-center justify-center text-3xl mb-3">
-            🍰
-          </div>
-          <p class="font-serif text-lg font-bold text-stone-800 dark:text-stone-200">Tu carrito está vacío</p>
-          <p class="text-xs mt-1">Explorá nuestro catálogo y sumá tus postres favoritos.</p>
+        <div class="py-12 text-center text-stone-400 dark:text-stone-500">
+          <div class="text-4xl mb-3">🧁</div>
+          <p class="font-medium text-stone-600 dark:text-stone-400">Tu carrito está vacío.</p>
+          <p class="text-xs text-stone-400 dark:text-stone-500 mt-1">Elegí nuestras exquisiteces artesanales para comenzar.</p>
         </div>
       `;
-      if (subtotalEl) subtotalEl.textContent = formatearMoneda(0);
-      if (envioEl) envioEl.textContent = formatearMoneda(0);
-      if (totalEl) totalEl.textContent = formatearMoneda(0);
+      if (subtotalEl) subtotalEl.textContent = '$ 0';
+      if (envioEl) envioEl.textContent = '$ 0';
+      if (totalEl) totalEl.textContent = '$ 0';
+      actualizarBloqueoBotonCheckout();
       return;
     }
 
-    // Renderizado con flexbox directo, imagen fija 70x70px y agrupación de título/precio
     contenedorLista.innerHTML = state.carrito.map(item => `
       <div class="carrito-item-row">
-        <!-- 1. Miniatura fija visible 70x70px -->
+        <!-- Miniatura del Producto 70x70px fija -->
         <img 
           src="${item.imagen}" 
           alt="${item.nombre}" 
           class="carrito-item-img"
           loading="lazy"
         >
-        
-        <!-- 2. Agrupación interna a la derecha: Título y Precio con tipografía aumentada -->
+
+        <!-- Información del Producto -->
         <div class="carrito-item-info">
-          <h4 class="carrito-item-titulo">
-            ${item.nombre}
-          </h4>
-          ${item.topping ? `
-            <span class="carrito-item-topping">
-              ✨ + ${item.topping.nombre}
-            </span>
-          ` : ''}
-          <span class="carrito-item-precio">
-            ${formatearMoneda(item.subtotal)}
-          </span>
+          <h4 class="carrito-item-titulo">${item.nombre}</h4>
+          ${item.topping ? `<span class="carrito-item-topping">✨ ${item.topping.nombre}</span>` : ''}
+          <span class="carrito-item-precio">${formatearMoneda(item.subtotal)}</span>
         </div>
 
-        <!-- 3. Controles de Cantidad -->
+        <!-- Controles de Cantidad -->
         <div class="carrito-item-controles">
-          <button class="btn-restar carrito-btn-qty" data-key="${item.itemKey}" aria-label="Restar uno">-</button>
-          <span class="px-2 text-xs font-bold font-mono">${item.cantidad}</span>
-          <button class="btn-sumar carrito-btn-qty" data-key="${item.itemKey}" aria-label="Sumar uno">+</button>
+          <button 
+            data-key="${item.itemKey}" 
+            class="btn-restar carrito-btn-qty" 
+            aria-label="Disminuir cantidad"
+          >−</button>
+          <span class="font-mono font-bold text-xs sm:text-sm px-1.5 text-stone-800 dark:text-stone-100">${item.cantidad}</span>
+          <button 
+            data-key="${item.itemKey}" 
+            class="btn-sumar carrito-btn-qty" 
+            aria-label="Aumentar cantidad"
+          >+</button>
         </div>
       </div>
     `).join('');
 
-    // Eventos sumar y restar
+    // Listeners de cantidad
     contenedorLista.querySelectorAll('.btn-restar').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const key = e.currentTarget.getAttribute('data-key');
@@ -516,15 +528,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (subtotalEl) subtotalEl.textContent = formatearMoneda(subtotal);
     if (envioEl) envioEl.textContent = state.tipoEntrega === 'delivery' ? formatearMoneda(costoEnvio) : 'Bonificado';
     if (totalEl) totalEl.textContent = formatearMoneda(total);
+
+    actualizarBloqueoBotonCheckout();
   };
 
   // ====================================================================
   // 9. GEOLOCALIZACIÓN Y GEOCODIFICACIÓN INVERSA (PUERTO IGUAZÚ ESTRICTO)
   // ====================================================================
-  
-  /**
-   * Distancia Haversine en kilómetros
-   */
   const calcularDistancia = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
     const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -536,15 +546,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return R * c;
   };
 
-  /**
-   * Valida la ubicación por Reverse Geocoding (Nominatim OpenStreetMap) e inyecta la dirección
-   */
   const ejecutarGeocodificacionInversa = async (lat, lon) => {
     const inputDireccion = document.getElementById('input-direccion');
     const infoGeo = document.getElementById('info-geolocalizacion');
 
     try {
-      // 1. Verificación preliminar de distancia respecto a Puerto Iguazú
       const distanciaKm = calcularDistancia(
         lat, lon, 
         CONFIG.centroIguazu.lat, CONFIG.centroIguazu.lon
@@ -554,7 +560,6 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error('FUERA_DE_COBERTURA');
       }
 
-      // 2. Consulta a API de Geocodificación Inversa
       const urlApi = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&addressdetails=1`;
       const response = await fetch(urlApi, {
         headers: { 'Accept-Language': 'es' }
@@ -565,7 +570,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       const addr = data.address || {};
 
-      // 3. Regla estricta: Comprobar ciudad/municipio Puerto Iguazú, Misiones
       const ciudad = (addr.city || addr.town || addr.village || addr.municipality || addr.county || '').toLowerCase();
       const provincia = (addr.state || '').toLowerCase();
 
@@ -576,14 +580,12 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error('FUERA_DE_COBERTURA');
       }
 
-      // 4. Construir y formatear calle y número
       const calle = addr.road || addr.pedestrian || addr.street || addr.avenue || addr.suburb || 'Calle sin nombre';
       const numero = addr.house_number ? ` ${addr.house_number}` : '';
       const barrio = addr.neighbourhood || addr.suburb ? ` (${addr.neighbourhood || addr.suburb})` : '';
       
       const direccionCompleta = `${calle}${numero}${barrio}, Puerto Iguazú, Misiones`;
 
-      // Inyectar en el campo de texto
       if (inputDireccion) {
         inputDireccion.value = direccionCompleta;
         inputDireccion.classList.remove('border-stone-300', 'dark:border-stone-700');
@@ -605,9 +607,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  /**
-   * Disparador del botón "Validar mi Ubicación"
-   */
   const manejarBotonGeolocalizar = () => {
     const infoGeo = document.getElementById('info-geolocalizacion');
     if (!navigator.geolocation) {
@@ -675,6 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputTelefono = document.getElementById('input-telefono');
     const inputNotas = document.getElementById('input-notas');
     const inputDireccion = document.getElementById('input-direccion');
+    const inputComprobante = document.getElementById('input-comprobante');
     const errorTelefono = document.getElementById('error-telefono');
     const infoGeo = document.getElementById('info-geolocalizacion');
 
@@ -682,6 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const telefono = (inputTelefono?.value || '').trim();
     const notas = (inputNotas?.value || '').trim();
     const direccion = (inputDireccion?.value || '').trim();
+    const comprobante = (inputComprobante?.value || '').trim();
 
     // Validar nombre
     if (!nombre) {
@@ -710,6 +711,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // Validar comprobante si es Transferencia
+    if (state.metodoPago === 'transferencia' && !comprobante) {
+      inputComprobante?.focus();
+      actualizarBloqueoBotonCheckout();
+      return mostrarToast('Por favor ingresá el número de comprobante de la transferencia.', 'error');
+    }
+
     // Totales y comanda
     const subtotal = state.carrito.reduce((acc, item) => acc + item.subtotal, 0);
     const costoEnvio = state.tipoEntrega === 'delivery' ? CONFIG.costoEnvioFijo : 0;
@@ -723,6 +731,8 @@ document.addEventListener('DOMContentLoaded', () => {
       telefono: telefono,
       tipoEntrega: state.tipoEntrega,
       direccion: state.tipoEntrega === 'delivery' ? direccion : 'Retiro por Boutique Dulces Momentos',
+      metodoPago: state.metodoPago,
+      comprobante: state.metodoPago === 'transferencia' ? comprobante : null,
       notas: notas || 'Sin notas especiales',
       estado: 'pendiente',
       items: state.carrito.map(item => ({
@@ -740,7 +750,12 @@ document.addEventListener('DOMContentLoaded', () => {
     state.comandasCocina.unshift(nuevaComanda);
     guardarComandasEnStorage();
 
-    // Mensaje Estructurado para WhatsApp
+    // Método de pago formateado
+    const metodoPagoTexto = state.metodoPago === 'transferencia'
+      ? '🏦 Transferencia / Mercado Pago (Alias QR)'
+      : '💵 Efectivo (al recibir / retirar)';
+
+    // Mensaje Estructurado para WhatsApp con emojis
     let mensaje = `🎂 *¡HOLA DULCES MOMENTOS!* 🎂\n`;
     mensaje += `Quiero confirmar el siguiente pedido para mi celebración:\n`;
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
@@ -755,6 +770,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (notas) {
       mensaje += `📝 *Dedicatoria / Notas:* _${notas}_\n`;
+    }
+
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `💳 *Método de Pago:* ${metodoPagoTexto}\n`;
+    if (state.metodoPago === 'transferencia' && comprobante) {
+      mensaje += `🔢 *N° de Comprobante:* ${comprobante}\n`;
     }
 
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
@@ -773,7 +794,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.tipoEntrega === 'delivery') {
       mensaje += `*Costo de Envío (Puerto Iguazú):* ${formatearMoneda(costoEnvio)}\n`;
     }
-    mensaje += `💰 *TOTAL A ABONAR: ${formatearMoneda(total)}*\n`;
+    mensaje += `💰 *TOTAL GENERAL: ${formatearMoneda(total)}*\n`;
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
     mensaje += `✨ _¡Muchas gracias por su atención!_`;
 
@@ -827,6 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div>Tel: ${comanda.telefono}</div>
       <div>Entrega: ${comanda.tipoEntrega.toUpperCase()}</div>
       ${comanda.tipoEntrega === 'delivery' ? `<div>Dir: ${comanda.direccion}</div>` : ''}
+      <div>Pago: ${comanda.metodoPago === 'transferencia' ? `TRANSF (#${comanda.comprobante || 'S/N'})` : 'EFECTIVO'}</div>
       ${comanda.notas ? `<div>Nota: ${comanda.notas}</div>` : ''}
       <div class="separador"></div>
       <div><strong>DETALLE PRODUCTOS:</strong></div>
@@ -903,6 +925,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <p><strong class="text-white">Tel:</strong> ${cmd.telefono}</p>
               <p><strong class="text-white">Modalidad:</strong> ${cmd.tipoEntrega === 'delivery' ? '🛵 Delivery' : '🏪 Retiro'}</p>
               ${cmd.tipoEntrega === 'delivery' ? `<p><strong class="text-white">Dirección:</strong> ${cmd.direccion}</p>` : ''}
+              <p><strong class="text-white">Pago:</strong> ${cmd.metodoPago === 'transferencia' ? `🏦 Transf. (Comp: #${cmd.comprobante || 'S/N'})` : '💵 Efectivo'}</p>
               ${cmd.notas ? `<p class="italic text-amber-200"><strong class="text-white">Nota:</strong> ${cmd.notas}</p>` : ''}
             </div>
 
@@ -955,16 +978,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // 12. REGISTRO DE EVENTOS UI Y MODAL KDS
   // ========================================================
   const registrarEventosUI = () => {
-    // Drawer Carrito
+    // Drawer Carrito (Header y Botón Flotante)
     const btnAbrirCarrito = document.getElementById('btn-abrir-carrito');
+    const btnAbrirCarritoFlotante = document.getElementById('btn-abrir-carrito-flotante');
     const btnCerrarCarrito = document.getElementById('btn-cerrar-carrito');
     const overlayCarrito = document.getElementById('overlay-carrito');
     const drawerCarrito = document.getElementById('drawer-carrito');
 
-    btnAbrirCarrito?.addEventListener('click', () => {
+    const abrirDrawer = () => {
       renderizarCarrito();
       drawerCarrito?.classList.remove('hidden');
-    });
+      actualizarBloqueoBotonCheckout();
+    };
+
+    btnAbrirCarrito?.addEventListener('click', abrirDrawer);
+    btnAbrirCarritoFlotante?.addEventListener('click', abrirDrawer);
 
     btnCerrarCarrito?.addEventListener('click', () => {
       drawerCarrito?.classList.add('hidden');
@@ -987,6 +1015,27 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarCarrito();
       });
     });
+
+    // Selector Método de Pago (Efectivo / Transferencia)
+    document.querySelectorAll('input[name="metodo-pago"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        state.metodoPago = e.target.value;
+        const bloqueTransf = document.getElementById('bloque-transferencia');
+        if (state.metodoPago === 'transferencia') {
+          bloqueTransf?.classList.remove('hidden');
+          const inputComprobante = document.getElementById('input-comprobante');
+          inputComprobante?.focus();
+        } else {
+          bloqueTransf?.classList.add('hidden');
+        }
+        actualizarBloqueoBotonCheckout();
+      });
+    });
+
+    // Input Comprobante Transferencia (Bloqueo dinámico)
+    const inputComprobante = document.getElementById('input-comprobante');
+    inputComprobante?.addEventListener('input', actualizarBloqueoBotonCheckout);
+    inputComprobante?.addEventListener('keyup', actualizarBloqueoBotonCheckout);
 
     // Botón de Geolocalización con Reverse Geocoding
     document.getElementById('btn-geolocalizar')?.addEventListener('click', manejarBotonGeolocalizar);
