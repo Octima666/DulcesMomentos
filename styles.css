@@ -27,9 +27,7 @@ body {
 }
 
 /* ======================================================== */
-/* 1. MODAL RESPONSIVE                                      */
-/* Escritorio: max-width 550px centrado                     */
-/* Móvil: 100% ancho con apilamiento vertical               */
+/* 1. MODAL RESPONSIVE (SCROLL ÓPTIMO MAX-H 85VH)           */
 /* ======================================================== */
 .modal-carrito-backdrop {
   position: fixed;
@@ -47,14 +45,14 @@ body {
 .modal-carrito-card {
   width: 100%;
   max-width: 550px;
-  max-height: 90vh;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   background: #ffffff;
   border-radius: 1.5rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
   border: 1px solid #e7e5e4;
-  overflow: hidden;
+  overflow-y: auto;
   animation: modalEntrada 0.25s ease-out;
 }
 
@@ -87,7 +85,7 @@ body {
   .modal-carrito-card {
     max-width: 100% !important;
     width: 100% !important;
-    max-height: 94vh;
+    max-height: 88vh;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }

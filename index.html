@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dulces Momentos | Pastelería Artesanal Boutique</title>
-  <meta name="description" content="Pastelería Dulces Momentos - Pedidos online con Mercado Pago v2 y WhatsApp.">
+  <meta name="description" content="Pastelería Dulces Momentos - Pedidos online con Mercado Pago QR y WhatsApp.">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -122,7 +122,7 @@
         Momentos dulces convertidos en <span class="text-brand-600 dark:text-brand-400 italic">arte pastelero</span>
       </h1>
       <p class="mt-4 text-sm sm:text-lg text-stone-600 dark:text-stone-300 max-w-2xl mx-auto">
-        Elaboración diaria con ingredientes premium. Encargá tu pedido online con pago seguro por Mercado Pago o en efectivo al recibir.
+        Elaboración diaria con ingredientes premium. Encargá tu pedido online con pago seguro por Mercado Pago QR o en efectivo al recibir.
       </p>
       <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
         <a href="#catalogo" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-600/30 transform hover:-translate-y-0.5 transition-all">
@@ -205,9 +205,11 @@
   <div id="drawer-carrito" class="modal-carrito-backdrop hidden">
     <div id="overlay-carrito" class="fixed inset-0 bg-stone-950/60 backdrop-blur-xs -z-10"></div>
     
-    <div class="modal-carrito-card">
+    <!-- Contenedor Interno Scrolleable con max-h-[85vh] overflow-y-auto pb-8 -->
+    <div class="modal-carrito-card max-h-[85vh] overflow-y-auto pb-8">
+      
       <!-- Header Modal Carrito -->
-      <div class="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-900/60 shrink-0">
+      <div class="sticky top-0 z-20 p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-md shrink-0">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-xl shadow-xs">
             🛒
@@ -222,13 +224,13 @@
         </button>
       </div>
 
-      <!-- Lista de Items en Carrito (Scrollable) -->
-      <div id="lista-carrito" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
+      <!-- Lista de Items en Carrito -->
+      <div id="lista-carrito" class="p-4 sm:p-5 space-y-3">
         <!-- Renderizado dinámico -->
       </div>
 
       <!-- Formulario Checkout y Resumen -->
-      <div class="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50/90 dark:bg-stone-900/80 space-y-3.5 overflow-y-auto max-h-[50vh]">
+      <div class="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50/90 dark:bg-stone-900/80 space-y-4">
         
         <!-- Método de Entrega -->
         <div>
@@ -248,9 +250,7 @@
           <p class="text-[11px] text-brand-700 dark:text-brand-400 mt-1 font-medium">📍 Envíos exclusivos en Puerto Iguazú, Misiones.</p>
         </div>
 
-        <!-- =====================================================================
-             GRUPO DE FORMA DE PAGO (Radio Buttons: Efectivo vs. Mercado Pago)
-             ===================================================================== -->
+        <!-- Forma de Pago (Radio Buttons) -->
         <div class="space-y-1.5 pt-1">
           <label class="block text-xs font-semibold text-stone-700 dark:text-stone-300">
             💳 Forma de Pago *
@@ -271,10 +271,67 @@
               <input type="radio" name="metodo-pago" value="mercadopago" class="w-4 h-4 text-[#009EE3] accent-[#009EE3] focus:ring-[#009EE3]">
               <div class="flex flex-col">
                 <span class="font-bold text-stone-900 dark:text-white">💳 Mercado Pago / Transferencia</span>
-                <span class="text-[11px] text-[#0081BA] dark:text-[#38bdf8] font-semibold">Tarjetas / Dinero en cuenta</span>
+                <span class="text-[11px] text-[#0081BA] dark:text-[#38bdf8] font-semibold">QR / Alias / CVU</span>
               </div>
             </label>
 
+          </div>
+        </div>
+
+        <!-- =====================================================================
+             1. SECCIÓN QR Y DATOS DE TRANSFERENCIA (#seccion-qr)
+             ===================================================================== -->
+        <div id="seccion-qr" class="hidden p-4 rounded-2xl bg-amber-50/90 dark:bg-stone-800/90 border border-amber-300 dark:border-amber-800/60 space-y-3.5 transition-all">
+          <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <!-- Imagen Código QR -->
+            <div class="bg-white p-2 rounded-2xl border border-amber-200 dark:border-stone-700 shadow-sm shrink-0 flex items-center justify-center">
+              <img 
+                src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=dulcesmomentos.mp" 
+                alt="Código QR Mercado Pago - Dulces Momentos" 
+                class="w-32 h-32 sm:w-36 sm:h-36 rounded-xl object-contain"
+                loading="lazy"
+              >
+            </div>
+
+            <!-- Datos Bancarios en Texto -->
+            <div class="flex-1 space-y-1.5 text-xs text-stone-700 dark:text-stone-200 w-full">
+              <div class="flex items-center justify-between pb-1 border-b border-amber-200/60 dark:border-stone-700/60">
+                <span class="font-bold text-sm text-stone-900 dark:text-white flex items-center gap-1.5">
+                  <span>🏦</span> Datos de Pago
+                </span>
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-amber-200/80 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200">
+                  Mercado Pago
+                </span>
+              </div>
+              
+              <div class="space-y-1 font-mono text-[11px] sm:text-xs pt-1">
+                <div class="flex justify-between items-center py-0.5 border-b border-amber-200/40 dark:border-stone-700/40">
+                  <span class="font-sans font-medium text-stone-500 dark:text-stone-400">Alias MP:</span>
+                  <span class="font-bold text-brand-700 dark:text-brand-400 select-all">dulcesmomentos.mp</span>
+                </div>
+                <div class="flex justify-between items-center py-0.5 border-b border-amber-200/40 dark:border-stone-700/40">
+                  <span class="font-sans font-medium text-stone-500 dark:text-stone-400">CVU / CBU:</span>
+                  <span class="font-bold text-stone-800 dark:text-stone-200 select-all">0000003100085472198532</span>
+                </div>
+                <div class="flex justify-between items-center py-0.5">
+                  <span class="font-sans font-medium text-stone-500 dark:text-stone-400">Titular:</span>
+                  <span class="font-semibold text-stone-800 dark:text-stone-200">Dulces Momentos Boutique</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Campo Obligatorio Número de Comprobante -->
+          <div class="pt-2 border-t border-amber-200/60 dark:border-stone-700/60">
+            <label for="input-comprobante" class="block text-xs font-bold text-amber-950 dark:text-amber-300 mb-1">
+              Número / Código de Comprobante * <span class="font-normal text-[11px] text-stone-500 dark:text-stone-400">(Obligatorio)</span>
+            </label>
+            <input 
+              type="text" 
+              id="input-comprobante" 
+              placeholder="Ej. Operación #8945231 o últimos 6 dígitos..." 
+              class="w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-900 border border-amber-300 dark:border-amber-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-none transition"
+            >
           </div>
         </div>
 
@@ -324,9 +381,7 @@
           </div>
         </div>
 
-        <!-- =====================================================================
-             BOTÓN PRINCIPAL DE CHECKOUT DINÁMICO (WhatsApp / Mercado Pago)
-             ===================================================================== -->
+        <!-- Botón Principal de Checkout (WhatsApp) -->
         <div class="pt-2">
           <button id="btn-checkout-principal" class="w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all">
             <span id="btn-checkout-icono" class="text-base">💬</span>

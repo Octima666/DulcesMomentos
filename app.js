@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  * PASTELERÍA "DULCES MOMENTOS" - LÓGICA PRINCIPAL (app.js)
- * Frontend JavaScript + Mercado Pago API v2 + Checkout WhatsApp + KDS
+ * Frontend JavaScript + Checkout WhatsApp + QR Transferencia + KDS
  * ============================================================================
  */
 
@@ -15,9 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clave de Seguridad de Cocina (KDS)
     claveCocinaKDS: 'niledlajo',
     costoEnvioFijo: 1500, // Costo de envío en Puerto Iguazú ($ ARS)
-    
-    // Endpoint backend para Mercado Pago API v2
-    apiCrearPreferencia: '/api/crear-preferencia',
 
     // Coordenadas de Referencia: Centro de Puerto Iguazú, Misiones, Argentina
     centroIguazu: {
@@ -28,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const STORAGE_KEYS = {
-    CARRITO: 'dulces_momentos_carrito_v2',
     COMANDAS: 'dulces_momentos_comandas_kds_v2',
     TEMA: 'dulces_momentos_theme'
   };
@@ -133,29 +129,30 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   // ========================================================
-  // 4. ESTADO GLOBAL DE LA APLICACIÓN
+  // 4. ESTADO GLOBAL (EL CARRITO COMIENZA SIEMPRE VACÍO: [])
   // ========================================================
   let state = {
-    carrito: [],
+    carrito: [], // Requerimiento: Siempre vacío al iniciar o recargar
     comandasCocina: [],
     categoriaSeleccionada: 'todos',
     tipoEntrega: 'takeaway', // 'takeaway' | 'delivery'
     metodoPago: 'efectivo',  // 'efectivo' | 'mercadopago'
-    ubicacionValidadaIguazu: false,
-    procesandoPagoMP: false
+    ubicacionValidadaIguazu: false
   };
 
   // ========================================================
-  // 5. INICIALIZACIÓN Y PERSISTENCIA (LocalStorage)
+  // 5. INICIALIZACIÓN (SIN PERSISTENCIA EN CARRITO)
   // ========================================================
-  const cargarEstadoDesdeStorage = () => {
+  const cargarEstadoInicial = () => {
     try {
-      const carritoGuardado = localStorage.getItem(STORAGE_KEYS.CARRITO);
-      if (carritoGuardado) state.carrito = JSON.parse(carritoGuardado);
+      // Forzar que el carrito inicie siempre vacío
+      state.carrito = [];
 
+      // Cargar comandas de cocina KDS si existen
       const comandasGuardadas = localStorage.getItem(STORAGE_KEYS.COMANDAS);
       if (comandasGuardadas) state.comandasCocina = JSON.parse(comandasGuardadas);
 
+      // Cargar tema visual
       const temaGuardado = localStorage.getItem(STORAGE_KEYS.TEMA);
       if (temaGuardado === 'dark' || (!temaGuardado && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
@@ -163,15 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.classList.remove('dark');
       }
     } catch (e) {
-      console.warn('Error al cargar datos desde localStorage:', e);
-    }
-  };
-
-  const guardarCarritoEnStorage = () => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.CARRITO, JSON.stringify(state.carrito));
-    } catch (e) {
-      console.warn('Error al guardar carrito:', e);
+      console.warn('Error al cargar datos iniciales:', e);
     }
   };
 
@@ -214,13 +203,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     contenedor.appendChild(toast);
 
-    // Animación de entrada
     requestAnimationFrame(() => {
       toast.classList.remove('opacity-0', 'translate-y-3');
       toast.classList.add('opacity-100', 'translate-y-0');
     });
 
-    // Auto eliminar
     setTimeout(() => {
       toast.classList.remove('opacity-100', 'translate-y-0');
       toast.classList.add('opacity-0', 'translate-y-3');
@@ -318,7 +305,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let toppingSeleccionado = null;
 
         if (selectTopping && selectTopping.value) {
-          const opt = selectTopping.selectedOptions[0];
           const prod = PRODUCTOS.find(p => p.id === prodId);
           const topObj = prod?.toppings?.find(t => t.id === selectTopping.value);
           if (topObj) {
@@ -342,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const itemKey = `${productoId}__${toppingId}`;
 
     const itemExistente = state.carrito.find(item => item.itemKey === itemKey);
-
     const precioUnitario = producto.precio + (topping ? topping.precio : 0);
 
     if (itemExistente) {
@@ -363,7 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    guardarCarritoEnStorage();
     renderizarCarrito();
     actualizarBadges();
 
@@ -382,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
       state.carrito[itemIndex].subtotal = state.carrito[itemIndex].cantidad * state.carrito[itemIndex].precioUnitario;
     }
 
-    guardarCarritoEnStorage();
     renderizarCarrito();
     actualizarBadges();
   };
@@ -412,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (state.carrito.length === 0) {
       contenedorLista.innerHTML = `
-        <div class="py-12 text-center text-stone-400 dark:text-stone-500">
+        <div class="py-8 text-center text-stone-400 dark:text-stone-500">
           <span class="text-4xl block mb-2">🛒</span>
           <p class="font-serif text-base font-bold text-stone-700 dark:text-stone-300">Tu pedido está vacío</p>
           <p class="text-xs mt-1">Explorá nuestra colección y agregá tus postres preferidos.</p>
@@ -494,12 +477,22 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ====================================================================
-  // 9. ALTERNANCIA DINÁMICA DE LA UI DEL BOTÓN DE PAGO
+  // 9. ALTERNANCIA DINÁMICA DE LA UI Y SECCIÓN QR
   // ====================================================================
   const actualizarBotonCheckoutUI = () => {
     const btnCheckout = document.getElementById('btn-checkout-principal');
     const iconoCheckout = document.getElementById('btn-checkout-icono');
     const textoCheckout = document.getElementById('btn-checkout-texto');
+    const seccionQr = document.getElementById('seccion-qr');
+
+    // 1. Mostrar/Ocultar Sección QR dinámicamente según la forma de pago
+    if (seccionQr) {
+      if (state.metodoPago === 'mercadopago') {
+        seccionQr.classList.remove('hidden');
+      } else {
+        seccionQr.classList.add('hidden');
+      }
+    }
 
     if (!btnCheckout || !iconoCheckout || !textoCheckout) return;
 
@@ -513,12 +506,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed');
 
     if (state.metodoPago === 'mercadopago') {
-      // Estilo oficial Mercado Pago
       btnCheckout.className = 'w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-[#009EE3] hover:bg-[#0081BA] active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-[#009EE3]/30 transition-all';
-      iconoCheckout.textContent = '💳';
-      textoCheckout.textContent = 'Pagar con Mercado Pago';
+      iconoCheckout.textContent = '💬';
+      textoCheckout.textContent = 'Confirmar Pedido por WhatsApp';
     } else {
-      // Estilo oficial WhatsApp
       btnCheckout.className = 'w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all';
       iconoCheckout.textContent = '💬';
       textoCheckout.textContent = 'Confirmar y Enviar Pedido por WhatsApp';
@@ -526,157 +517,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ====================================================================
-  // 10. CHECKOUT: PAGAR CON MERCADO PAGO (API V2)
-  // ====================================================================
-  const pagarConMercadoPago = async () => {
-    if (state.procesandoPagoMP) return;
-
-    if (state.carrito.length === 0) {
-      mostrarToast('Tu carrito está vacío.', 'warning');
-      return;
-    }
-
-    const inputNombre = document.getElementById('input-nombre');
-    const inputTelefono = document.getElementById('input-telefono');
-    const inputNotas = document.getElementById('input-notas');
-    const inputDireccion = document.getElementById('input-direccion');
-    const errorTelefono = document.getElementById('error-telefono');
-
-    const nombre = (inputNombre?.value || '').trim();
-    const telefono = (inputTelefono?.value || '').trim();
-    const notas = (inputNotas?.value || '').trim();
-    const direccion = (inputDireccion?.value || '').trim();
-
-    // Validaciones
-    if (!nombre) {
-      inputNombre?.focus();
-      return mostrarToast('Por favor ingresá tu nombre completo.', 'error');
-    }
-
-    const telLimpio = telefono.replace(/\D/g, '');
-    if (telLimpio.length < 8) {
-      errorTelefono?.classList.remove('hidden');
-      inputTelefono?.focus();
-      return mostrarToast('El teléfono debe tener un formato válido (mínimo 8 dígitos)', 'error');
-    } else {
-      errorTelefono?.classList.add('hidden');
-    }
-
-    if (state.tipoEntrega === 'delivery' && !direccion) {
-      inputDireccion?.focus();
-      return mostrarToast('Por favor ingresá la dirección de entrega en Puerto Iguazú.', 'error');
-    }
-
-    // Preparar Items para el Backend
-    const items = state.carrito.map(item => ({
-      id: item.id,
-      title: `${item.nombre}${item.topping ? ` (+ ${item.topping.nombre})` : ''}`,
-      quantity: Number(item.cantidad),
-      unit_price: Number(item.precioUnitario),
-      currency_id: 'ARS',
-      topping: item.topping ? item.topping.nombre : null
-    }));
-
-    // Si tiene costo de envío, lo sumamos como ítem adicional
-    if (state.tipoEntrega === 'delivery' && CONFIG.costoEnvioFijo > 0) {
-      items.push({
-        id: 'envio-iguazu',
-        title: 'Costo de Envío (Puerto Iguazú)',
-        quantity: 1,
-        unit_price: CONFIG.costoEnvioFijo,
-        currency_id: 'ARS'
-      });
-    }
-
-    const cliente = {
-      nombre,
-      telefono,
-      direccion: state.tipoEntrega === 'delivery' ? direccion : 'Retiro en Boutique',
-      tipoEntrega: state.tipoEntrega,
-      notas
-    };
-
-    // UI Loading en Botón
-    const btnCheckout = document.getElementById('btn-checkout-principal');
-    const textoCheckout = document.getElementById('btn-checkout-texto');
-    const iconoCheckout = document.getElementById('btn-checkout-icono');
-
-    try {
-      state.procesandoPagoMP = true;
-      if (btnCheckout) btnCheckout.disabled = true;
-      if (iconoCheckout) iconoCheckout.textContent = '⏳';
-      if (textoCheckout) textoCheckout.textContent = 'Conectando con Mercado Pago...';
-
-      mostrarToast('Generando preferencia de pago en Mercado Pago...', 'info');
-
-      const response = await fetch(CONFIG.apiCrearPreferencia, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, cliente })
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || errData.details || `Error del servidor (${response.status})`);
-      }
-
-      const data = await response.json();
-
-      if (!data.init_point) {
-        throw new Error('No se recibió la URL de pago (init_point) de Mercado Pago.');
-      }
-
-      // Guardar comanda preliminar en KDS
-      const subtotal = state.carrito.reduce((acc, item) => acc + item.subtotal, 0);
-      const costoEnvio = state.tipoEntrega === 'delivery' ? CONFIG.costoEnvioFijo : 0;
-      const total = subtotal + costoEnvio;
-
-      const nuevaComanda = {
-        id: `MP-${data.id ? data.id.substring(0, 8) : Date.now().toString().slice(-4)}`,
-        fecha: new Date().toISOString(),
-        cliente: nombre,
-        telefono: telefono,
-        tipoEntrega: state.tipoEntrega,
-        direccion: state.tipoEntrega === 'delivery' ? direccion : 'Retiro en Boutique',
-        metodoPago: 'mercadopago',
-        estado: 'pendiente',
-        items: state.carrito.map(item => ({
-          nombre: item.nombre,
-          cantidad: item.cantidad,
-          topping: item.topping ? item.topping.nombre : null,
-          subtotal: item.subtotal
-        })),
-        subtotal,
-        envio: costoEnvio,
-        total,
-        preferenceId: data.id
-      };
-
-      state.comandasCocina.unshift(nuevaComanda);
-      guardarComandasEnStorage();
-
-      mostrarToast('¡Preferencia generada! Redirigiendo a Mercado Pago...', 'success');
-
-      // Redirección oficial a Mercado Pago
-      setTimeout(() => {
-        window.location.href = data.init_point;
-      }, 700);
-
-    } catch (error) {
-      console.error('Error al iniciar Mercado Pago:', error);
-      mostrarToast(`Error: ${error.message}. Verificá el Access Token en server.js`, 'error');
-    } finally {
-      state.procesandoPagoMP = false;
-      actualizarBotonCheckoutUI();
-    }
-  };
-
-  // ====================================================================
-  // 11. CHECKOUT: ENVIAR PEDIDO POR WHATSAPP (+54 9 3757 57-1985)
+  // 10. CHECKOUT: ENVIAR PEDIDO POR WHATSAPP (+54 9 3757 57-1985)
   // ====================================================================
   const enviarPedidoWhatsApp = () => {
     if (state.carrito.length === 0) {
-      mostrarToast('Tu carrito está vacío. Agregá al menos un postre.', 'warning');
+      mostrarToast('Tu pedido está vacío. Agregá al menos un postre.', 'warning');
       return;
     }
 
@@ -684,20 +529,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputTelefono = document.getElementById('input-telefono');
     const inputNotas = document.getElementById('input-notas');
     const inputDireccion = document.getElementById('input-direccion');
+    const inputComprobante = document.getElementById('input-comprobante');
     const errorTelefono = document.getElementById('error-telefono');
 
     const nombre = (inputNombre?.value || '').trim();
     const telefono = (inputTelefono?.value || '').trim();
     const notas = (inputNotas?.value || '').trim();
     const direccion = (inputDireccion?.value || '').trim();
+    const comprobante = (inputComprobante?.value || '').trim();
 
-    // Validar nombre
+    // 1. Validar Nombre Completo (Obligatorio)
     if (!nombre) {
       inputNombre?.focus();
       return mostrarToast('Por favor ingresá tu nombre completo.', 'error');
     }
     
-    // Validar teléfono
+    // 2. Validar Teléfono WhatsApp (Obligatorio, mínimo 8 dígitos)
     const telLimpio = telefono.replace(/\D/g, '');
     if (telLimpio.length < 8) {
       errorTelefono?.classList.remove('hidden');
@@ -707,10 +554,18 @@ document.addEventListener('DOMContentLoaded', () => {
       errorTelefono?.classList.add('hidden');
     }
 
-    // Validar dirección si es Delivery
+    // 3. Validar Dirección si es modalidad Delivery
     if (state.tipoEntrega === 'delivery' && !direccion) {
       inputDireccion?.focus();
       return mostrarToast('Por favor ingresá o validá tu dirección en Puerto Iguazú.', 'error');
+    }
+
+    // 4. Validar Comprobante si la opción es Mercado Pago / Transferencia
+    if (state.metodoPago === 'mercadopago') {
+      if (!comprobante) {
+        inputComprobante?.focus();
+        return mostrarToast('Por favor ingresá el número o código de comprobante.', 'error');
+      }
     }
 
     // Totales y comanda
@@ -726,7 +581,8 @@ document.addEventListener('DOMContentLoaded', () => {
       telefono: telefono,
       tipoEntrega: state.tipoEntrega,
       direccion: state.tipoEntrega === 'delivery' ? direccion : 'Retiro por Boutique Dulces Momentos',
-      metodoPago: 'efectivo',
+      metodoPago: state.metodoPago,
+      comprobante: state.metodoPago === 'mercadopago' ? comprobante : null,
       notas: notas || 'Sin notas especiales',
       estado: 'pendiente',
       items: state.carrito.map(item => ({
@@ -762,7 +618,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `💳 *Forma de Pago:* 💵 Efectivo (al retirar / recibir)\n`;
+    if (state.metodoPago === 'mercadopago') {
+      mensaje += `💳 *Forma de Pago:* 💳 Mercado Pago / Transferencia\n`;
+      mensaje += `🧾 *N° de Comprobante:* ${comprobante}\n`;
+    } else {
+      mensaje += `💳 *Forma de Pago:* 💵 Efectivo (al retirar / recibir)\n`;
+    }
+
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
     mensaje += `🛒 *DETALLE DEL PEDIDO:*\n`;
 
@@ -786,14 +648,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // URL oficial de WhatsApp con número destino +54 9 3757 57-1985
     const urlWhatsApp = `https://wa.me/${CONFIG.telefonoWhatsApp}?text=${encodeURIComponent(mensaje)}`;
 
-    // Limpiar carrito y cerrar modal
+    // Reiniciar Carrito
     state.carrito = [];
-    guardarCarritoEnStorage();
     renderizarCarrito();
     actualizarBadges();
-    document.getElementById('drawer-carrito')?.classList.add('hidden');
 
-    mostrarToast('¡Pedido confirmado! Abriendo WhatsApp oficial...', 'success');
+    // Cerrar drawer
+    document.getElementById('drawer-carrito')?.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+
+    mostrarToast('¡Pedido confirmado con éxito! Abriendo WhatsApp oficial...', 'success');
 
     setTimeout(() => {
       window.open(urlWhatsApp, '_blank');
@@ -801,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ========================================================
-  // 12. GEOLOCALIZACIÓN (PUERTO IGUAZÚ)
+  // 11. GEOLOCALIZACIÓN (PUERTO IGUAZÚ)
   // ========================================================
   const calcularDistancia = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
@@ -901,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ========================================================
-  // 13. PANEL KDS (KITCHEN DISPLAY SYSTEM) & TICKETS TÉRMICOS
+  // 12. PANEL KDS (KITCHEN DISPLAY SYSTEM) & TICKETS TÉRMICOS
   // ========================================================
   window.cambiarEstadoComanda = (idComanda, nuevoEstado) => {
     const comanda = state.comandasCocina.find(c => c.id === idComanda);
@@ -935,6 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div>Entrega: ${comanda.tipoEntrega.toUpperCase()}</div>
       <div>Dirección: ${comanda.direccion}</div>
       <div>Pago: ${comanda.metodoPago.toUpperCase()}</div>
+      ${comanda.comprobante ? `<div>Comprobante: #${comanda.comprobante}</div>` : ''}
       ${comanda.notas ? `<div>Notas: ${comanda.notas}</div>` : ''}
       <div class="separador"></div>
       <div style="font-weight: bold;">DETALLE:</div>
@@ -1004,7 +869,8 @@ document.addEventListener('DOMContentLoaded', () => {
               <p class="text-white font-bold text-sm">${comanda.cliente}</p>
               <p class="text-stone-400">📞 ${comanda.telefono}</p>
               <p class="text-stone-300">📍 ${comanda.tipoEntrega === 'delivery' ? `🛵 Delivery: ${comanda.direccion}` : '🛍️ Retiro en Local'}</p>
-              <p class="text-stone-300 font-semibold">💳 Pago: ${comanda.metodoPago.toUpperCase()}</p>
+              <p class="text-stone-300 font-semibold">💳 Pago: ${comanda.metodoPago === 'mercadopago' ? 'MERCADO PAGO / TRANSF.' : 'EFECTIVO'}</p>
+              ${comanda.comprobante ? `<p class="text-emerald-400 font-mono text-[11px]">🧾 Comprobante: #${comanda.comprobante}</p>` : ''}
               ${comanda.notas ? `<p class="text-amber-300 italic">📝 "${comanda.notas}"</p>` : ''}
             </div>
 
@@ -1048,7 +914,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ========================================================
-  // 14. EVENT LISTENERS Y CONFIGURACIÓN DOM
+  // 13. EVENT LISTENERS Y CONFIGURACIÓN DOM
   // ========================================================
   const configurarEventListeners = () => {
     // Drawer Carrito
@@ -1114,14 +980,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Botón Principal de Checkout (Alterna entre WhatsApp y Mercado Pago)
+    // Botón Principal de Checkout (Envío a WhatsApp)
     const btnCheckoutPrincipal = document.getElementById('btn-checkout-principal');
     btnCheckoutPrincipal?.addEventListener('click', () => {
-      if (state.metodoPago === 'mercadopago') {
-        pagarConMercadoPago();
-      } else {
-        enviarPedidoWhatsApp();
-      }
+      enviarPedidoWhatsApp();
     });
 
     // Geolocalización
@@ -1183,30 +1045,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem(STORAGE_KEYS.TEMA, isDark ? 'dark' : 'light');
     });
-
-    // Verificar retorno de Mercado Pago en la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const mpStatus = urlParams.get('status');
-    if (mpStatus === 'success' || mpStatus === 'approved') {
-      mostrarToast('🎉 ¡Tu pago con Mercado Pago fue aprobado con éxito! Gracias por tu compra.', 'success');
-      state.carrito = [];
-      guardarCarritoEnStorage();
-      actualizarBadges();
-      // Limpiar query params de la URL sin recargar
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (mpStatus === 'failure') {
-      mostrarToast('El pago no pudo ser completado. Podés intentar nuevamente o pagar en efectivo.', 'warning');
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (mpStatus === 'pending') {
-      mostrarToast('Tu pago con Mercado Pago está pendiente de acreditación.', 'info');
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
   };
 
   // ========================================================
-  // 15. INICIALIZACIÓN
+  // 14. INICIALIZACIÓN
   // ========================================================
-  cargarEstadoDesdeStorage();
+  cargarEstadoInicial();
   renderizarCatalogo();
   actualizarBadges();
   configurarEventListeners();
