@@ -46,7 +46,7 @@ body {
 
 .modal-carrito-card {
   width: 100%;
-  max-width: 550px; /* Escritorio: máximo 550px */
+  max-width: 550px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -76,143 +76,12 @@ body {
 }
 
 /* ======================================================== */
-/* 2. FILA DE PRODUCTO EN CARRITO                           */
-/* Sin overflow hidden extraño, flexbox directo, 70x70px img */
-/* ======================================================== */
-.carrito-item-row {
-  display: flex !important;
-  align-items: center !important;
-  gap: 15px !important;
-  padding: 12px 14px;
-  background: #fafaf9;
-  border: 1px solid #e7e5e4;
-  border-radius: 14px;
-  position: static !important;
-  margin: 0 !important;
-  overflow: visible !important;
-}
-
-.dark .carrito-item-row {
-  background: #262422;
-  border-color: #383533;
-}
-
-/* Miniatura fija visible 70x70px */
-.carrito-item-img {
-  width: 70px !important;
-  height: 70px !important;
-  object-fit: cover !important;
-  border-radius: 10px !important;
-  flex-shrink: 0 !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e5e7eb;
-}
-
-.dark .carrito-item-img {
-  border-color: #44403c;
-}
-
-/* Agrupación de Título y Precio a la derecha */
-.carrito-item-info {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 4px !important;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.carrito-item-titulo {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.05rem; /* ~17px destacado */
-  font-weight: 700;
-  line-height: 1.25;
-  color: #1c1917;
-  margin: 0;
-}
-
-.dark .carrito-item-titulo {
-  color: #fafaf9;
-}
-
-.carrito-item-topping {
-  font-size: 0.75rem;
-  color: #a12d44;
-  font-weight: 600;
-}
-
-.dark .carrito-item-topping {
-  color: #f0b3bc;
-}
-
-.carrito-item-precio {
-  font-family: 'Space Mono', monospace;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #a12d44;
-}
-
-.dark .carrito-item-precio {
-  color: #e58595;
-}
-
-/* Controles de cantidad */
-.carrito-item-controles {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #ffffff;
-  border: 1px solid #d6d3d1;
-  border-radius: 10px;
-  padding: 3px 6px;
-  flex-shrink: 0;
-}
-
-.dark .carrito-item-controles {
-  background: #1c1917;
-  border-color: #44403c;
-}
-
-.carrito-btn-qty {
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 14px;
-  color: #44403c;
-  border-radius: 6px;
-  transition: background 0.15s;
-}
-
-.dark .carrito-btn-qty {
-  color: #e7e5e4;
-}
-
-.carrito-btn-qty:hover {
-  background: #f5f5f4;
-}
-
-.dark .carrito-btn-qty:hover {
-  background: #292524;
-}
-
-/* Botón checkout estado bloqueado */
-#btn-checkout-whatsapp:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-  filter: grayscale(0.85);
-  box-shadow: none !important;
-}
-
-/* ======================================================== */
-/* 3. MEDIA QUERIES PARA MÓVILES (APILAMIENTO VERTICAL)      */
+/* 2. MEDIA QUERIES PARA MÓVILES (APILAMIENTO VERTICAL)      */
 /* ======================================================== */
 @media (max-width: 640px) {
   .modal-carrito-backdrop {
     padding: 0.5rem;
-    align-items: flex-end; /* En móviles abre como bottom-sheet */
+    align-items: flex-end;
   }
 
   .modal-carrito-card {
@@ -224,7 +93,7 @@ body {
   }
 
   .metodos-entrega-grid {
-    grid-template-columns: 1fr !important; /* Apilado vertical */
+    grid-template-columns: 1fr !important;
     gap: 0.5rem !important;
   }
 
@@ -234,7 +103,7 @@ body {
 }
 
 /* ======================================================== */
-/* 4. IMPRESIÓN TÉRMICA DE TICKETS KDS (@media print)       */
+/* 3. IMPRESIÓN TÉRMICA DE TICKETS KDS (@media print)       */
 /* ======================================================== */
 @media print {
   body * {

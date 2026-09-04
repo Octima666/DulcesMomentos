@@ -1,15 +1,8 @@
 /**
- * DULCES MOMENTOS - Pastelería Artesanal Boutique
- * Core Logic Engine (Vanilla JS)
- * 
- * Funcionalidades clave:
- * 1. UI de Carrito 100% Responsive con miniaturas ampliadas y tipografía legible
- * 2. Método de Pago (Efectivo / Transferencia Alias QR) sin API externa
- * 3. Bloqueo estricto del botón de confirmación hasta ingresar N° de comprobante
- * 4. Envío estructurado a WhatsApp oficial (+54 9 3757 57-1985) con emojis y datos completos
- * 5. Geolocalización y Geocodificación Inversa estricta para Puerto Iguazú, Misiones
- * 6. Persistencia LocalStorage (Carrito & Comandas KDS)
- * 7. Panel KDS y Soporte de Impresión Térmica
+ * ============================================================================
+ * PASTELERÍA "DULCES MOMENTOS" - LÓGICA PRINCIPAL (app.js)
+ * Frontend JavaScript + Mercado Pago API v2 + Checkout WhatsApp + KDS
+ * ============================================================================
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,11 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     claveCocinaKDS: 'niledlajo',
     costoEnvioFijo: 1500, // Costo de envío en Puerto Iguazú ($ ARS)
     
+    // Endpoint backend para Mercado Pago API v2
+    apiCrearPreferencia: '/api/crear-preferencia',
+
     // Coordenadas de Referencia: Centro de Puerto Iguazú, Misiones, Argentina
     centroIguazu: {
       lat: -25.5988,
       lon: -54.5755,
-      radioMaximoKm: 12.0 // Radio máximo de entrega
+      radioMaximoKm: 12.0
     }
   };
 
@@ -144,12 +140,13 @@ document.addEventListener('DOMContentLoaded', () => {
     comandasCocina: [],
     categoriaSeleccionada: 'todos',
     tipoEntrega: 'takeaway', // 'takeaway' | 'delivery'
-    metodoPago: 'efectivo',  // 'efectivo' | 'transferencia'
-    ubicacionValidadaIguazu: false
+    metodoPago: 'efectivo',  // 'efectivo' | 'mercadopago'
+    ubicacionValidadaIguazu: false,
+    procesandoPagoMP: false
   };
 
   // ========================================================
-  // 5. PERSISTENCIA (LOCALSTORAGE ENGINE)
+  // 5. INICIALIZACIÓN Y PERSISTENCIA (LocalStorage)
   // ========================================================
   const cargarEstadoDesdeStorage = () => {
     try {
@@ -157,350 +154,313 @@ document.addEventListener('DOMContentLoaded', () => {
       if (carritoGuardado) state.carrito = JSON.parse(carritoGuardado);
 
       const comandasGuardadas = localStorage.getItem(STORAGE_KEYS.COMANDAS);
-      if (comandasGuardadas) {
-        state.comandasCocina = JSON.parse(comandasGuardadas);
+      if (comandasGuardadas) state.comandasCocina = JSON.parse(comandasGuardadas);
+
+      const temaGuardado = localStorage.getItem(STORAGE_KEYS.TEMA);
+      if (temaGuardado === 'dark' || (!temaGuardado && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
       } else {
-        state.comandasCocina = [
-          {
-            id: 'CMD-8021',
-            fecha: new Date(Date.now() - 15 * 60000).toISOString(),
-            cliente: 'Sofía Valenzuela',
-            telefono: '3757445566',
-            tipoEntrega: 'delivery',
-            direccion: 'Av. Victoria Aguirre 450, Puerto Iguazú',
-            metodoPago: 'transferencia',
-            comprobante: '94821034',
-            notas: 'Sin cubiertos plásticos por favor',
-            estado: 'en_preparacion',
-            items: [
-              { nombre: 'Cheesecake New York Clásico', cantidad: 1, topping: 'Salsa Reducción de Maracuyá', subtotal: 17300 }
-            ],
-            subtotal: 17300,
-            envio: 1500,
-            total: 18800
-          }
-        ];
-        guardarComandasEnStorage();
+        document.documentElement.classList.remove('dark');
       }
-    } catch (error) {
-      console.error('Error al cargar datos desde localStorage:', error);
+    } catch (e) {
+      console.warn('Error al cargar datos desde localStorage:', e);
     }
   };
 
   const guardarCarritoEnStorage = () => {
     try {
       localStorage.setItem(STORAGE_KEYS.CARRITO, JSON.stringify(state.carrito));
-      actualizarBadgeCarrito();
-    } catch (error) {
-      console.error('Error al guardar el carrito:', error);
+    } catch (e) {
+      console.warn('Error al guardar carrito:', e);
     }
   };
 
   const guardarComandasEnStorage = () => {
     try {
       localStorage.setItem(STORAGE_KEYS.COMANDAS, JSON.stringify(state.comandasCocina));
-      renderizarKDS();
-    } catch (error) {
-      console.error('Error al guardar comandas:', error);
+      renderizarComandasKDS();
+    } catch (e) {
+      console.warn('Error al guardar comandas:', e);
     }
   };
 
   // ========================================================
-  // 6. SISTEMA DE NOTIFICACIONES TOAST (UI/UX)
+  // 6. SISTEMA DE NOTIFICACIONES (TOASTS)
   // ========================================================
   const mostrarToast = (mensaje, tipo = 'info') => {
     const contenedor = document.getElementById('toast-container');
     if (!contenedor) return;
 
     const toast = document.createElement('div');
-    toast.className = `pointer-events-auto flex items-start gap-3 p-4 rounded-2xl shadow-xl text-sm font-medium text-white transition-all transform duration-300 translate-y-2 opacity-0 ${
-      tipo === 'success' ? 'bg-emerald-600 border border-emerald-500' :
-      tipo === 'error' ? 'bg-rose-600 border border-rose-500' :
-      tipo === 'warning' ? 'bg-amber-600 border border-amber-500' :
-      'bg-stone-900 border border-stone-800'
-    }`;
+    const iconos = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+      info: 'ℹ️'
+    };
 
-    const icono = tipo === 'success' ? '✅' : tipo === 'error' ? '🚫' : tipo === 'warning' ? '⚠️' : 'ℹ️';
+    const colores = {
+      success: 'bg-emerald-600 text-white shadow-emerald-600/30',
+      error: 'bg-red-600 text-white shadow-red-600/30',
+      warning: 'bg-amber-600 text-white shadow-amber-600/30',
+      info: 'bg-brand-600 text-white shadow-brand-600/30'
+    };
 
+    toast.className = `flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl font-medium text-xs sm:text-sm transform transition-all duration-300 pointer-events-auto opacity-0 translate-y-3 ${colores[tipo] || colores.info}`;
     toast.innerHTML = `
-      <span class="text-base">${icono}</span>
-      <p class="flex-1">${mensaje}</p>
+      <span class="text-base sm:text-lg">${iconos[tipo] || 'ℹ️'}</span>
+      <span class="flex-1">${mensaje}</span>
     `;
 
     contenedor.appendChild(toast);
 
+    // Animación de entrada
     requestAnimationFrame(() => {
-      toast.classList.remove('translate-y-2', 'opacity-0');
+      toast.classList.remove('opacity-0', 'translate-y-3');
+      toast.classList.add('opacity-100', 'translate-y-0');
     });
 
+    // Auto eliminar
     setTimeout(() => {
-      toast.classList.add('opacity-0', 'translate-y-2');
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'translate-y-3');
       setTimeout(() => toast.remove(), 300);
-    }, 3800);
+    }, 4000);
   };
 
   // ========================================================
-  // 7. RENDERIZADO DEL CATÁLOGO (V2.0 CON TOPPINGS)
+  // 7. RENDERIZADO DEL CATÁLOGO DE PRODUCTOS
   // ========================================================
   const renderizarCatalogo = () => {
-    const contenedorCatalogo = document.getElementById('catalogo-productos');
-    if (!contenedorCatalogo) return;
+    const contenedor = document.getElementById('catalogo-productos');
+    if (!contenedor) return;
 
     const productosFiltrados = state.categoriaSeleccionada === 'todos'
       ? PRODUCTOS
       : PRODUCTOS.filter(p => p.categoria.toLowerCase() === state.categoriaSeleccionada.toLowerCase());
 
-    contenedorCatalogo.innerHTML = productosFiltrados.map(producto => `
-      <article class="flex flex-col justify-between bg-white dark:bg-stone-900 rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-sm hover:shadow-xl hover:border-brand-300 dark:hover:border-brand-800 transition-all duration-300 group">
-        <div>
-          <!-- Imagen Producto -->
-          <div class="relative h-60 w-full overflow-hidden bg-stone-100 dark:bg-stone-800">
-            <img 
-              src="${producto.imagen}" 
-              alt="${producto.nombre}" 
-              loading="lazy"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            >
-            <div class="absolute top-3 left-3 flex gap-2">
-              <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/90 dark:bg-stone-900/90 text-brand-700 dark:text-brand-300 backdrop-blur-xs shadow-xs border border-brand-200/50">
-                ${producto.categoria}
-              </span>
-              ${producto.badge ? `
-                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-600 text-white shadow-xs">
-                  ${producto.badge}
-                </span>
-              ` : ''}
-            </div>
-            <div class="absolute bottom-3 right-3 px-3 py-1 rounded-xl bg-stone-950/80 backdrop-blur-xs text-white font-mono font-bold text-sm">
-              Stock: ${producto.stock}u
-            </div>
-          </div>
+    if (productosFiltrados.length === 0) {
+      contenedor.innerHTML = `
+        <div class="col-span-full py-12 text-center text-stone-500 dark:text-stone-400">
+          <p class="text-4xl mb-2">🍰</p>
+          <p class="font-serif text-lg font-bold text-stone-800 dark:text-stone-200">No encontramos productos en esta categoría.</p>
+        </div>
+      `;
+      return;
+    }
 
-          <!-- Contenido y Toppings -->
-          <div class="p-6">
-            <h3 class="font-serif text-xl font-bold text-stone-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-              ${producto.nombre}
-            </h3>
-            <p class="mt-2 text-sm text-stone-600 dark:text-stone-400 line-clamp-2">
-              ${producto.descripcion}
-            </p>
-
-            <!-- Selector de Toppings -->
-            ${producto.toppings && producto.toppings.length > 0 ? `
-              <div class="mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
-                <label for="select-topping-${producto.id}" class="block text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-1.5">
-                  Personalizá con Topping:
-                </label>
-                <select id="select-topping-${producto.id}" class="w-full text-xs sm:text-sm px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-                  <option value="">Sin topping adicional</option>
-                  ${producto.toppings.map(t => `
-                    <option value="${t.id}">${t.nombre} (+${formatearMoneda(t.precio)})</option>
-                  `).join('')}
-                </select>
-              </div>
-            ` : ''}
-          </div>
+    contenedor.innerHTML = productosFiltrados.map(prod => `
+      <article class="card-producto bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
+        <div class="relative overflow-hidden aspect-[4/3] bg-stone-100 dark:bg-stone-800">
+          <img 
+            src="${prod.imagen}" 
+            alt="${prod.nombre}" 
+            loading="lazy"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          >
+          <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-white/90 dark:bg-stone-900/90 text-brand-700 dark:text-brand-300 backdrop-blur-xs shadow-xs">
+            ${prod.badge || prod.categoria}
+          </span>
         </div>
 
-        <!-- Footer Card & Precio -->
-        <div class="p-6 pt-0 flex items-center justify-between border-t border-stone-100 dark:border-stone-800 mt-2">
-          <div>
-            <span class="block text-xs text-stone-400 font-medium">Precio base</span>
-            <span class="font-mono text-xl font-bold text-brand-700 dark:text-brand-400">
-              ${formatearMoneda(producto.precio)}
-            </span>
+        <div class="p-5 flex flex-col flex-1">
+          <div class="flex-1">
+            <div class="flex items-baseline justify-between gap-2 mb-1">
+              <h3 class="font-serif text-lg sm:text-xl font-bold text-stone-900 dark:text-white leading-tight">
+                ${prod.nombre}
+              </h3>
+            </div>
+            <p class="text-xs sm:text-sm text-stone-600 dark:text-stone-300 line-clamp-2 mb-4 leading-relaxed">
+              ${prod.descripcion}
+            </p>
           </div>
-          <button 
-            data-id="${producto.id}" 
-            class="btn-agregar-carrito flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-sm font-semibold shadow-md shadow-brand-600/30 transition duration-200"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Agregar</span>
-          </button>
+
+          <!-- Selector de Toppings Opcionales -->
+          ${prod.toppings && prod.toppings.length > 0 ? `
+            <div class="mb-4 pt-3 border-t border-dashed border-stone-200 dark:border-stone-800">
+              <label for="topping-${prod.id}" class="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-1">
+                Personalizá tu Topping
+              </label>
+              <select id="topping-${prod.id}" class="select-topping w-full text-xs rounded-xl px-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-200 focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                <option value="">✨ Sin topping adicional</option>
+                ${prod.toppings.map(t => `
+                  <option value="${t.id}" data-precio="${t.precio}">+ ${t.nombre} (${formatearMoneda(t.precio)})</option>
+                `).join('')}
+              </select>
+            </div>
+          ` : ''}
+
+          <div class="flex items-center justify-between pt-3 border-t border-stone-200 dark:border-stone-800">
+            <div>
+              <span class="text-[10px] uppercase tracking-wider text-stone-500 dark:text-stone-400 block font-semibold">Precio</span>
+              <span class="font-serif text-xl sm:text-2xl font-bold text-brand-600 dark:text-brand-400">
+                ${formatearMoneda(prod.precio)}
+              </span>
+            </div>
+
+            <button 
+              data-id="${prod.id}" 
+              class="btn-agregar-carrito inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-900 hover:bg-brand-600 dark:bg-white dark:text-stone-900 dark:hover:bg-brand-500 text-white font-semibold text-xs sm:text-sm shadow-md transition-all transform active:scale-95"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>Agregar</span>
+            </button>
+          </div>
         </div>
       </article>
     `).join('');
 
-    // Listener para botones de agregar
-    contenedorCatalogo.querySelectorAll('.btn-agregar-carrito').forEach(boton => {
-      boton.addEventListener('click', (e) => {
-        const idProd = e.currentTarget.getAttribute('data-id');
-        const selectTopping = document.getElementById(`select-topping-${idProd}`);
-        const idTopping = selectTopping ? selectTopping.value : null;
-        agregarProductoAlCarrito(idProd, idTopping);
-      });
-    });
-  };
+    // Listeners para botones agregar al carrito
+    contenedor.querySelectorAll('.btn-agregar-carrito').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const prodId = e.currentTarget.getAttribute('data-id');
+        const selectTopping = document.getElementById(`topping-${prodId}`);
+        let toppingSeleccionado = null;
 
-  const inicializarFiltros = () => {
-    const contenedorFiltros = document.getElementById('filtros-categoria');
-    if (!contenedorFiltros) return;
+        if (selectTopping && selectTopping.value) {
+          const opt = selectTopping.selectedOptions[0];
+          const prod = PRODUCTOS.find(p => p.id === prodId);
+          const topObj = prod?.toppings?.find(t => t.id === selectTopping.value);
+          if (topObj) {
+            toppingSeleccionado = topObj;
+          }
+        }
 
-    contenedorFiltros.querySelectorAll('.btn-filtro').forEach(boton => {
-      boton.addEventListener('click', () => {
-        contenedorFiltros.querySelectorAll('.btn-filtro').forEach(b => {
-          b.classList.remove('bg-brand-600', 'text-white');
-          b.classList.add('bg-stone-100', 'dark:bg-stone-800', 'text-stone-700', 'dark:text-stone-300');
-        });
-
-        boton.classList.add('bg-brand-600', 'text-white');
-        boton.classList.remove('bg-stone-100', 'dark:bg-stone-800', 'text-stone-700', 'dark:text-stone-300');
-
-        state.categoriaSeleccionada = boton.getAttribute('data-categoria');
-        renderizarCatalogo();
+        agregarProductoAlCarrito(prodId, toppingSeleccionado);
       });
     });
   };
 
   // ========================================================
-  // 8. GESTIÓN DEL CARRITO (CON miniaturas 70x70 y flexbox)
+  // 8. GESTIÓN DEL CARRITO DE COMPRAS
   // ========================================================
-  const actualizarBadgeCarrito = () => {
-    const badge = document.getElementById('badge-carrito');
-    const badgeFlotante = document.getElementById('badge-carrito-flotante');
-    const totalCount = state.carrito.reduce((acc, item) => acc + item.cantidad, 0);
-    if (badge) badge.textContent = totalCount;
-    if (badgeFlotante) badgeFlotante.textContent = totalCount;
-  };
-
-  const agregarProductoAlCarrito = (productoId, toppingId = null) => {
+  const agregarProductoAlCarrito = (productoId, topping = null) => {
     const producto = PRODUCTOS.find(p => p.id === productoId);
     if (!producto) return;
 
-    let toppingSeleccionado = null;
-    if (toppingId && producto.toppings) {
-      toppingSeleccionado = producto.toppings.find(t => t.id === toppingId);
-    }
+    const toppingId = topping ? topping.id : 'sin-topping';
+    const itemKey = `${productoId}__${toppingId}`;
 
-    const precioUnitario = producto.precio + (toppingSeleccionado ? toppingSeleccionado.precio : 0);
-    const itemIdUnico = `${producto.id}_${toppingSeleccionado ? toppingSeleccionado.id : 'base'}`;
+    const itemExistente = state.carrito.find(item => item.itemKey === itemKey);
 
-    const itemExistente = state.carrito.find(item => item.itemKey === itemIdUnico);
+    const precioUnitario = producto.precio + (topping ? topping.precio : 0);
 
     if (itemExistente) {
       itemExistente.cantidad += 1;
       itemExistente.subtotal = itemExistente.cantidad * itemExistente.precioUnitario;
     } else {
       state.carrito.push({
-        itemKey: itemIdUnico,
+        itemKey,
         id: producto.id,
         nombre: producto.nombre,
-        precioUnitario: precioUnitario,
-        cantidad: 1,
-        subtotal: precioUnitario,
+        categoria: producto.categoria,
         imagen: producto.imagen,
-        topping: toppingSeleccionado ? { id: toppingSeleccionado.id, nombre: toppingSeleccionado.nombre, precio: toppingSeleccionado.precio } : null
+        precioBase: producto.precio,
+        precioUnitario: precioUnitario,
+        topping: topping,
+        cantidad: 1,
+        subtotal: precioUnitario
       });
     }
 
     guardarCarritoEnStorage();
     renderizarCarrito();
-    mostrarToast(`Agregaste "${producto.nombre}" al carrito.`, 'success');
+    actualizarBadges();
+
+    mostrarToast(`¡${producto.nombre} agregado al pedido!`, 'success');
   };
 
   const modificarCantidadItem = (itemKey, cambio) => {
-    const index = state.carrito.findIndex(item => item.itemKey === itemKey);
-    if (index === -1) return;
+    const itemIndex = state.carrito.findIndex(item => item.itemKey === itemKey);
+    if (itemIndex === -1) return;
 
-    state.carrito[index].cantidad += cambio;
+    state.carrito[itemIndex].cantidad += cambio;
 
-    if (state.carrito[index].cantidad <= 0) {
-      const nombreEliminado = state.carrito[index].nombre;
-      state.carrito.splice(index, 1);
-      mostrarToast(`Quitaste "${nombreEliminado}" del pedido.`, 'info');
+    if (state.carrito[itemIndex].cantidad <= 0) {
+      state.carrito.splice(itemIndex, 1);
     } else {
-      state.carrito[index].subtotal = state.carrito[index].cantidad * state.carrito[index].precioUnitario;
+      state.carrito[itemIndex].subtotal = state.carrito[itemIndex].cantidad * state.carrito[itemIndex].precioUnitario;
     }
 
     guardarCarritoEnStorage();
     renderizarCarrito();
+    actualizarBadges();
   };
 
-  /**
-   * Valida si el botón de checkout debe estar bloqueado o habilitado
-   */
-  const actualizarBloqueoBotonCheckout = () => {
-    const btnCheckout = document.getElementById('btn-checkout-whatsapp');
-    const inputComprobante = document.getElementById('input-comprobante');
-    const avisoBloqueo = document.getElementById('aviso-bloqueo-comprobante');
-    if (!btnCheckout) return;
+  const actualizarBadges = () => {
+    const totalItems = state.carrito.reduce((acc, item) => acc + item.cantidad, 0);
+    const badgeHeader = document.getElementById('badge-carrito');
+    const badgeFlotante = document.getElementById('badge-carrito-flotante');
 
-    if (state.metodoPago === 'transferencia') {
-      const comprobante = (inputComprobante?.value || '').trim();
-      if (comprobante.length === 0) {
-        btnCheckout.disabled = true;
-        btnCheckout.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'grayscale');
-        if (avisoBloqueo) avisoBloqueo.classList.remove('hidden');
-      } else {
-        btnCheckout.disabled = false;
-        btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'grayscale');
-        if (avisoBloqueo) avisoBloqueo.classList.add('hidden');
-      }
-    } else {
-      // Efectivo -> Habilitado
-      btnCheckout.disabled = false;
-      btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'grayscale');
-      if (avisoBloqueo) avisoBloqueo.classList.add('hidden');
-    }
+    if (badgeHeader) badgeHeader.textContent = totalItems;
+    if (badgeFlotante) badgeFlotante.textContent = totalItems;
   };
 
   const renderizarCarrito = () => {
     const contenedorLista = document.getElementById('lista-carrito');
-    const totalItemsEl = document.getElementById('total-items-carrito');
+    const totalItemsHeader = document.getElementById('total-items-carrito');
     const subtotalEl = document.getElementById('subtotal-carrito');
     const envioEl = document.getElementById('costo-envio');
     const totalEl = document.getElementById('total-carrito');
 
     if (!contenedorLista) return;
 
-    const totalArticulos = state.carrito.reduce((acc, item) => acc + item.cantidad, 0);
-    if (totalItemsEl) totalItemsEl.textContent = `${totalArticulos} producto${totalArticulos !== 1 ? 's' : ''} seleccionado${totalArticulos !== 1 ? 's' : ''}`;
+    const totalCantidad = state.carrito.reduce((acc, item) => acc + item.cantidad, 0);
+    if (totalItemsHeader) {
+      totalItemsHeader.textContent = `${totalCantidad} producto${totalCantidad === 1 ? '' : 's'} seleccionado${totalCantidad === 1 ? '' : 's'}`;
+    }
 
     if (state.carrito.length === 0) {
       contenedorLista.innerHTML = `
         <div class="py-12 text-center text-stone-400 dark:text-stone-500">
-          <div class="text-4xl mb-3">🧁</div>
-          <p class="font-medium text-stone-600 dark:text-stone-400">Tu carrito está vacío.</p>
-          <p class="text-xs text-stone-400 dark:text-stone-500 mt-1">Elegí nuestras exquisiteces artesanales para comenzar.</p>
+          <span class="text-4xl block mb-2">🛒</span>
+          <p class="font-serif text-base font-bold text-stone-700 dark:text-stone-300">Tu pedido está vacío</p>
+          <p class="text-xs mt-1">Explorá nuestra colección y agregá tus postres preferidos.</p>
         </div>
       `;
-      if (subtotalEl) subtotalEl.textContent = '$ 0';
-      if (envioEl) envioEl.textContent = '$ 0';
-      if (totalEl) totalEl.textContent = '$ 0';
-      actualizarBloqueoBotonCheckout();
+
+      if (subtotalEl) subtotalEl.textContent = formatearMoneda(0);
+      if (envioEl) envioEl.textContent = formatearMoneda(0);
+      if (totalEl) totalEl.textContent = formatearMoneda(0);
+
+      actualizarBotonCheckoutUI();
       return;
     }
 
     contenedorLista.innerHTML = state.carrito.map(item => `
-      <div class="carrito-item-row">
-        <!-- Miniatura del Producto 70x70px fija -->
+      <div class="flex items-center gap-3 p-3 rounded-2xl bg-white dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 shadow-xs">
         <img 
           src="${item.imagen}" 
           alt="${item.nombre}" 
-          class="carrito-item-img"
-          loading="lazy"
+          class="w-16 h-16 rounded-xl object-cover shrink-0 border border-stone-200 dark:border-stone-700"
         >
-
-        <!-- Información del Producto -->
-        <div class="carrito-item-info">
-          <h4 class="carrito-item-titulo">${item.nombre}</h4>
-          ${item.topping ? `<span class="carrito-item-topping">✨ ${item.topping.nombre}</span>` : ''}
-          <span class="carrito-item-precio">${formatearMoneda(item.subtotal)}</span>
+        <div class="flex-1 min-w-0">
+          <h4 class="font-serif font-bold text-xs sm:text-sm text-stone-900 dark:text-white truncate">
+            ${item.nombre}
+          </h4>
+          ${item.topping ? `
+            <p class="text-[11px] text-brand-600 dark:text-brand-400 font-medium truncate">
+              + ${item.topping.nombre}
+            </p>
+          ` : ''}
+          <div class="flex items-center gap-2 mt-1">
+            <span class="font-serif text-xs font-extrabold text-brand-600 dark:text-brand-400">
+              ${formatearMoneda(item.subtotal)}
+            </span>
+            <span class="text-[10px] text-stone-400">(${formatearMoneda(item.precioUnitario)} c/u)</span>
+          </div>
         </div>
 
-        <!-- Controles de Cantidad -->
-        <div class="carrito-item-controles">
+        <div class="flex items-center gap-1.5 bg-stone-100 dark:bg-stone-900/60 p-1 rounded-xl border border-stone-200 dark:border-stone-700 shrink-0">
           <button 
             data-key="${item.itemKey}" 
-            class="btn-restar carrito-btn-qty" 
+            class="btn-restar w-6 h-6 flex items-center justify-center rounded-lg bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-brand-100 dark:hover:bg-stone-700 text-xs font-bold transition"
             aria-label="Disminuir cantidad"
-          >−</button>
-          <span class="font-mono font-bold text-xs sm:text-sm px-1.5 text-stone-800 dark:text-stone-100">${item.cantidad}</span>
+          >-</button>
+          <span class="font-mono font-bold text-xs px-1.5 text-stone-800 dark:text-stone-100">${item.cantidad}</span>
           <button 
             data-key="${item.itemKey}" 
-            class="btn-sumar carrito-btn-qty" 
+            class="btn-sumar w-6 h-6 flex items-center justify-center rounded-lg bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-brand-100 dark:hover:bg-stone-700 text-xs font-bold transition" 
             aria-label="Aumentar cantidad"
           >+</button>
         </div>
@@ -530,12 +490,319 @@ document.addEventListener('DOMContentLoaded', () => {
     if (envioEl) envioEl.textContent = state.tipoEntrega === 'delivery' ? formatearMoneda(costoEnvio) : 'Bonificado';
     if (totalEl) totalEl.textContent = formatearMoneda(total);
 
-    actualizarBloqueoBotonCheckout();
+    actualizarBotonCheckoutUI();
   };
 
   // ====================================================================
-  // 9. GEOLOCALIZACIÓN Y GEOCODIFICACIÓN INVERSA (PUERTO IGUAZÚ ESTRICTO)
+  // 9. ALTERNANCIA DINÁMICA DE LA UI DEL BOTÓN DE PAGO
   // ====================================================================
+  const actualizarBotonCheckoutUI = () => {
+    const btnCheckout = document.getElementById('btn-checkout-principal');
+    const iconoCheckout = document.getElementById('btn-checkout-icono');
+    const textoCheckout = document.getElementById('btn-checkout-texto');
+
+    if (!btnCheckout || !iconoCheckout || !textoCheckout) return;
+
+    if (state.carrito.length === 0) {
+      btnCheckout.disabled = true;
+      btnCheckout.classList.add('opacity-50', 'cursor-not-allowed');
+      return;
+    }
+
+    btnCheckout.disabled = false;
+    btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed');
+
+    if (state.metodoPago === 'mercadopago') {
+      // Estilo oficial Mercado Pago
+      btnCheckout.className = 'w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-[#009EE3] hover:bg-[#0081BA] active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-[#009EE3]/30 transition-all';
+      iconoCheckout.textContent = '💳';
+      textoCheckout.textContent = 'Pagar con Mercado Pago';
+    } else {
+      // Estilo oficial WhatsApp
+      btnCheckout.className = 'w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all';
+      iconoCheckout.textContent = '💬';
+      textoCheckout.textContent = 'Confirmar y Enviar Pedido por WhatsApp';
+    }
+  };
+
+  // ====================================================================
+  // 10. CHECKOUT: PAGAR CON MERCADO PAGO (API V2)
+  // ====================================================================
+  const pagarConMercadoPago = async () => {
+    if (state.procesandoPagoMP) return;
+
+    if (state.carrito.length === 0) {
+      mostrarToast('Tu carrito está vacío.', 'warning');
+      return;
+    }
+
+    const inputNombre = document.getElementById('input-nombre');
+    const inputTelefono = document.getElementById('input-telefono');
+    const inputNotas = document.getElementById('input-notas');
+    const inputDireccion = document.getElementById('input-direccion');
+    const errorTelefono = document.getElementById('error-telefono');
+
+    const nombre = (inputNombre?.value || '').trim();
+    const telefono = (inputTelefono?.value || '').trim();
+    const notas = (inputNotas?.value || '').trim();
+    const direccion = (inputDireccion?.value || '').trim();
+
+    // Validaciones
+    if (!nombre) {
+      inputNombre?.focus();
+      return mostrarToast('Por favor ingresá tu nombre completo.', 'error');
+    }
+
+    const telLimpio = telefono.replace(/\D/g, '');
+    if (telLimpio.length < 8) {
+      errorTelefono?.classList.remove('hidden');
+      inputTelefono?.focus();
+      return mostrarToast('El teléfono debe tener un formato válido (mínimo 8 dígitos)', 'error');
+    } else {
+      errorTelefono?.classList.add('hidden');
+    }
+
+    if (state.tipoEntrega === 'delivery' && !direccion) {
+      inputDireccion?.focus();
+      return mostrarToast('Por favor ingresá la dirección de entrega en Puerto Iguazú.', 'error');
+    }
+
+    // Preparar Items para el Backend
+    const items = state.carrito.map(item => ({
+      id: item.id,
+      title: `${item.nombre}${item.topping ? ` (+ ${item.topping.nombre})` : ''}`,
+      quantity: Number(item.cantidad),
+      unit_price: Number(item.precioUnitario),
+      currency_id: 'ARS',
+      topping: item.topping ? item.topping.nombre : null
+    }));
+
+    // Si tiene costo de envío, lo sumamos como ítem adicional
+    if (state.tipoEntrega === 'delivery' && CONFIG.costoEnvioFijo > 0) {
+      items.push({
+        id: 'envio-iguazu',
+        title: 'Costo de Envío (Puerto Iguazú)',
+        quantity: 1,
+        unit_price: CONFIG.costoEnvioFijo,
+        currency_id: 'ARS'
+      });
+    }
+
+    const cliente = {
+      nombre,
+      telefono,
+      direccion: state.tipoEntrega === 'delivery' ? direccion : 'Retiro en Boutique',
+      tipoEntrega: state.tipoEntrega,
+      notas
+    };
+
+    // UI Loading en Botón
+    const btnCheckout = document.getElementById('btn-checkout-principal');
+    const textoCheckout = document.getElementById('btn-checkout-texto');
+    const iconoCheckout = document.getElementById('btn-checkout-icono');
+
+    try {
+      state.procesandoPagoMP = true;
+      if (btnCheckout) btnCheckout.disabled = true;
+      if (iconoCheckout) iconoCheckout.textContent = '⏳';
+      if (textoCheckout) textoCheckout.textContent = 'Conectando con Mercado Pago...';
+
+      mostrarToast('Generando preferencia de pago en Mercado Pago...', 'info');
+
+      const response = await fetch(CONFIG.apiCrearPreferencia, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, cliente })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || errData.details || `Error del servidor (${response.status})`);
+      }
+
+      const data = await response.json();
+
+      if (!data.init_point) {
+        throw new Error('No se recibió la URL de pago (init_point) de Mercado Pago.');
+      }
+
+      // Guardar comanda preliminar en KDS
+      const subtotal = state.carrito.reduce((acc, item) => acc + item.subtotal, 0);
+      const costoEnvio = state.tipoEntrega === 'delivery' ? CONFIG.costoEnvioFijo : 0;
+      const total = subtotal + costoEnvio;
+
+      const nuevaComanda = {
+        id: `MP-${data.id ? data.id.substring(0, 8) : Date.now().toString().slice(-4)}`,
+        fecha: new Date().toISOString(),
+        cliente: nombre,
+        telefono: telefono,
+        tipoEntrega: state.tipoEntrega,
+        direccion: state.tipoEntrega === 'delivery' ? direccion : 'Retiro en Boutique',
+        metodoPago: 'mercadopago',
+        estado: 'pendiente',
+        items: state.carrito.map(item => ({
+          nombre: item.nombre,
+          cantidad: item.cantidad,
+          topping: item.topping ? item.topping.nombre : null,
+          subtotal: item.subtotal
+        })),
+        subtotal,
+        envio: costoEnvio,
+        total,
+        preferenceId: data.id
+      };
+
+      state.comandasCocina.unshift(nuevaComanda);
+      guardarComandasEnStorage();
+
+      mostrarToast('¡Preferencia generada! Redirigiendo a Mercado Pago...', 'success');
+
+      // Redirección oficial a Mercado Pago
+      setTimeout(() => {
+        window.location.href = data.init_point;
+      }, 700);
+
+    } catch (error) {
+      console.error('Error al iniciar Mercado Pago:', error);
+      mostrarToast(`Error: ${error.message}. Verificá el Access Token en server.js`, 'error');
+    } finally {
+      state.procesandoPagoMP = false;
+      actualizarBotonCheckoutUI();
+    }
+  };
+
+  // ====================================================================
+  // 11. CHECKOUT: ENVIAR PEDIDO POR WHATSAPP (+54 9 3757 57-1985)
+  // ====================================================================
+  const enviarPedidoWhatsApp = () => {
+    if (state.carrito.length === 0) {
+      mostrarToast('Tu carrito está vacío. Agregá al menos un postre.', 'warning');
+      return;
+    }
+
+    const inputNombre = document.getElementById('input-nombre');
+    const inputTelefono = document.getElementById('input-telefono');
+    const inputNotas = document.getElementById('input-notas');
+    const inputDireccion = document.getElementById('input-direccion');
+    const errorTelefono = document.getElementById('error-telefono');
+
+    const nombre = (inputNombre?.value || '').trim();
+    const telefono = (inputTelefono?.value || '').trim();
+    const notas = (inputNotas?.value || '').trim();
+    const direccion = (inputDireccion?.value || '').trim();
+
+    // Validar nombre
+    if (!nombre) {
+      inputNombre?.focus();
+      return mostrarToast('Por favor ingresá tu nombre completo.', 'error');
+    }
+    
+    // Validar teléfono
+    const telLimpio = telefono.replace(/\D/g, '');
+    if (telLimpio.length < 8) {
+      errorTelefono?.classList.remove('hidden');
+      inputTelefono?.focus();
+      return mostrarToast('El teléfono debe tener un formato válido (mínimo 8 dígitos)', 'error');
+    } else {
+      errorTelefono?.classList.add('hidden');
+    }
+
+    // Validar dirección si es Delivery
+    if (state.tipoEntrega === 'delivery' && !direccion) {
+      inputDireccion?.focus();
+      return mostrarToast('Por favor ingresá o validá tu dirección en Puerto Iguazú.', 'error');
+    }
+
+    // Totales y comanda
+    const subtotal = state.carrito.reduce((acc, item) => acc + item.subtotal, 0);
+    const costoEnvio = state.tipoEntrega === 'delivery' ? CONFIG.costoEnvioFijo : 0;
+    const total = subtotal + costoEnvio;
+    const comandaId = `CMD-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const nuevaComanda = {
+      id: comandaId,
+      fecha: new Date().toISOString(),
+      cliente: nombre,
+      telefono: telefono,
+      tipoEntrega: state.tipoEntrega,
+      direccion: state.tipoEntrega === 'delivery' ? direccion : 'Retiro por Boutique Dulces Momentos',
+      metodoPago: 'efectivo',
+      notas: notas || 'Sin notas especiales',
+      estado: 'pendiente',
+      items: state.carrito.map(item => ({
+        nombre: item.nombre,
+        cantidad: item.cantidad,
+        topping: item.topping ? item.topping.nombre : null,
+        subtotal: item.subtotal
+      })),
+      subtotal: subtotal,
+      envio: costoEnvio,
+      total: total
+    };
+
+    // Guardar comanda en KDS
+    state.comandasCocina.unshift(nuevaComanda);
+    guardarComandasEnStorage();
+
+    // Generar Mensaje Estructurado con Emojis para WhatsApp
+    let mensaje = `🎂 *¡HOLA DULCES MOMENTOS!* 🎂\n`;
+    mensaje += `Quiero confirmar el siguiente pedido para mi celebración:\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `🧾 *ID Pedido:* #${nuevaComanda.id}\n`;
+    mensaje += `👤 *Cliente:* ${nombre}\n`;
+    mensaje += `📞 *Teléfono:* ${telefono}\n`;
+    mensaje += `📍 *Método de Entrega:* ${state.tipoEntrega === 'takeaway' ? '🛍️ Retiro en Boutique (Local)' : '🛵 Delivery a Domicilio'}\n`;
+    
+    if (state.tipoEntrega === 'delivery') {
+      mensaje += `🏡 *Dirección:* ${direccion} (Puerto Iguazú, Misiones)\n`;
+    }
+    
+    if (notas) {
+      mensaje += `📝 *Dedicatoria / Notas:* _${notas}_\n`;
+    }
+
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `💳 *Forma de Pago:* 💵 Efectivo (al retirar / recibir)\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `🛒 *DETALLE DEL PEDIDO:*\n`;
+
+    state.carrito.forEach(item => {
+      mensaje += `▪️ *${item.cantidad}x* ${item.nombre}`;
+      if (item.topping) {
+        mensaje += `\n   └ _Topping: ${item.topping.nombre}_`;
+      }
+      mensaje += ` -> ${formatearMoneda(item.subtotal)}\n`;
+    });
+
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `*Subtotal:* ${formatearMoneda(subtotal)}\n`;
+    if (state.tipoEntrega === 'delivery') {
+      mensaje += `*Costo de Envío (Puerto Iguazú):* ${formatearMoneda(costoEnvio)}\n`;
+    }
+    mensaje += `💰 *TOTAL GENERAL: ${formatearMoneda(total)}*\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `✨ _¡Muchas gracias por su atención!_`;
+
+    // URL oficial de WhatsApp con número destino +54 9 3757 57-1985
+    const urlWhatsApp = `https://wa.me/${CONFIG.telefonoWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+
+    // Limpiar carrito y cerrar modal
+    state.carrito = [];
+    guardarCarritoEnStorage();
+    renderizarCarrito();
+    actualizarBadges();
+    document.getElementById('drawer-carrito')?.classList.add('hidden');
+
+    mostrarToast('¡Pedido confirmado! Abriendo WhatsApp oficial...', 'success');
+
+    setTimeout(() => {
+      window.open(urlWhatsApp, '_blank');
+    }, 500);
+  };
+
+  // ========================================================
+  // 12. GEOLOCALIZACIÓN (PUERTO IGUAZÚ)
+  // ========================================================
   const calcularDistancia = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
     const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -571,17 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       const addr = data.address || {};
 
-      const ciudad = (addr.city || addr.town || addr.village || addr.municipality || addr.county || '').toLowerCase();
-      const provincia = (addr.state || '').toLowerCase();
-
-      const esIguazu = ciudad.includes('iguazu') || ciudad.includes('iguazú') || ciudad.includes('puerto iguazú') || distanciaKm <= 8.5;
-      const esMisiones = provincia.includes('misiones') || distanciaKm <= 8.5;
-
-      if (!esIguazu && !esMisiones) {
-        throw new Error('FUERA_DE_COBERTURA');
-      }
-
-      const calle = addr.road || addr.pedestrian || addr.street || addr.avenue || addr.suburb || 'Calle sin nombre';
+      const calle = addr.road || addr.pedestrian || addr.street || addr.avenue || 'Calle sin nombre';
       const numero = addr.house_number ? ` ${addr.house_number}` : '';
       const barrio = addr.neighbourhood || addr.suburb ? ` (${addr.neighbourhood || addr.suburb})` : '';
       
@@ -596,7 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.ubicacionValidadaIguazu = true;
 
       if (infoGeo) {
-        infoGeo.textContent = `✅ Ubicación detectada en Puerto Iguazú (${distanciaKm.toFixed(1)} km del centro).`;
+        infoGeo.textContent = `✅ Ubicación validada en Puerto Iguazú (${distanciaKm.toFixed(1)} km del centro).`;
         infoGeo.className = 'text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1';
       }
 
@@ -604,7 +861,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (error) {
       state.ubicacionValidadaIguazu = false;
-      forzarRetiroEnLocal('La ubicación detectada no pertenece a Puerto Iguazú, Misiones.');
+      if (infoGeo) {
+        infoGeo.textContent = '⚠️ No pudimos validar la ubicación automáticamente. Podés escribirla manualmente.';
+        infoGeo.className = 'text-[11px] text-amber-600 font-semibold mt-1';
+      }
     }
   };
 
@@ -619,7 +879,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (infoGeo) {
-      infoGeo.textContent = '📍 Obteniendo coordenadas y traduciendo calle en Puerto Iguazú...';
+      infoGeo.textContent = '📍 Obteniendo coordenadas en Puerto Iguazú...';
       infoGeo.className = 'text-[11px] text-brand-600 dark:text-brand-400 font-semibold animate-pulse';
     }
 
@@ -628,195 +888,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const { latitude, longitude } = pos.coords;
         ejecutarGeocodificacionInversa(latitude, longitude);
       },
-      (err) => {
+      () => {
         state.ubicacionValidadaIguazu = false;
         if (infoGeo) {
-          infoGeo.textContent = '⚠️ No pudimos acceder al GPS. Por favor escribe tu dirección manualmente en Puerto Iguazú.';
+          infoGeo.textContent = '⚠️ Permiso GPS no concedido. Podés escribir tu dirección manualmente.';
           infoGeo.className = 'text-[11px] text-amber-600 font-medium mt-1';
         }
-        mostrarToast('Permiso de GPS no concedido. Podés escribir tu dirección.', 'warning');
+        mostrarToast('Podés ingresar tu dirección de entrega manualmente.', 'info');
       },
       { enableHighAccuracy: true, timeout: 9000 }
     );
   };
 
-  const forzarRetiroEnLocal = (motivo) => {
-    const radioTakeaway = document.querySelector('input[name="tipo-entrega"][value="takeaway"]');
-    const campoDireccion = document.getElementById('campo-direccion');
-    const infoGeo = document.getElementById('info-geolocalizacion');
-    const inputDireccion = document.getElementById('input-direccion');
-
-    if (radioTakeaway) radioTakeaway.checked = true;
-    state.tipoEntrega = 'takeaway';
-    state.ubicacionValidadaIguazu = false;
-
-    if (campoDireccion) campoDireccion.classList.add('hidden');
-    if (inputDireccion) inputDireccion.value = '';
-    
-    if (infoGeo) {
-      infoGeo.textContent = '❌ Fuera del área de cobertura (Solo envíos en Puerto Iguazú, Misiones).';
-      infoGeo.className = 'text-[11px] text-red-500 font-bold mt-1';
-    }
-
-    renderizarCarrito();
-    mostrarToast(`Delivery no disponible: ${motivo} Se seleccionó Retiro por el Local.`, 'error');
-  };
-
   // ========================================================
-  // 10. CHECKOUT Y REDIRECCIÓN A WHATSAPP (+54 9 3757 57-1985)
-  // ========================================================
-  const ejecutarCheckoutWhatsApp = () => {
-    if (state.carrito.length === 0) {
-      mostrarToast('Tu carrito está vacío. Agregá al menos un postre.', 'warning');
-      return;
-    }
-
-    const inputNombre = document.getElementById('input-nombre');
-    const inputTelefono = document.getElementById('input-telefono');
-    const inputNotas = document.getElementById('input-notas');
-    const inputDireccion = document.getElementById('input-direccion');
-    const inputComprobante = document.getElementById('input-comprobante');
-    const errorTelefono = document.getElementById('error-telefono');
-    const infoGeo = document.getElementById('info-geolocalizacion');
-
-    const nombre = (inputNombre?.value || '').trim();
-    const telefono = (inputTelefono?.value || '').trim();
-    const notas = (inputNotas?.value || '').trim();
-    const direccion = (inputDireccion?.value || '').trim();
-    const comprobante = (inputComprobante?.value || '').trim();
-
-    // Validar nombre
-    if (!nombre) {
-      inputNombre?.focus();
-      return mostrarToast('Por favor, ingresá tu nombre completo.', 'error');
-    }
-    
-    // Validar teléfono (mínimo 8 dígitos)
-    const telLimpio = telefono.replace(/\D/g, '');
-    if (telLimpio.length < 8) {
-      errorTelefono?.classList.remove('hidden');
-      inputTelefono?.focus();
-      return mostrarToast('El teléfono debe tener un formato válido (mínimo 8 dígitos)', 'error');
-    } else {
-      errorTelefono?.classList.add('hidden');
-    }
-
-    // Validar dirección si es Delivery
-    if (state.tipoEntrega === 'delivery') {
-      if (!direccion) {
-        inputDireccion?.focus();
-        return mostrarToast('Por favor, ingresá o validá tu dirección en Puerto Iguazú.', 'error');
-      }
-      if (infoGeo && infoGeo.textContent.includes('Fuera del área')) {
-        return mostrarToast('Lamentablemente la dirección está fuera de nuestra zona de envíos en Puerto Iguazú.', 'error');
-      }
-    }
-
-    // Validar comprobante si es Transferencia
-    if (state.metodoPago === 'transferencia' && !comprobante) {
-      inputComprobante?.focus();
-      actualizarBloqueoBotonCheckout();
-      return mostrarToast('Por favor ingresá el número de comprobante de la transferencia.', 'error');
-    }
-
-    // Totales y comanda
-    const subtotal = state.carrito.reduce((acc, item) => acc + item.subtotal, 0);
-    const costoEnvio = state.tipoEntrega === 'delivery' ? CONFIG.costoEnvioFijo : 0;
-    const total = subtotal + costoEnvio;
-    const comandaId = `CMD-${Math.floor(1000 + Math.random() * 9000)}`;
-
-    const nuevaComanda = {
-      id: comandaId,
-      fecha: new Date().toISOString(),
-      cliente: nombre,
-      telefono: telefono,
-      tipoEntrega: state.tipoEntrega,
-      direccion: state.tipoEntrega === 'delivery' ? direccion : 'Retiro por Boutique Dulces Momentos',
-      metodoPago: state.metodoPago,
-      comprobante: state.metodoPago === 'transferencia' ? comprobante : null,
-      notas: notas || 'Sin notas especiales',
-      estado: 'pendiente',
-      items: state.carrito.map(item => ({
-        nombre: item.nombre,
-        cantidad: item.cantidad,
-        topping: item.topping ? item.topping.nombre : null,
-        subtotal: item.subtotal
-      })),
-      subtotal: subtotal,
-      envio: costoEnvio,
-      total: total
-    };
-
-    // Guardar comanda en KDS
-    state.comandasCocina.unshift(nuevaComanda);
-    guardarComandasEnStorage();
-
-    // Método de pago formateado
-    const metodoPagoTexto = state.metodoPago === 'transferencia'
-      ? '🏦 Transferencia / Mercado Pago (Alias QR)'
-      : '💵 Efectivo (al recibir / retirar)';
-
-    // Mensaje Estructurado para WhatsApp con emojis
-    let mensaje = `🎂 *¡HOLA DULCES MOMENTOS!* 🎂\n`;
-    mensaje += `Quiero confirmar el siguiente pedido para mi celebración:\n`;
-    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `🧾 *ID Comanda:* #${nuevaComanda.id}\n`;
-    mensaje += `👤 *Cliente:* ${nombre}\n`;
-    mensaje += `📞 *Teléfono:* ${telefono}\n`;
-    mensaje += `📍 *Método de Entrega:* ${state.tipoEntrega === 'takeaway' ? '🛍️ Retiro en Boutique (Local)' : '🛵 Delivery a Domicilio'}\n`;
-    
-    if (state.tipoEntrega === 'delivery') {
-      mensaje += `🏡 *Dirección:* ${direccion} (Puerto Iguazú, Misiones)\n`;
-    }
-    
-    if (notas) {
-      mensaje += `📝 *Dedicatoria / Notas:* _${notas}_\n`;
-    }
-
-    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `💳 *Método de Pago:* ${metodoPagoTexto}\n`;
-    if (state.metodoPago === 'transferencia' && comprobante) {
-      mensaje += `🔢 *N° de Comprobante:* ${comprobante}\n`;
-    }
-
-    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `🛒 *DETALLE DEL PEDIDO:*\n`;
-
-    state.carrito.forEach(item => {
-      mensaje += `▪️ *${item.cantidad}x* ${item.nombre}`;
-      if (item.topping) {
-        mensaje += `\n   └ _Topping: ${item.topping.nombre}_`;
-      }
-      mensaje += ` -> ${formatearMoneda(item.subtotal)}\n`;
-    });
-
-    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `*Subtotal:* ${formatearMoneda(subtotal)}\n`;
-    if (state.tipoEntrega === 'delivery') {
-      mensaje += `*Costo de Envío (Puerto Iguazú):* ${formatearMoneda(costoEnvio)}\n`;
-    }
-    mensaje += `💰 *TOTAL GENERAL: ${formatearMoneda(total)}*\n`;
-    mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `✨ _¡Muchas gracias por su atención!_`;
-
-    // URL oficial de WhatsApp con número destino +54 9 3757 57-1985
-    const urlWhatsApp = `https://wa.me/${CONFIG.telefonoWhatsApp}?text=${encodeURIComponent(mensaje)}`;
-
-    // Limpiar carrito y cerrar drawer
-    state.carrito = [];
-    guardarCarritoEnStorage();
-    renderizarCarrito();
-    document.getElementById('drawer-carrito')?.classList.add('hidden');
-
-    mostrarToast('¡Pedido armado con éxito! Abriendo WhatsApp oficial...', 'success');
-
-    setTimeout(() => {
-      window.open(urlWhatsApp, '_blank');
-    }, 500);
-  };
-
-  // ========================================================
-  // 11. PANEL KDS (KITCHEN DISPLAY SYSTEM) & TICKETS TÉRMICOS
+  // 13. PANEL KDS (KITCHEN DISPLAY SYSTEM) & TICKETS TÉRMICOS
   // ========================================================
   window.cambiarEstadoComanda = (idComanda, nuevoEstado) => {
     const comanda = state.comandasCocina.find(c => c.id === idComanda);
@@ -848,126 +933,113 @@ document.addEventListener('DOMContentLoaded', () => {
       <div>Cliente: ${comanda.cliente}</div>
       <div>Tel: ${comanda.telefono}</div>
       <div>Entrega: ${comanda.tipoEntrega.toUpperCase()}</div>
-      ${comanda.tipoEntrega === 'delivery' ? `<div>Dir: ${comanda.direccion}</div>` : ''}
-      <div>Pago: ${comanda.metodoPago === 'transferencia' ? `TRANSF (#${comanda.comprobante || 'S/N'})` : 'EFECTIVO'}</div>
-      ${comanda.notas ? `<div>Nota: ${comanda.notas}</div>` : ''}
+      <div>Dirección: ${comanda.direccion}</div>
+      <div>Pago: ${comanda.metodoPago.toUpperCase()}</div>
+      ${comanda.notas ? `<div>Notas: ${comanda.notas}</div>` : ''}
       <div class="separador"></div>
-      <div><strong>DETALLE PRODUCTOS:</strong></div>
-      ${comanda.items.map(item => `
-        <div class="item-fila">
-          <span>${item.cantidad}x ${item.nombre} ${item.topping ? `(+${item.topping})` : ''}</span>
-          <span>${formatearMoneda(item.subtotal)}</span>
-        </div>
+      <div style="font-weight: bold;">DETALLE:</div>
+      ${comanda.items.map(it => `
+        <div>• ${it.cantidad}x ${it.nombre} ${it.topping ? `(${it.topping})` : ''} - ${formatearMoneda(it.subtotal)}</div>
       `).join('')}
       <div class="separador"></div>
-      <div class="item-fila">
-        <span>Subtotal:</span>
-        <span>${formatearMoneda(comanda.subtotal)}</span>
-      </div>
-      <div class="item-fila">
-        <span>Envío:</span>
-        <span>${formatearMoneda(comanda.envio)}</span>
-      </div>
-      <div class="total-fila">
-        <span>TOTAL:</span>
-        <span>${formatearMoneda(comanda.total)}</span>
-      </div>
+      <div style="font-size: 13px; font-weight: bold;">TOTAL: ${formatearMoneda(comanda.total)}</div>
       <div class="separador"></div>
-      <div class="subtitulo" style="margin-top:8px;">*** COMPROBANTE DE COMANDA ***</div>
+      <div style="text-align: center; font-size: 9px;">¡Gracias por tu compra!</div>
     `;
 
     window.print();
   };
 
-  const renderizarKDS = () => {
-    const grid = document.getElementById('grid-comandas-kds');
+  const renderizarComandasKDS = () => {
+    const gridComandas = document.getElementById('grid-comandas-kds');
     const countPendiente = document.getElementById('kds-count-pendiente');
-    const countPreparacion = document.getElementById('kds-count-preparacion');
+    const countPrep = document.getElementById('kds-count-preparacion');
     const countListo = document.getElementById('kds-count-listo');
 
-    if (!grid) return;
+    if (!gridComandas) return;
 
-    const pendientes = state.comandasCocina.filter(c => c.estado === 'pendiente').length;
-    const preparacion = state.comandasCocina.filter(c => c.estado === 'en_preparacion').length;
-    const listos = state.comandasCocina.filter(c => c.estado === 'listo').length;
+    const pendientes = state.comandasCocina.filter(c => c.estado === 'pendiente');
+    const preparacion = state.comandasCocina.filter(c => c.estado === 'preparacion');
+    const listos = state.comandasCocina.filter(c => c.estado === 'listo' || c.estado === 'entregado');
 
-    if (countPendiente) countPendiente.textContent = pendientes;
-    if (countPreparacion) countPreparacion.textContent = preparacion;
-    if (countListo) countListo.textContent = listos;
+    if (countPendiente) countPendiente.textContent = pendientes.length;
+    if (countPrep) countPrep.textContent = preparacion.length;
+    if (countListo) countListo.textContent = listos.length;
 
     if (state.comandasCocina.length === 0) {
-      grid.innerHTML = `
-        <div class="col-span-full py-16 text-center text-stone-400">
-          <p class="text-xl">No hay comandas activas en la cocina.</p>
+      gridComandas.innerHTML = `
+        <div class="col-span-full py-16 text-center text-stone-500">
+          <p class="text-4xl mb-2">👨‍🍳</p>
+          <p class="text-lg font-bold text-stone-300">No hay comandas activas en cocina.</p>
+          <p class="text-xs text-stone-500 mt-1">Los nuevos pedidos ingresarán aquí en tiempo real.</p>
         </div>
       `;
       return;
     }
 
-    grid.innerHTML = state.comandasCocina.map(cmd => {
-      const fechaCorta = new Date(cmd.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    gridComandas.innerHTML = state.comandasCocina.map(comanda => {
+      const fecha = new Date(comanda.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
       
-      const badgeEstado = cmd.estado === 'pendiente' 
-        ? '<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40">⏳ PENDIENTE</span>'
-        : cmd.estado === 'en_preparacion'
-        ? '<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/40 animate-pulse">🔥 EN HORNO</span>'
-        : '<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">✅ ENTREGADO</span>';
+      const badgeColores = {
+        pendiente: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+        preparacion: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+        listo: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+        entregado: 'bg-stone-500/20 text-stone-400 border-stone-500/30'
+      };
 
       return `
-        <div class="p-5 rounded-2xl bg-stone-800 border ${cmd.estado === 'pendiente' ? 'border-amber-500/50' : cmd.estado === 'en_preparacion' ? 'border-blue-500/50' : 'border-emerald-500/50'} shadow-xl flex flex-col justify-between space-y-4">
+        <div class="p-5 rounded-2xl bg-stone-800 border border-stone-700 shadow-lg flex flex-col justify-between">
           <div>
-            <div class="flex items-center justify-between gap-2 mb-3">
-              <span class="font-mono text-sm font-bold text-white">#${cmd.id} <span class="text-stone-400 text-xs">(${fechaCorta})</span></span>
-              ${badgeEstado}
+            <div class="flex items-center justify-between pb-3 border-b border-stone-700 mb-3">
+              <div>
+                <span class="font-mono text-xs font-bold text-brand-400">#${comanda.id}</span>
+                <span class="text-xs text-stone-400 ml-2">🕒 ${fecha}</span>
+              </div>
+              <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${badgeColores[comanda.estado] || badgeColores.pendiente}">
+                ${comanda.estado}
+              </span>
             </div>
 
-            <div class="text-xs space-y-1 text-stone-300 pb-3 border-b border-stone-700">
-              <p><strong class="text-white">Cliente:</strong> ${cmd.cliente}</p>
-              <p><strong class="text-white">Tel:</strong> ${cmd.telefono}</p>
-              <p><strong class="text-white">Modalidad:</strong> ${cmd.tipoEntrega === 'delivery' ? '🛵 Delivery' : '🏪 Retiro'}</p>
-              ${cmd.tipoEntrega === 'delivery' ? `<p><strong class="text-white">Dirección:</strong> ${cmd.direccion}</p>` : ''}
-              <p><strong class="text-white">Pago:</strong> ${cmd.metodoPago === 'transferencia' ? `🏦 Transf. (Comp: #${cmd.comprobante || 'S/N'})` : '💵 Efectivo'}</p>
-              ${cmd.notas ? `<p class="italic text-amber-200"><strong class="text-white">Nota:</strong> ${cmd.notas}</p>` : ''}
+            <div class="space-y-1 text-xs mb-3">
+              <p class="text-white font-bold text-sm">${comanda.cliente}</p>
+              <p class="text-stone-400">📞 ${comanda.telefono}</p>
+              <p class="text-stone-300">📍 ${comanda.tipoEntrega === 'delivery' ? `🛵 Delivery: ${comanda.direccion}` : '🛍️ Retiro en Local'}</p>
+              <p class="text-stone-300 font-semibold">💳 Pago: ${comanda.metodoPago.toUpperCase()}</p>
+              ${comanda.notas ? `<p class="text-amber-300 italic">📝 "${comanda.notas}"</p>` : ''}
             </div>
 
-            <div class="py-3 space-y-1.5 border-b border-stone-700">
-              <p class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Productos:</p>
-              ${cmd.items.map(item => `
-                <div class="text-xs flex justify-between text-white">
-                  <span><strong>${item.cantidad}x</strong> ${item.nombre} ${item.topping ? `<span class="text-brand-300">(+${item.topping})</span>` : ''}</span>
-                  <span class="font-mono text-stone-400">${formatearMoneda(item.subtotal)}</span>
+            <div class="border-t border-dashed border-stone-700 pt-2 mb-4 space-y-1">
+              ${comanda.items.map(it => `
+                <div class="flex justify-between text-xs text-stone-200">
+                  <span><strong>${it.cantidad}x</strong> ${it.nombre} ${it.topping ? `<span class="text-brand-300">(${it.topping})</span>` : ''}</span>
+                  <span class="font-mono">${formatearMoneda(it.subtotal)}</span>
                 </div>
               `).join('')}
-            </div>
-
-            <div class="pt-2 flex justify-between items-center text-sm">
-              <span class="text-stone-400">Total:</span>
-              <span class="font-mono font-bold text-emerald-400 text-base">${formatearMoneda(cmd.total)}</span>
+              <div class="flex justify-between text-xs font-bold text-white pt-2 border-t border-stone-700">
+                <span>TOTAL:</span>
+                <span class="font-mono text-emerald-400">${formatearMoneda(comanda.total)}</span>
+              </div>
             </div>
           </div>
 
-          <div class="space-y-2 pt-2 border-t border-stone-700/60">
-            <div class="grid grid-cols-2 gap-2">
-              <button 
-                onclick="cambiarEstadoComanda('${cmd.id}', 'en_preparacion')" 
-                class="px-3 py-2 text-xs font-semibold rounded-xl bg-blue-600/80 hover:bg-blue-600 text-white transition"
-              >
-                👨‍🍳 Cocinando
+          <div class="flex flex-wrap gap-2 pt-2 border-t border-stone-700">
+            ${comanda.estado === 'pendiente' ? `
+              <button onclick="cambiarEstadoComanda('${comanda.id}', 'preparacion')" class="flex-1 py-1.5 px-2 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition">
+                En Preparación
               </button>
-              <button 
-                onclick="cambiarEstadoComanda('${cmd.id}', 'listo')" 
-                class="px-3 py-2 text-xs font-semibold rounded-xl bg-emerald-600/80 hover:bg-emerald-600 text-white transition"
-              >
-                ✅ Finalizar
+            ` : ''}
+            ${comanda.estado === 'preparacion' ? `
+              <button onclick="cambiarEstadoComanda('${comanda.id}', 'listo')" class="flex-1 py-1.5 px-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition">
+                Marcar Listo
               </button>
-            </div>
-            
-            <button 
-              onclick="imprimirTicketTermico('${cmd.id}')" 
-              class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold rounded-xl bg-stone-700 hover:bg-stone-600 text-stone-100 transition"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-              <span>Imprimir Ticket Térmico</span>
+            ` : ''}
+            ${comanda.estado === 'listo' ? `
+              <button onclick="cambiarEstadoComanda('${comanda.id}', 'entregado')" class="flex-1 py-1.5 px-2 text-xs font-bold rounded-xl bg-stone-600 hover:bg-stone-500 text-white transition">
+                Entregado
+              </button>
+            ` : ''}
+            <button onclick="imprimirTicketTermico('${comanda.id}')" class="py-1.5 px-3 text-xs font-bold rounded-xl bg-stone-700 hover:bg-stone-600 text-stone-200 transition">
+              🖨️
             </button>
           </div>
         </div>
@@ -976,38 +1048,54 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ========================================================
-  // 12. REGISTRO DE EVENTOS UI Y MODAL KDS
+  // 14. EVENT LISTENERS Y CONFIGURACIÓN DOM
   // ========================================================
-  const registrarEventosUI = () => {
-    // Drawer Carrito (Header y Botón Flotante)
+  const configurarEventListeners = () => {
+    // Drawer Carrito
     const btnAbrirCarrito = document.getElementById('btn-abrir-carrito');
     const btnAbrirCarritoFlotante = document.getElementById('btn-abrir-carrito-flotante');
     const btnCerrarCarrito = document.getElementById('btn-cerrar-carrito');
     const overlayCarrito = document.getElementById('overlay-carrito');
     const drawerCarrito = document.getElementById('drawer-carrito');
 
-    const abrirDrawer = () => {
+    const abrirCarrito = () => {
       renderizarCarrito();
       drawerCarrito?.classList.remove('hidden');
-      actualizarBloqueoBotonCheckout();
+      document.body.classList.add('overflow-hidden');
     };
 
-    btnAbrirCarrito?.addEventListener('click', abrirDrawer);
-    btnAbrirCarritoFlotante?.addEventListener('click', abrirDrawer);
-
-    btnCerrarCarrito?.addEventListener('click', () => {
+    const cerrarCarrito = () => {
       drawerCarrito?.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    };
+
+    btnAbrirCarrito?.addEventListener('click', abrirCarrito);
+    btnAbrirCarritoFlotante?.addEventListener('click', abrirCarrito);
+    btnCerrarCarrito?.addEventListener('click', cerrarCarrito);
+    overlayCarrito?.addEventListener('click', cerrarCarrito);
+
+    // Filtros de categoría
+    const botonesFiltro = document.querySelectorAll('.btn-filtro');
+    botonesFiltro.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        botonesFiltro.forEach(b => {
+          b.classList.remove('bg-brand-600', 'text-white', 'shadow-sm');
+          b.classList.add('bg-stone-100', 'dark:bg-stone-800', 'text-stone-700', 'dark:text-stone-300');
+        });
+        e.currentTarget.classList.add('bg-brand-600', 'text-white', 'shadow-sm');
+        e.currentTarget.classList.remove('bg-stone-100', 'dark:bg-stone-800', 'text-stone-700', 'dark:text-stone-300');
+
+        state.categoriaSeleccionada = e.currentTarget.getAttribute('data-categoria') || 'todos';
+        renderizarCatalogo();
+      });
     });
 
-    overlayCarrito?.addEventListener('click', () => {
-      drawerCarrito?.classList.add('hidden');
-    });
-
-    // Selector Delivery vs Takeaway
-    document.querySelectorAll('input[name="tipo-entrega"]').forEach(radio => {
+    // Modalidad de Entrega (Takeaway / Delivery)
+    const radiosEntrega = document.querySelectorAll('input[name="tipo-entrega"]');
+    const campoDireccion = document.getElementById('campo-direccion');
+    radiosEntrega.forEach(radio => {
       radio.addEventListener('change', (e) => {
         state.tipoEntrega = e.target.value;
-        const campoDireccion = document.getElementById('campo-direccion');
         if (state.tipoEntrega === 'delivery') {
           campoDireccion?.classList.remove('hidden');
         } else {
@@ -1017,124 +1105,109 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Selector Método de Pago (Efectivo / Transferencia)
-    document.querySelectorAll('input[name="metodo-pago"]').forEach(radio => {
+    // Forma de Pago (Efectivo / Mercado Pago)
+    const radiosPago = document.querySelectorAll('input[name="metodo-pago"]');
+    radiosPago.forEach(radio => {
       radio.addEventListener('change', (e) => {
         state.metodoPago = e.target.value;
-        const bloqueTransf = document.getElementById('bloque-transferencia');
-        if (state.metodoPago === 'transferencia') {
-          bloqueTransf?.classList.remove('hidden');
-          const inputComprobante = document.getElementById('input-comprobante');
-          inputComprobante?.focus();
-        } else {
-          bloqueTransf?.classList.add('hidden');
-        }
-        actualizarBloqueoBotonCheckout();
+        actualizarBotonCheckoutUI();
       });
     });
 
-    // Input Comprobante Transferencia (Bloqueo dinámico)
-    const inputComprobante = document.getElementById('input-comprobante');
-    inputComprobante?.addEventListener('input', actualizarBloqueoBotonCheckout);
-    inputComprobante?.addEventListener('keyup', actualizarBloqueoBotonCheckout);
+    // Botón Principal de Checkout (Alterna entre WhatsApp y Mercado Pago)
+    const btnCheckoutPrincipal = document.getElementById('btn-checkout-principal');
+    btnCheckoutPrincipal?.addEventListener('click', () => {
+      if (state.metodoPago === 'mercadopago') {
+        pagarConMercadoPago();
+      } else {
+        enviarPedidoWhatsApp();
+      }
+    });
 
-    // Botón de Geolocalización con Reverse Geocoding
-    document.getElementById('btn-geolocalizar')?.addEventListener('click', manejarBotonGeolocalizar);
+    // Geolocalización
+    const btnGeolocalizar = document.getElementById('btn-geolocalizar');
+    btnGeolocalizar?.addEventListener('click', manejarBotonGeolocalizar);
 
-    // Botón Checkout WhatsApp
-    document.getElementById('btn-checkout-whatsapp')?.addEventListener('click', ejecutarCheckoutWhatsApp);
-
-    // Modal de Autenticación Segura KDS
-    const modalAuthKDS = document.getElementById('modal-auth-kds');
-    const btnAbrirAuthKDS = document.getElementById('btn-abrir-auth-kds');
-    const btnCancelarKDS = document.getElementById('btn-cancelar-kds');
-    const formAuthKDS = document.getElementById('form-auth-kds');
+    // KDS Modal de Autenticación
+    const btnAbrirAuthKds = document.getElementById('btn-abrir-auth-kds');
+    const modalAuthKds = document.getElementById('modal-auth-kds');
+    const formAuthKds = document.getElementById('form-auth-kds');
     const inputKdsPin = document.getElementById('input-kds-pin');
     const errorKdsPin = document.getElementById('error-kds-pin');
-    const seccionKDS = document.getElementById('seccion-kds');
-    const btnCerrarKDS = document.getElementById('btn-cerrar-kds');
+    const btnCancelarKds = document.getElementById('btn-cancelar-kds');
+    const seccionKds = document.getElementById('seccion-kds');
+    const btnCerrarKds = document.getElementById('btn-cerrar-kds');
     const btnLimpiarComandas = document.getElementById('btn-limpiar-comandas');
 
-    const resetearModalKDS = () => {
-      if (inputKdsPin) inputKdsPin.value = '';
-      if (errorKdsPin) {
-        errorKdsPin.classList.add('hidden');
-        errorKdsPin.textContent = 'Clave incorrecta. Intentá nuevamente.';
+    btnAbrirAuthKds?.addEventListener('click', () => {
+      modalAuthKds?.classList.remove('hidden');
+      if (inputKdsPin) {
+        inputKdsPin.value = '';
+        setTimeout(() => inputKdsPin.focus(), 150);
       }
-    };
-
-    btnAbrirAuthKDS?.addEventListener('click', () => {
-      resetearModalKDS();
-      modalAuthKDS?.classList.remove('hidden');
-      inputKdsPin?.focus();
+      errorKdsPin?.classList.add('hidden');
     });
 
-    btnCancelarKDS?.addEventListener('click', () => {
-      resetearModalKDS();
-      modalAuthKDS?.classList.add('hidden');
+    btnCancelarKds?.addEventListener('click', () => {
+      modalAuthKds?.classList.add('hidden');
     });
 
-    formAuthKDS?.addEventListener('submit', (e) => {
+    formAuthKds?.addEventListener('submit', (e) => {
       e.preventDefault();
-      const pinIngresado = (inputKdsPin?.value || '').trim();
-
-      if (pinIngresado === CONFIG.claveCocinaKDS) {
-        resetearModalKDS();
-        modalAuthKDS?.classList.add('hidden');
-        seccionKDS?.classList.remove('hidden');
-        renderizarKDS();
-        mostrarToast('Acceso autorizado al Panel de Cocina (KDS).', 'success');
+      const claveIngresada = (inputKdsPin?.value || '').trim();
+      if (claveIngresada === CONFIG.claveCocinaKDS) {
+        modalAuthKds?.classList.add('hidden');
+        seccionKds?.classList.remove('hidden');
+        renderizarComandasKDS();
+        mostrarToast('👨‍🍳 Acceso concedido al panel de cocina KDS.', 'success');
       } else {
-        if (errorKdsPin) {
-          errorKdsPin.textContent = 'Clave incorrecta. Intentá nuevamente.';
-          errorKdsPin.classList.remove('hidden');
-        }
-        if (inputKdsPin) {
-          inputKdsPin.value = '';
-          inputKdsPin.focus();
-        }
+        errorKdsPin?.classList.remove('hidden');
+        inputKdsPin?.focus();
+        inputKdsPin?.select();
       }
     });
 
-    btnCerrarKDS?.addEventListener('click', () => {
-      seccionKDS?.classList.add('hidden');
+    btnCerrarKds?.addEventListener('click', () => {
+      seccionKds?.classList.add('hidden');
     });
 
     btnLimpiarComandas?.addEventListener('click', () => {
-      state.comandasCocina = state.comandasCocina.filter(c => c.estado !== 'listo');
+      state.comandasCocina = state.comandasCocina.filter(c => c.estado !== 'entregado');
       guardarComandasEnStorage();
-      mostrarToast('Comandas finalizadas eliminadas de la vista.', 'info');
+      mostrarToast('Comandas entregadas archivadas.', 'info');
     });
 
-    // Dark Mode
+    // Dark Mode Toggle
     const btnDarkMode = document.getElementById('btn-dark-mode');
-    const aplicarTema = (oscuro) => {
-      if (oscuro) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem(STORAGE_KEYS.TEMA, 'dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem(STORAGE_KEYS.TEMA, 'light');
-      }
-    };
-
-    const temaGuardado = localStorage.getItem(STORAGE_KEYS.TEMA);
-    if (temaGuardado === 'dark' || (!temaGuardado && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      aplicarTema(true);
-    }
-
     btnDarkMode?.addEventListener('click', () => {
-      const esOscuro = document.documentElement.classList.contains('dark');
-      aplicarTema(!esOscuro);
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem(STORAGE_KEYS.TEMA, isDark ? 'dark' : 'light');
     });
+
+    // Verificar retorno de Mercado Pago en la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const mpStatus = urlParams.get('status');
+    if (mpStatus === 'success' || mpStatus === 'approved') {
+      mostrarToast('🎉 ¡Tu pago con Mercado Pago fue aprobado con éxito! Gracias por tu compra.', 'success');
+      state.carrito = [];
+      guardarCarritoEnStorage();
+      actualizarBadges();
+      // Limpiar query params de la URL sin recargar
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (mpStatus === 'failure') {
+      mostrarToast('El pago no pudo ser completado. Podés intentar nuevamente o pagar en efectivo.', 'warning');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (mpStatus === 'pending') {
+      mostrarToast('Tu pago con Mercado Pago está pendiente de acreditación.', 'info');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   };
 
   // ========================================================
-  // 13. INICIALIZACIÓN
+  // 15. INICIALIZACIÓN
   // ========================================================
   cargarEstadoDesdeStorage();
-  inicializarFiltros();
   renderizarCatalogo();
-  renderizarCarrito();
-  registrarEventosUI();
+  actualizarBadges();
+  configurarEventListeners();
 });
