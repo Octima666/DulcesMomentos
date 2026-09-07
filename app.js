@@ -300,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listeners para botones agregar al carrito
     contenedor.querySelectorAll('.btn-agregar-carrito').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        e.preventDefault(); // Previene cualquier salto o scroll por defecto
         const prodId = e.currentTarget.getAttribute('data-id');
         const selectTopping = document.getElementById(`topping-${prodId}`);
         let toppingSeleccionado = null;
