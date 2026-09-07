@@ -1050,6 +1050,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================================
   // 14. INICIALIZACIÓN
   // ========================================================
+  const elYear = document.getElementById('footer-year');
+  if (elYear) elYear.textContent = new Date().getFullYear();
+
   cargarEstadoInicial();
   renderizarCatalogo();
   actualizarBadges();
