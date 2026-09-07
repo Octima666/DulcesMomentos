@@ -318,34 +318,42 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ========================================================
-  // 8. GESTIÓN DEL CARRITO DE COMPRAS Y FEEDBACK VISUAL
+  // 8. GESTIÓN DEL CARRITO DE COMPRAS Y ANIMACIÓN FLOTANTE
   // ========================================================
-  const activarFeedbackCarrito = () => {
-    const btnHeader = document.getElementById('btn-abrir-carrito');
+  let timeoutAnimacionFlotante = null;
+
+  const animarBotonCarritoFlotante = () => {
     const btnFlotante = document.getElementById('btn-abrir-carrito-flotante');
-    const badgeHeader = document.getElementById('badge-carrito');
     const badgeFlotante = document.getElementById('badge-carrito-flotante');
+    if (!btnFlotante) return;
 
-    const botones = [btnHeader, btnFlotante].filter(Boolean);
-    const badges = [badgeHeader, badgeFlotante].filter(Boolean);
+    // Limpiar timeout previo si el usuario hace clics rápidos seguidos
+    if (timeoutAnimacionFlotante) {
+      clearTimeout(timeoutAnimacionFlotante);
+    }
 
-    // Activar animación feedback (rebote, pulso y destello de anillo)
-    botones.forEach(btn => {
-      btn.classList.add('animate-bounce', 'scale-105', 'ring-4', 'ring-brand-400');
-    });
-    badges.forEach(b => {
-      b.classList.add('scale-125', '!bg-brand-500', '!text-white');
-    });
+    // Remover clases para reiniciar la animación limpiamente
+    btnFlotante.classList.remove('animate-bounce', 'scale-110', '!bg-emerald-500', '!shadow-emerald-500/60', 'ring-4', 'ring-emerald-300');
+    if (badgeFlotante) {
+      badgeFlotante.classList.remove('scale-125', '!bg-emerald-700', '!text-white');
+    }
 
-    // Remover clases tras 1 segundo
-    setTimeout(() => {
-      botones.forEach(btn => {
-        btn.classList.remove('animate-bounce', 'scale-105', 'ring-4', 'ring-brand-400');
-      });
-      badges.forEach(b => {
-        b.classList.remove('scale-125', '!bg-brand-500', '!text-white');
-      });
-    }, 1000);
+    // Forzar reflow para reiniciar la animación
+    void btnFlotante.offsetWidth;
+
+    // Agregar animación de rebote y cambio de color temporal
+    btnFlotante.classList.add('animate-bounce', 'scale-110', '!bg-emerald-500', '!shadow-emerald-500/60', 'ring-4', 'ring-emerald-300');
+    if (badgeFlotante) {
+      badgeFlotante.classList.add('scale-125', '!bg-emerald-700', '!text-white');
+    }
+
+    // Regresar suavemente a su estado y color original en 800ms
+    timeoutAnimacionFlotante = setTimeout(() => {
+      btnFlotante.classList.remove('animate-bounce', 'scale-110', '!bg-emerald-500', '!shadow-emerald-500/60', 'ring-4', 'ring-emerald-300');
+      if (badgeFlotante) {
+        badgeFlotante.classList.remove('scale-125', '!bg-emerald-700', '!text-white');
+      }
+    }, 800);
   };
 
   const agregarProductoAlCarrito = (productoId, topping = null) => {
@@ -379,11 +387,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarCarrito();
     actualizarBadges();
 
-    // Scroll suave hacia la parte superior para enfocar el botón del carrito
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    // Disparar animación feedback visual
-    activarFeedbackCarrito();
+    // Animación visual y cambio de color en el botón flotante (sin scroll)
+    animarBotonCarritoFlotante();
 
     mostrarToast(`¡${producto.nombre} agregado al pedido!`, 'success');
   };
@@ -404,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarBadges();
 
     if (cambio > 0) {
-      activarFeedbackCarrito();
+      animarBotonCarritoFlotante();
     }
   };
 
