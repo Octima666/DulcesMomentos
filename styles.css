@@ -157,3 +157,18 @@ body {
     margin: 0mm;
   }
 }
+
+/* ======================================================== */
+/* 4. POSICIONAMIENTO DE TOAST (INFERIOR IZQUIERDA)          */
+/* ======================================================== */
+#toast-container {
+  position: fixed !important;
+  bottom: 24px !important;
+  left: 24px !important;
+  right: auto !important;
+  z-index: 9999 !important;
+  max-width: 360px;
+  width: calc(100vw - 48px);
+  pointer-events: none;
+}
+
