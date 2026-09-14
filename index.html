@@ -214,51 +214,53 @@
   </section>
 
   <!-- ======================================================== -->
-  <!-- 4. NAVEGACIÓN POR CATEGORÍAS (5 TARJETAS OSCURAS)        -->
+  <!-- 4. NAVEGACIÓN POR CATEGORÍAS (5 ELEMENTOS CIRCULARES 3D)  -->
   <!-- ======================================================== -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4">
-      
-      <!-- Categoría 1: Tortas -->
-      <button data-categoria="Tortas" class="card-categoria-nav category-card rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 group text-center cursor-pointer">
-        <div class="w-12 h-12 rounded-full bg-[#271520] group-hover:bg-brand-600/30 flex items-center justify-center text-xl sm:text-2xl transition-colors border border-[#3e2436]">
-          🎂
-        </div>
-        <span class="text-xs sm:text-sm font-semibold text-stone-200 group-hover:text-pink-300 transition-colors">Tortas</span>
-      </button>
+  <section class="w-full bg-[#000000] py-10 sm:py-14 border-b border-[#181116]">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-center gap-4 sm:gap-8 md:gap-12 flex-wrap sm:flex-nowrap">
+        
+        <!-- Elemento 1: Tortas -->
+        <button data-categoria="Tortas" class="card-categoria-nav category-circle-item group" aria-label="Categoría Tortas">
+          <div class="category-circle-btn">
+            <span class="category-icon-3d">🎂</span>
+          </div>
+          <span class="category-label">Tortas</span>
+        </button>
 
-      <!-- Categoría 2: Postres -->
-      <button data-categoria="Postres" class="card-categoria-nav category-card rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 group text-center cursor-pointer">
-        <div class="w-12 h-12 rounded-full bg-[#271520] group-hover:bg-brand-600/30 flex items-center justify-center text-xl sm:text-2xl transition-colors border border-[#3e2436]">
-          🧁
-        </div>
-        <span class="text-xs sm:text-sm font-semibold text-stone-200 group-hover:text-pink-300 transition-colors">Postres</span>
-      </button>
+        <!-- Elemento 2: Postres -->
+        <button data-categoria="Postres" class="card-categoria-nav category-circle-item group" aria-label="Categoría Postres">
+          <div class="category-circle-btn">
+            <span class="category-icon-3d">🧁</span>
+          </div>
+          <span class="category-label">Postres</span>
+        </button>
 
-      <!-- Categoría 3: Masas -->
-      <button data-categoria="Masas" class="card-categoria-nav category-card rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 group text-center cursor-pointer">
-        <div class="w-12 h-12 rounded-full bg-[#271520] group-hover:bg-brand-600/30 flex items-center justify-center text-xl sm:text-2xl transition-colors border border-[#3e2436]">
-          🥐
-        </div>
-        <span class="text-xs sm:text-sm font-semibold text-stone-200 group-hover:text-pink-300 transition-colors">Masas</span>
-      </button>
+        <!-- Elemento 3: Masas -->
+        <button data-categoria="Masas" class="card-categoria-nav category-circle-item group" aria-label="Categoría Masas">
+          <div class="category-circle-btn">
+            <span class="category-icon-3d">🥐</span>
+          </div>
+          <span class="category-label">Masas</span>
+        </button>
 
-      <!-- Categoría 4: Especialidades -->
-      <button data-categoria="Especialidades" class="card-categoria-nav category-card rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 group text-center cursor-pointer">
-        <div class="w-12 h-12 rounded-full bg-[#271520] group-hover:bg-brand-600/30 flex items-center justify-center text-xl sm:text-2xl transition-colors border border-[#3e2436]">
-          🍪
-        </div>
-        <span class="text-xs sm:text-sm font-semibold text-stone-200 group-hover:text-pink-300 transition-colors">Especialidades</span>
-      </button>
+        <!-- Elemento 4: Especialidades (Activo / Destacado) -->
+        <button data-categoria="Especialidades" class="card-categoria-nav category-circle-item active group" aria-label="Categoría Especialidades">
+          <div class="category-circle-btn">
+            <span class="category-icon-3d">🍪</span>
+          </div>
+          <span class="category-label">Especialidades</span>
+        </button>
 
-      <!-- Categoría 5: Promociones -->
-      <button data-categoria="Promociones" class="card-categoria-nav category-card rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 group text-center cursor-pointer col-span-2 sm:col-span-1">
-        <div class="w-12 h-12 rounded-full bg-[#271520] group-hover:bg-brand-600/30 flex items-center justify-center text-xl sm:text-2xl transition-colors border border-[#3e2436]">
-          🎁
-        </div>
-        <span class="text-xs sm:text-sm font-semibold text-stone-200 group-hover:text-pink-300 transition-colors">Promociones</span>
-      </button>
+        <!-- Elemento 5: Promociones -->
+        <button data-categoria="Promociones" class="card-categoria-nav category-circle-item group" aria-label="Categoría Promociones">
+          <div class="category-circle-btn">
+            <span class="category-icon-3d">🎁</span>
+          </div>
+          <span class="category-label">Promociones</span>
+        </button>
 
+      </div>
     </div>
   </section>
 
