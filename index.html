@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth overflow-x-hidden w-full">
+<html lang="es" class="dark scroll-smooth overflow-x-hidden w-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dulces Momentos | Pastelería Artesanal Boutique</title>
-  <meta name="description" content="Pastelería Dulces Momentos - Pedidos online con Mercado Pago QR y WhatsApp.">
+  <meta name="description" content="Dulces Momentos - Pastelería artesanal gourmet en Puerto Iguazú. Creaciones de autor, tortas personalizadas y pedidos online.">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,26 +20,30 @@
         extend: {
           colors: {
             brand: {
-              50: '#fdf4f5',
-              100: '#fbe8eb',
-              200: '#f7d5d9',
-              300: '#f0b3bc',
-              400: '#e58595',
-              500: '#d75a71',
-              600: '#c03d57',
-              700: '#a12d44',
-              800: '#86283c',
-              900: '#712536',
-              950: '#3f0f1b',
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e03a6c', // Rosa / Magenta primario del diseño
+              700: '#be123c',
+              800: '#9f1239',
+              900: '#881337',
+              950: '#4c0519',
             },
-            mp: {
-              DEFAULT: '#009EE3',
-              hover: '#0081BA',
-              light: '#E6F6FD'
+            dark: {
+              bg: '#0c090c',
+              surface: '#140f13',
+              card: '#181317',
+              border: '#2a1e27',
+              borderLight: '#382534'
             }
           },
           fontFamily: {
-            serif: ['"Playfair Display"', 'serif'],
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            script: ['"Alex Brush"', 'cursive'],
+            handwriting: ['"Caveat"', 'cursive'],
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
             mono: ['"Space Mono"', 'monospace'],
           }
@@ -49,177 +53,361 @@
   </script>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="overflow-x-hidden w-full bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 font-sans antialiased selection:bg-brand-500 selection:text-white transition-colors duration-300">
+<body class="overflow-x-hidden w-full bg-[#0c090c] text-stone-100 font-sans antialiased selection:bg-brand-600 selection:text-white">
 
   <!-- ======================================================== -->
-  <!-- BARRA DE ANUNCIOS / SUB-HEADER (MEJORA DE CONTRASTE WCAG) -->
+  <!-- 1. BARRA SUPERIOR DE ANUNCIO                             -->
   <!-- ======================================================== -->
-  <div class="bg-pink-200 dark:bg-pink-950/60 border-b border-pink-300 dark:border-pink-900/50 py-2 px-4 text-center text-xs sm:text-sm font-semibold text-pink-950 dark:text-pink-200 transition-colors">
+  <div class="bg-[#140d12] border-b border-[#2b1420] py-2 px-4 text-center text-xs font-medium text-pink-300 transition-colors">
     <p class="flex items-center justify-center gap-2">
-      <span>✨ Pastelería Artesanal en Puerto Iguazú</span>
-      <span class="hidden sm:inline">•</span>
-      <span class="hidden sm:inline">Envíos exclusivos en Puerto Iguazú o Retiro en Boutique</span>
-      <span class="inline-block animate-pulse">🍓</span>
+      <span class="text-brand-400">✨</span>
+      <span>Pastelería Artesanal en Puerto Iguazú</span>
+      <span class="text-stone-500">•</span>
+      <span>Envíos exclusivos en Puerto Iguazú o Retiro en Boutique</span>
+      <span class="text-brand-400">✨</span>
     </p>
   </div>
 
   <!-- ======================================================== -->
-  <!-- NAVBAR PRINCIPAL (RESPONSIVE FLEX-WRAP & GAP)            -->
+  <!-- 2. CABECERA / NAVBAR PRINCIPAL                           -->
   <!-- ======================================================== -->
-  <header class="sticky top-0 z-40 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 min-h-16 sm:h-20 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
-      <!-- Logo -->
-      <a href="#" class="flex items-center gap-2.5 sm:gap-3 group">
-        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-pink-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform shrink-0">
-          <span class="text-xl sm:text-2xl">🍰</span>
+  <header class="sticky top-0 z-40 bg-[#0c090c]/90 backdrop-blur-md border-b border-[#221720] transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 min-h-16 flex items-center justify-between gap-4">
+      
+      <!-- Logotipo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-pink-400 flex items-center justify-center text-white shadow-lg shadow-brand-600/30 group-hover:scale-105 transition-transform shrink-0">
+          <span class="text-xl">🍰</span>
         </div>
         <div>
-          <span class="font-serif text-lg sm:text-2xl font-bold tracking-tight text-stone-900 dark:text-white block leading-tight">Dulces Momentos</span>
-          <span class="text-[10px] sm:text-xs uppercase tracking-widest text-brand-600 dark:text-brand-400 font-semibold">Pastelería Boutique</span>
+          <span class="font-serif text-xl sm:text-2xl font-bold tracking-tight text-white block leading-tight">Dulces Momentos</span>
+          <span class="text-[9px] sm:text-[10px] uppercase tracking-widest text-brand-400 font-bold block">PASTELERÍA BOUTIQUE</span>
         </div>
       </a>
 
-      <!-- Acciones de Navegación -->
-      <div class="flex items-center flex-wrap gap-2 sm:gap-3">
-        <!-- Selector Modo Oscuro -->
-        <button id="btn-dark-mode" aria-label="Cambiar modo oscuro" class="p-2 sm:p-2.5 rounded-xl text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 transition">
-          <svg id="icon-sun" class="w-4 h-4 sm:w-5 sm:h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-          <svg id="icon-moon" class="w-4 h-4 sm:w-5 sm:h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+      <!-- Enlaces de Navegación Central -->
+      <nav class="hidden md:flex items-center gap-1.5 lg:gap-2">
+        <a href="#catalogo" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white shadow-md shadow-brand-600/30 transition">Inicio</a>
+        <button onclick="filtrarCategoriaDesdeNav('Tortas')" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition">Tortas</button>
+        <button onclick="filtrarCategoriaDesdeNav('Postres')" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition">Postres</button>
+        <button onclick="filtrarCategoriaDesdeNav('Especialidades')" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition">Especialidades</button>
+        <a href="#contacto" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition">Contacto</a>
+      </nav>
+
+      <!-- Acciones Derecha -->
+      <div class="flex items-center gap-3">
+        <!-- Buscador -->
+        <button id="btn-buscar" aria-label="Buscar productos" class="p-2.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800/70 border border-transparent hover:border-[#352230] transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </button>
 
-        <!-- Botón Acceso KDS (Cocina) -->
-        <button id="btn-abrir-auth-kds" class="flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition">
-          <span class="text-sm">👨‍🍳</span>
-          <span class="hidden sm:inline">Panel Cocina (KDS)</span>
-          <span class="sm:hidden">Cocina</span>
-        </button>
-
-        <!-- Botón Carrito Header -->
-        <button id="btn-abrir-carrito" class="relative flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium shadow-md shadow-brand-600/30 transition transform active:scale-95">
-          <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Icono Carrito con Badge -->
+        <button id="btn-icono-carrito" aria-label="Ver carrito" class="relative p-2.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800/70 border border-transparent hover:border-[#352230] transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
           </svg>
-          <span class="hidden md:inline text-xs sm:text-sm">Mi Carrito</span>
-          <span id="badge-carrito" class="bg-white text-brand-700 text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full shadow-sm">0</span>
+          <span id="badge-carrito" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">0</span>
+        </button>
+
+        <!-- Botón Rosa Mi Carrito -->
+        <button id="btn-abrir-carrito" class="relative flex items-center gap-2 px-4 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-brand-600/30 transition transform active:scale-95">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <span>Mi Carrito</span>
+        </button>
+
+        <!-- Acceso KDS Cocina -->
+        <button id="btn-abrir-auth-kds" title="Panel de Cocina" class="p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/50 text-xs transition">
+          <span>👨‍🍳</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- ======================================================== -->
-  <!-- HERO SECTION (ESCALADO TIPOGRÁFICO text-3xl A sm:text-5xl) -->
+  <!-- 3. SECCIÓN HERO (BANNER PRINCIPAL)                       -->
   <!-- ======================================================== -->
-  <section class="relative overflow-hidden py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-brand-50/50 via-stone-50 to-stone-50 dark:from-stone-900 dark:via-stone-950 dark:to-stone-950 border-b border-stone-200 dark:border-stone-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-      <span class="inline-block text-xs font-bold tracking-widest uppercase px-3.5 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 mb-4">
-        ✨ Creaciones Gourmet & Recetas de Autor
-      </span>
-      <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-stone-900 dark:text-white max-w-3xl mx-auto leading-tight">
-        Momentos dulces convertidos en <span class="text-brand-600 dark:text-brand-400 italic">arte pastelero</span>
-      </h1>
-      <p class="mt-4 text-sm sm:text-lg text-stone-600 dark:text-stone-300 max-w-2xl mx-auto">
-        Elaboración diaria con ingredientes premium. Encargá tu pedido online con pago seguro por Mercado Pago QR o en efectivo al recibir.
-      </p>
-      <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-        <a href="#catalogo" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-600/30 transform hover:-translate-y-0.5 transition-all">
-          <span>Ver Menú & Pedir</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-        </a>
-        <a href="https://wa.me/5493757571985?text=Hola!%20Quiero%20hacer%20una%20consulta%20para%20un%20pedido." target="_blank" rel="noopener" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-semibold text-stone-800 dark:text-stone-200 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700 shadow-sm transition-all">
-          <span>💬 Consultas WhatsApp</span>
-        </a>
+  <section class="relative overflow-hidden pt-8 pb-16 lg:py-20 bg-gradient-to-b from-[#140d12]/40 via-[#0c090c] to-[#0c090c] border-b border-[#221720]">
+    
+    <!-- Elementos decorativos de fondo -->
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-brand-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-1/2 -right-32 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+        
+        <!-- Lado Izquierdo: Textos y Botones -->
+        <div class="lg:col-span-7 space-y-6 text-left">
+          
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold tracking-widest uppercase text-stone-400">
+              CREACIONES GOURMET & RECETAS DE AUTOR
+            </span>
+            <span class="text-brand-400 font-script text-lg">♥</span>
+          </div>
+
+          <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.15]">
+            Momentos dulces<br>
+            convertidos en <span class="font-script text-brand-400 italic text-4xl sm:text-6xl lg:text-7xl font-normal inline-block pr-2">arte pastelero</span>
+          </h1>
+
+          <p class="text-sm sm:text-base text-stone-400 max-w-xl leading-relaxed">
+            Elaboración diaria con ingredientes premium. Encargá tu pedido online con pago seguro por Mercado Pago o en efectivo al recibir.
+          </p>
+
+          <div class="pt-2 flex flex-wrap items-center gap-4">
+            <a href="#catalogo" class="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-xl shadow-brand-600/35 transform hover:-translate-y-0.5 transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span>Ver Menú & Pedir</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
+
+            <a href="https://wa.me/5493757571985?text=Hola!%20Quiero%20hacer%20una%20consulta%20para%20un%20pedido%20en%20Dulces%20Momentos." target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm text-stone-200 bg-transparent border-2 border-stone-700 hover:border-brand-500 hover:bg-brand-600/10 transition-all">
+              <svg class="w-4 h-4 text-emerald-400 fill-current" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.158.57 4.183 1.564 5.939l-1.66 6.071 6.223-1.632c1.701.927 3.652 1.455 5.727 1.455 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z"/>
+              </svg>
+              <span>Consultas WhatsApp</span>
+            </a>
+          </div>
+
+        </div>
+
+        <!-- Lado Derecho: Imagen de Torta enmarcada con trazos decorativos -->
+        <div class="lg:col-span-5 relative flex items-center justify-center">
+          
+          <!-- Fondo decorativo circular -->
+          <div class="absolute inset-0 bg-gradient-to-tr from-brand-900/40 via-pink-900/20 to-transparent rounded-full filter blur-2xl -z-10"></div>
+          
+          <div class="relative w-full max-w-md group">
+            <!-- Imagen Hero -->
+            <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-[#382232] bg-[#140e13]">
+              <img 
+                src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1000&q=85" 
+                alt="Porción de torta de chocolate gourmet con frutillas - Dulces Momentos" 
+                class="w-full h-[320px] sm:h-[380px] object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
+              >
+              <div class="absolute inset-0 bg-gradient-to-t from-[#0c090c]/80 via-transparent to-transparent"></div>
+            </div>
+
+            <!-- Anotación Manuscrita Decorativa -->
+            <div class="absolute -top-4 -right-3 sm:-right-6 bg-[#181318]/90 backdrop-blur-md border border-brand-500/40 px-4 py-2 rounded-2xl shadow-xl transform rotate-3">
+              <p class="font-handwriting text-lg sm:text-xl text-pink-300 font-bold flex items-center gap-1.5">
+                <span>Hecho con mucho amor</span>
+                <span class="text-brand-400 font-script text-2xl">♥</span>
+              </p>
+            </div>
+
+            <!-- Trazos decorativos en esquinas -->
+            <div class="absolute -bottom-3 -left-3 w-8 h-8 border-b-2 border-l-2 border-brand-500/60 rounded-bl-xl pointer-events-none"></div>
+            <div class="absolute -top-3 -left-3 w-8 h-8 border-t-2 border-l-2 border-brand-500/60 rounded-tl-xl pointer-events-none"></div>
+          </div>
+
+        </div>
+
       </div>
     </div>
   </section>
 
   <!-- ======================================================== -->
-  <!-- CATÁLOGO DINÁMICO                                        -->
+  <!-- 4. NAVEGACIÓN POR CATEGORÍAS (5 TARJETAS OSCURAS)        -->
   <!-- ======================================================== -->
-  <main id="catalogo" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-    <!-- Filtros de Categorías -->
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b border-stone-200 dark:border-stone-800">
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4">
+      
+      <!-- Categoría 1: Tortas -->
+      <button data-categoria="Tortas" class="card-categoria-nav category-card rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 group text-center cursor-pointer">
+        <div class="w-12 h-12 rounded-full bg-[#271520] group-hover:bg-brand-600/30 flex items-center justify-center text-xl sm:text-2xl transition-colors border border-[#3e2436]">
+          🎂
+        </div>
+        <span class="text-xs sm:text-sm font-semibold text-stone-200 group-hover:text-pink-300 transition-colors">Tortas</span>
+      </button>
+
+      <!-- Categoría 2: Postres -->
+      <button data-categoria="Postres" class="card-categoria-nav category-card rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 group text-center cursor-pointer">
+        <div class="w-12 h-12 rounded-full bg-[#271520] group-hover:bg-brand-600/30 flex items-center justify-center text-xl sm:text-2xl transition-colors border border-[#3e2436]">
+          🧁
+        </div>
+        <span class="text-xs sm:text-sm font-semibold text-stone-200 group-hover:text-pink-300 transition-colors">Postres</span>
+      </button>
+
+      <!-- Categoría 3: Masas -->
+      <button data-categoria="Masas" class="card-categoria-nav category-card rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 group text-center cursor-pointer">
+        <div class="w-12 h-12 rounded-full bg-[#271520] group-hover:bg-brand-600/30 flex items-center justify-center text-xl sm:text-2xl transition-colors border border-[#3e2436]">
+          🥐
+        </div>
+        <span class="text-xs sm:text-sm font-semibold text-stone-200 group-hover:text-pink-300 transition-colors">Masas</span>
+      </button>
+
+      <!-- Categoría 4: Especialidades -->
+      <button data-categoria="Especialidades" class="card-categoria-nav category-card rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 group text-center cursor-pointer">
+        <div class="w-12 h-12 rounded-full bg-[#271520] group-hover:bg-brand-600/30 flex items-center justify-center text-xl sm:text-2xl transition-colors border border-[#3e2436]">
+          🍪
+        </div>
+        <span class="text-xs sm:text-sm font-semibold text-stone-200 group-hover:text-pink-300 transition-colors">Especialidades</span>
+      </button>
+
+      <!-- Categoría 5: Promociones -->
+      <button data-categoria="Promociones" class="card-categoria-nav category-card rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-2 group text-center cursor-pointer col-span-2 sm:col-span-1">
+        <div class="w-12 h-12 rounded-full bg-[#271520] group-hover:bg-brand-600/30 flex items-center justify-center text-xl sm:text-2xl transition-colors border border-[#3e2436]">
+          🎁
+        </div>
+        <span class="text-xs sm:text-sm font-semibold text-stone-200 group-hover:text-pink-300 transition-colors">Promociones</span>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 5. SECCIÓN COLECCIÓN DE PRODUCTOS & FILTROS              -->
+  <!-- ======================================================== -->
+  <main id="catalogo" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+    
+    <!-- Encabezado de Sección y Filtros -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-4 border-b border-[#251b24]">
       <div>
-        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">Nuestra Colección</h2>
-        <p class="text-xs sm:text-sm text-stone-500 dark:text-stone-400">Seleccioná tus delicias favoritas y personalizalas a tu gusto</p>
+        <div class="flex items-center gap-2">
+          <span class="text-brand-400 font-script text-2xl">❦</span>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white">Nuestra Colección</h2>
+        </div>
+        <p class="text-xs sm:text-sm text-stone-400 mt-1">Seleccioná tus delicias favoritas y personalizalas a tu gusto</p>
       </div>
+
+      <!-- Botones de Filtro -->
       <div id="filtros-categoria" class="flex flex-wrap gap-2">
-        <button data-categoria="todos" class="btn-filtro active px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-brand-600 text-white shadow-sm transition">Todos</button>
-        <button data-categoria="Tortas" class="btn-filtro px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 transition">Tortas</button>
-        <button data-categoria="Postres" class="btn-filtro px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 transition">Postres</button>
-        <button data-categoria="Especialidades" class="btn-filtro px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 transition">Especialidades</button>
+        <button data-categoria="todos" class="btn-filtro active px-5 py-2 text-xs sm:text-sm font-semibold rounded-full bg-brand-600 text-white shadow-md shadow-brand-600/30 transition">Todos</button>
+        <button data-categoria="Tortas" class="btn-filtro px-5 py-2 text-xs sm:text-sm font-semibold rounded-full bg-[#181318] text-stone-300 hover:text-white hover:bg-[#231a22] border border-[#2b1f28] transition">Tortas</button>
+        <button data-categoria="Postres" class="btn-filtro px-5 py-2 text-xs sm:text-sm font-semibold rounded-full bg-[#181318] text-stone-300 hover:text-white hover:bg-[#231a22] border border-[#2b1f28] transition">Postres</button>
+        <button data-categoria="Especialidades" class="btn-filtro px-5 py-2 text-xs sm:text-sm font-semibold rounded-full bg-[#181318] text-stone-300 hover:text-white hover:bg-[#231a22] border border-[#2b1f28] transition">Especialidades</button>
       </div>
     </div>
 
-    <!-- Contenedor dinámico del catálogo -->
-    <div id="catalogo-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-      <!-- Se inyecta dinámicamente con JavaScript (.map()) -->
+    <!-- Cuadrícula de 4 Tarjetas de Productos -->
+    <div id="catalogo-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Inyectado dinámicamente con JavaScript -->
     </div>
+
   </main>
 
   <!-- ======================================================== -->
-  <!-- MODAL: AUTENTICACIÓN SEGURA KDS (PIN DE COCINA)          -->
+  <!-- 6. PIE DE PÁGINA (FOOTER CON GARANTÍAS)                  -->
   <!-- ======================================================== -->
-  <div id="modal-auth-kds" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm transition-opacity">
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl transform transition-all">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center mb-4">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-      </div>
-      <h3 class="font-serif text-2xl font-bold text-center text-stone-900 dark:text-white mb-2">Acceso a Cocina (KDS)</h3>
-      <p class="text-xs text-stone-500 dark:text-stone-400 text-center mb-6">Ingresá el PIN de seguridad de la pastelería para gestionar las comandas en tiempo real.</p>
+  <footer id="contacto" class="relative mt-16 bg-[#100b10] border-t border-[#261a24] text-stone-300 overflow-hidden">
+    
+    <!-- Vector botánico decorativo inferior izquierdo -->
+    <div class="absolute bottom-2 left-3 opacity-20 pointer-events-none select-none">
+      <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#e03a6c" stroke-width="1.5">
+        <path d="M10 90 Q 30 50 80 40 Q 50 70 10 90 Z" />
+        <path d="M30 65 Q 50 50 65 55" />
+        <path d="M20 75 Q 35 60 45 68" />
+        <path d="M10 90 C 20 60, 40 30, 90 20" />
+        <path d="M50 40 Q 70 30 75 42" />
+      </svg>
+    </div>
+
+    <!-- Vector botánico decorativo inferior derecho -->
+    <div class="absolute bottom-2 right-3 opacity-20 pointer-events-none select-none transform scale-x-[-1]">
+      <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#e03a6c" stroke-width="1.5">
+        <path d="M10 90 Q 30 50 80 40 Q 50 70 10 90 Z" />
+        <path d="M30 65 Q 50 50 65 55" />
+        <path d="M20 75 Q 35 60 45 68" />
+        <path d="M10 90 C 20 60, 40 30, 90 20" />
+      </svg>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-12">
       
-      <form id="form-auth-kds" class="space-y-4">
-        <div>
-          <label for="input-kds-pin" class="block text-xs font-semibold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">Clave de Cocina</label>
-          <input 
-            type="password" 
-            id="input-kds-pin" 
-            placeholder="Ingresá la clave..." 
-            autocomplete="current-password"
-            required
-            class="w-full px-4 py-3 text-center text-lg rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition"
-          >
-          <p id="error-kds-pin" class="hidden text-xs text-red-500 dark:text-red-400 mt-2 text-center font-semibold">Clave incorrecta. Intentá nuevamente.</p>
+      <!-- Franja de 3 Bloques con Iconos Rosas + Marca Estilizada -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+        
+        <!-- Bloque 1: Pedidos seguros -->
+        <div class="flex items-center gap-3.5 p-3 rounded-2xl bg-[#171116] border border-[#2b1e29]">
+          <div class="w-10 h-10 rounded-full bg-[#271520] border border-brand-500/40 text-brand-400 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-xs sm:text-sm text-white">Pedidos seguros</h4>
+            <p class="text-[11px] text-stone-400">Tu compra protegida</p>
+          </div>
         </div>
 
-        <div class="flex gap-3 pt-2">
-          <button type="button" id="btn-cancelar-kds" class="flex-1 px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 text-sm font-semibold hover:bg-stone-100 dark:hover:bg-stone-800 transition">
-            Cancelar
-          </button>
-          <button type="submit" class="flex-1 px-4 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-md shadow-brand-600/30 transition">
-            Desbloquear
-          </button>
+        <!-- Bloque 2: Envíos en Puerto Iguazú -->
+        <div class="flex items-center gap-3.5 p-3 rounded-2xl bg-[#171116] border border-[#2b1e29]">
+          <div class="w-10 h-10 rounded-full bg-[#271520] border border-brand-500/40 text-brand-400 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-xs sm:text-sm text-white">Envíos en Puerto Iguazú</h4>
+            <p class="text-[11px] text-stone-400">o retiro en Boutique</p>
+          </div>
         </div>
-      </form>
+
+        <!-- Bloque 3: Ingredientes premium -->
+        <div class="flex items-center gap-3.5 p-3 rounded-2xl bg-[#171116] border border-[#2b1e29]">
+          <div class="w-10 h-10 rounded-full bg-[#271520] border border-brand-500/40 text-brand-400 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-xs sm:text-sm text-white">Ingredientes premium</h4>
+            <p class="text-[11px] text-stone-400">Calidad en cada detalle</p>
+          </div>
+        </div>
+
+        <!-- Bloque 4: Marca estilizada -->
+        <div class="text-center lg:text-right py-2">
+          <span class="font-script text-2xl sm:text-3xl text-pink-300 block hover:scale-105 transition-transform">
+            Dulces Momentos <span class="text-brand-400">♥</span>
+          </span>
+          <span class="text-[10px] uppercase tracking-widest text-stone-500 block">Puerto Iguazú • Misiones</span>
+        </div>
+
+      </div>
+
+      <!-- Copyright y Redes -->
+      <div class="border-t border-[#231721] mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
+        <p>
+          © <span id="footer-year">2026</span> <strong class="text-stone-300 font-medium">Dulces Momentos</strong>. Todos los derechos reservados.
+        </p>
+        <div class="flex items-center gap-4 text-stone-400">
+          <a href="https://wa.me/5493757571985" target="_blank" rel="noopener" class="hover:text-emerald-400 transition">WhatsApp: +54 9 3757 57-1985</a>
+          <span>•</span>
+          <a href="https://instagram.com/dreykumozza" target="_blank" rel="noopener" class="hover:text-pink-400 transition">Instagram</a>
+        </div>
+      </div>
+
     </div>
-  </div>
+  </footer>
 
   <!-- ======================================================== -->
   <!-- MODAL: CARRITO Y CHECKOUT ("TU PEDIDO")                  -->
   <!-- ======================================================== -->
   <div id="drawer-carrito" class="modal-carrito-backdrop hidden">
-    <div id="overlay-carrito" class="fixed inset-0 bg-stone-950/60 backdrop-blur-xs -z-10"></div>
+    <div id="overlay-carrito" class="fixed inset-0 bg-black/75 backdrop-blur-xs -z-10"></div>
     
-    <!-- Contenedor Interno Scrolleable con max-h-[85vh] overflow-y-auto pb-8 -->
-    <div class="modal-carrito-card max-h-[85vh] overflow-y-auto pb-8">
+    <div class="modal-carrito-card">
       
       <!-- Header Modal Carrito -->
-      <div class="sticky top-0 z-20 p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-md shrink-0">
+      <div class="sticky top-0 z-20 p-4 sm:p-5 border-b border-[#2d1e2a] flex items-center justify-between bg-[#171216]/95 backdrop-blur-md shrink-0">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-xl shadow-xs">
+          <div class="w-10 h-10 rounded-xl bg-[#2b1623] border border-brand-500/40 text-brand-400 flex items-center justify-center font-bold text-xl shadow-xs">
             🛒
           </div>
           <div>
-            <h3 class="font-serif text-lg sm:text-xl font-bold text-stone-900 dark:text-white">Tu Pedido</h3>
-            <p id="total-items-carrito" class="text-xs text-stone-500 dark:text-stone-400">0 productos seleccionados</p>
+            <h3 class="font-serif text-lg sm:text-xl font-bold text-white">Tu Pedido</h3>
+            <p id="total-items-carrito" class="text-xs text-stone-400">0 productos seleccionados</p>
           </div>
         </div>
-        <button id="btn-cerrar-carrito" aria-label="Cerrar carrito" class="p-2 rounded-xl text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800 transition">
+        <button id="btn-cerrar-carrito" aria-label="Cerrar carrito" class="p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
@@ -230,107 +418,100 @@
       </div>
 
       <!-- Formulario Checkout y Resumen -->
-      <div class="p-4 sm:p-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50/90 dark:bg-stone-900/80 space-y-4">
+      <div class="p-4 sm:p-5 border-t border-[#2d1e2a] bg-[#140e13]/90 space-y-4">
         
         <!-- Método de Entrega -->
         <div>
-          <label class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+          <label class="block text-xs font-semibold text-stone-300 mb-1.5">
             📦 Modalidad de Entrega *
           </label>
           <div class="metodos-entrega-grid grid grid-cols-2 gap-2.5">
-            <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition select-none">
+            <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-[#33202e] bg-[#1c151b] cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-[#2c1524] text-xs sm:text-sm font-medium transition select-none">
               <input type="radio" name="tipo-entrega" value="takeaway" checked class="text-brand-600 focus:ring-brand-500">
-              <span>🛍️ Retiro en Local</span>
+              <span>🛍️ Retiro en Boutique</span>
             </label>
-            <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition select-none">
+            <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-[#33202e] bg-[#1c151b] cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-[#2c1524] text-xs sm:text-sm font-medium transition select-none">
               <input type="radio" name="tipo-entrega" value="delivery" class="text-brand-600 focus:ring-brand-500">
               <span>🛵 Delivery ($ 1.500)</span>
             </label>
           </div>
-          <p class="text-[11px] text-brand-700 dark:text-brand-400 mt-1 font-medium">📍 Envíos exclusivos en Puerto Iguazú, Misiones.</p>
+          <p class="text-[11px] text-pink-400 mt-1 font-medium">📍 Envíos exclusivos en Puerto Iguazú, Misiones.</p>
         </div>
 
-        <!-- Forma de Pago (Radio Buttons) -->
+        <!-- Forma de Pago -->
         <div class="space-y-1.5 pt-1">
-          <label class="block text-xs font-semibold text-stone-700 dark:text-stone-300">
+          <label class="block text-xs font-semibold text-stone-300">
             💳 Forma de Pago *
           </label>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             
-            <!-- Opción 1: Efectivo -->
-            <label class="flex items-center gap-2.5 p-3 rounded-2xl border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-950/40 text-xs sm:text-sm font-medium transition select-none">
+            <label class="flex items-center gap-2.5 p-3 rounded-2xl border-2 border-[#33202e] bg-[#1c151b] cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-[#2c1524] text-xs sm:text-sm font-medium transition select-none">
               <input type="radio" name="metodo-pago" value="efectivo" checked class="w-4 h-4 text-brand-600 accent-brand-600 focus:ring-brand-500">
               <div class="flex flex-col">
-                <span class="font-bold text-stone-900 dark:text-white">💵 Efectivo</span>
-                <span class="text-[11px] text-stone-500 dark:text-stone-400">Al retirar / recibir</span>
+                <span class="font-bold text-white">💵 Efectivo</span>
+                <span class="text-[11px] text-stone-400">Al retirar / recibir</span>
               </div>
             </label>
 
-            <!-- Opción 2: Mercado Pago / Transferencia -->
-            <label class="flex items-center gap-2.5 p-3 rounded-2xl border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 cursor-pointer has-[:checked]:border-[#009EE3] has-[:checked]:bg-[#009EE3]/10 dark:has-[:checked]:bg-[#009EE3]/20 text-xs sm:text-sm font-medium transition select-none">
+            <label class="flex items-center gap-2.5 p-3 rounded-2xl border-2 border-[#33202e] bg-[#1c151b] cursor-pointer has-[:checked]:border-[#009EE3] has-[:checked]:bg-[#009EE3]/15 text-xs sm:text-sm font-medium transition select-none">
               <input type="radio" name="metodo-pago" value="mercadopago" class="w-4 h-4 text-[#009EE3] accent-[#009EE3] focus:ring-[#009EE3]">
               <div class="flex flex-col">
-                <span class="font-bold text-stone-900 dark:text-white">💳 Mercado Pago / Transferencia</span>
-                <span class="text-[11px] text-[#0081BA] dark:text-[#38bdf8] font-semibold">QR / Alias / CVU</span>
+                <span class="font-bold text-white">💳 Mercado Pago</span>
+                <span class="text-[11px] text-[#38bdf8] font-semibold">QR / Transferencia</span>
               </div>
             </label>
 
           </div>
         </div>
 
-        <!-- =====================================================================
-             1. SECCIÓN QR Y DATOS DE TRANSFERENCIA (#seccion-qr)
-             ===================================================================== -->
-        <div id="seccion-qr" class="hidden p-4 rounded-2xl bg-amber-50/90 dark:bg-stone-800/90 border border-amber-300 dark:border-amber-800/60 space-y-3.5 transition-all">
+        <!-- Sección QR Datos Bancarios -->
+        <div id="seccion-qr" class="hidden p-4 rounded-2xl bg-[#1c1619] border border-brand-500/30 space-y-3.5">
           <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-            <!-- Imagen Código QR -->
-            <div class="bg-white p-2 rounded-2xl border border-amber-200 dark:border-stone-700 shadow-sm shrink-0 flex items-center justify-center">
+            <div class="bg-white p-2 rounded-2xl shrink-0 flex items-center justify-center">
               <img 
                 src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=dulcesmomentos.mp" 
-                alt="Código QR Mercado Pago - Dulces Momentos" 
+                alt="Código QR Mercado Pago" 
                 class="w-32 h-32 sm:w-36 sm:h-36 rounded-xl object-contain"
                 loading="lazy"
               >
             </div>
 
-            <!-- Datos Bancarios en Texto -->
-            <div class="flex-1 space-y-1.5 text-xs text-stone-700 dark:text-stone-200 w-full">
-              <div class="flex items-center justify-between pb-1 border-b border-amber-200/60 dark:border-stone-700/60">
-                <span class="font-bold text-sm text-stone-900 dark:text-white flex items-center gap-1.5">
+            <div class="flex-1 space-y-1.5 text-xs text-stone-200 w-full">
+              <div class="flex items-center justify-between pb-1 border-b border-[#352331]">
+                <span class="font-bold text-sm text-white flex items-center gap-1.5">
                   <span>🏦</span> Datos de Pago
                 </span>
-                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-amber-200/80 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200">
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-brand-950 text-brand-300 border border-brand-800">
                   Mercado Pago
                 </span>
               </div>
               
               <div class="space-y-1 font-mono text-[11px] sm:text-xs pt-1">
-                <div class="flex justify-between items-center py-0.5 border-b border-amber-200/40 dark:border-stone-700/40">
-                  <span class="font-sans font-medium text-stone-500 dark:text-stone-400">Alias MP:</span>
-                  <span class="font-bold text-brand-700 dark:text-brand-400 select-all">dulcesmomentos.mp</span>
+                <div class="flex justify-between items-center py-0.5 border-b border-[#352331]">
+                  <span class="font-sans font-medium text-stone-400">Alias MP:</span>
+                  <span class="font-bold text-brand-400 select-all">dulcesmomentos.mp</span>
                 </div>
-                <div class="flex justify-between items-center py-0.5 border-b border-amber-200/40 dark:border-stone-700/40">
-                  <span class="font-sans font-medium text-stone-500 dark:text-stone-400">CVU / CBU:</span>
-                  <span class="font-bold text-stone-800 dark:text-stone-200 select-all">0000003100085472198532</span>
+                <div class="flex justify-between items-center py-0.5 border-b border-[#352331]">
+                  <span class="font-sans font-medium text-stone-400">CVU / CBU:</span>
+                  <span class="font-bold text-stone-200 select-all">0000003100085472198532</span>
                 </div>
                 <div class="flex justify-between items-center py-0.5">
-                  <span class="font-sans font-medium text-stone-500 dark:text-stone-400">Titular:</span>
-                  <span class="font-semibold text-stone-800 dark:text-stone-200">Dulces Momentos Boutique</span>
+                  <span class="font-sans font-medium text-stone-400">Titular:</span>
+                  <span class="font-semibold text-stone-200">Dulces Momentos Boutique</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Campo Obligatorio Número de Comprobante -->
-          <div class="pt-2 border-t border-amber-200/60 dark:border-stone-700/60">
-            <label for="input-comprobante" class="block text-xs font-bold text-amber-950 dark:text-amber-300 mb-1">
-              Número / Código de Comprobante * <span class="font-normal text-[11px] text-stone-500 dark:text-stone-400">(Obligatorio)</span>
+          <div class="pt-2 border-t border-[#352331]">
+            <label for="input-comprobante" class="block text-xs font-bold text-pink-300 mb-1">
+              Número / Código de Comprobante * <span class="font-normal text-[11px] text-stone-400">(Obligatorio)</span>
             </label>
             <input 
               type="text" 
               id="input-comprobante" 
-              placeholder="Ej. Operación #8945231 o últimos 6 dígitos..." 
-              class="w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-900 border border-amber-300 dark:border-amber-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-none transition"
+              placeholder="Ej. Operación #8945231..." 
+              class="w-full px-3.5 py-2 text-sm rounded-xl bg-[#130d12] border border-[#382333] text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition"
             >
           </div>
         </div>
@@ -338,52 +519,52 @@
         <!-- Datos del Cliente -->
         <div class="space-y-2.5">
           <div>
-            <label for="input-nombre" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Nombre Completo *</label>
-            <input type="text" id="input-nombre" placeholder="Ej. Camila Benítez" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <label for="input-nombre" class="block text-xs font-semibold text-stone-300 mb-1">Nombre Completo *</label>
+            <input type="text" id="input-nombre" placeholder="Ej. Camila Benítez" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-[#181217] border border-[#352331] text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
           </div>
 
           <div>
-            <label for="input-telefono" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Teléfono WhatsApp * (mínimo 8 dígitos)</label>
-            <input type="tel" id="input-telefono" placeholder="Ej. 3757 571985" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
-            <p id="error-telefono" class="hidden text-xs text-red-500 mt-1 font-medium">Ingresá un número válido (mínimo 8 dígitos).</p>
+            <label for="input-telefono" class="block text-xs font-semibold text-stone-300 mb-1">Teléfono WhatsApp * (mínimo 8 dígitos)</label>
+            <input type="tel" id="input-telefono" placeholder="Ej. 3757 571985" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-[#181217] border border-[#352331] text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <p id="error-telefono" class="hidden text-xs text-red-400 mt-1 font-medium">Ingresá un número válido (mínimo 8 dígitos).</p>
           </div>
 
           <div id="campo-direccion" class="hidden space-y-1">
             <div class="flex flex-wrap items-center justify-between gap-1">
-              <label for="input-direccion" class="block text-xs font-semibold text-stone-700 dark:text-stone-300">Dirección en Puerto Iguazú *</label>
-              <button type="button" id="btn-geolocalizar" class="text-xs text-brand-600 dark:text-brand-400 hover:underline font-bold flex items-center gap-1">
+              <label for="input-direccion" class="block text-xs font-semibold text-stone-300">Dirección en Puerto Iguazú *</label>
+              <button type="button" id="btn-geolocalizar" class="text-xs text-pink-400 hover:underline font-bold flex items-center gap-1">
                 🎯 Validar mi Ubicación
               </button>
             </div>
-            <input type="text" id="input-direccion" placeholder="Ej. Av. Victoria Aguirre 450, Puerto Iguazú" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-            <p id="info-geolocalizacion" class="text-[11px] text-stone-500 dark:text-stone-400"></p>
+            <input type="text" id="input-direccion" placeholder="Ej. Av. Victoria Aguirre 450, Puerto Iguazú" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-[#181217] border border-[#352331] text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <p id="info-geolocalizacion" class="text-[11px] text-stone-400"></p>
           </div>
 
           <div>
-            <label for="input-notas" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Dedicatoria o Notas Especiales</label>
-            <input type="text" id="input-notas" placeholder="Ej. Placa de chocolate con dedicatoria" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <label for="input-notas" class="block text-xs font-semibold text-stone-300 mb-1">Dedicatoria o Notas Especiales</label>
+            <input type="text" id="input-notas" placeholder="Ej. Placa con dedicatoria de cumpleaños" class="form-control-input w-full px-3.5 py-2 text-sm rounded-xl bg-[#181217] border border-[#352331] text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
           </div>
         </div>
 
         <!-- Desglose de Totales -->
-        <div class="border-t border-stone-200 dark:border-stone-800 pt-2.5 space-y-1 text-xs sm:text-sm">
-          <div class="flex justify-between text-stone-600 dark:text-stone-400">
+        <div class="border-t border-[#2d1e2a] pt-2.5 space-y-1 text-xs sm:text-sm">
+          <div class="flex justify-between text-stone-400">
             <span>Subtotal</span>
             <span id="subtotal-carrito" class="font-mono font-medium">$ 0</span>
           </div>
-          <div class="flex justify-between text-stone-600 dark:text-stone-400">
+          <div class="flex justify-between text-stone-400">
             <span>Envío (Puerto Iguazú)</span>
             <span id="costo-envio" class="font-mono font-medium">$ 0</span>
           </div>
-          <div class="flex justify-between font-bold text-base sm:text-lg text-stone-900 dark:text-white pt-1.5 border-t border-dashed border-stone-300 dark:border-stone-700">
+          <div class="flex justify-between font-bold text-base sm:text-lg text-white pt-1.5 border-t border-dashed border-[#382333]">
             <span>Total a Pagar</span>
-            <span id="total-carrito" class="text-brand-600 dark:text-brand-400">$ 0</span>
+            <span id="total-carrito" class="text-brand-400 font-mono">$ 0</span>
           </div>
         </div>
 
-        <!-- Botón Principal de Checkout (WhatsApp) -->
+        <!-- Botón Principal de Checkout -->
         <div class="pt-2">
-          <button id="btn-checkout-principal" class="w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all">
+          <button id="btn-checkout-principal" class="w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-brand-600 hover:bg-brand-700 active:scale-[0.99] text-white font-bold text-sm shadow-xl shadow-brand-600/30 transition-all">
             <span id="btn-checkout-icono" class="text-base">💬</span>
             <span id="btn-checkout-texto">Confirmar y Enviar Pedido por WhatsApp</span>
           </button>
@@ -395,26 +576,51 @@
   </div>
 
   <!-- ======================================================== -->
-  <!-- BOTÓN FLOTANTE DEL CARRITO (FIJO INFERIOR DERECHO Z-50)  -->
+  <!-- MODAL: AUTENTICACIÓN KDS (COCINA)                        -->
   <!-- ======================================================== -->
-  <button id="btn-abrir-carrito-flotante" aria-label="Abrir Carrito de Compras" class="fixed bottom-5 right-5 z-50 flex items-center justify-center gap-2.5 px-4 py-3 sm:px-5 sm:py-3.5 rounded-full bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-bold shadow-2xl shadow-brand-600/50 transition-all transform hover:-translate-y-1 group">
-    <div class="relative flex items-center justify-center">
-      <svg class="w-6 h-6 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-      </svg>
-      <span id="badge-carrito-flotante" class="absolute -top-2.5 -right-3.5 bg-white text-brand-700 text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center shadow-md ring-2 ring-brand-600">0</span>
+  <div id="modal-auth-kds" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity">
+    <div class="bg-[#171216] border border-[#33202e] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-[#2b1523] border border-brand-500/40 text-brand-400 flex items-center justify-center mb-4">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+      <h3 class="font-serif text-2xl font-bold text-center text-white mb-2">Acceso a Cocina (KDS)</h3>
+      <p class="text-xs text-stone-400 text-center mb-6">Ingresá el PIN de seguridad de la pastelería para gestionar las comandas en tiempo real.</p>
+      
+      <form id="form-auth-kds" class="space-y-4">
+        <div>
+          <label for="input-kds-pin" class="block text-xs font-semibold uppercase tracking-wider text-stone-300 mb-1">Clave de Cocina</label>
+          <input 
+            type="password" 
+            id="input-kds-pin" 
+            placeholder="Clave: niledlajo" 
+            autocomplete="current-password"
+            required
+            class="w-full px-4 py-3 text-center text-lg rounded-xl bg-[#110c10] border border-[#382333] text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition"
+          >
+          <p id="error-kds-pin" class="hidden text-xs text-red-400 mt-2 text-center font-semibold">Clave incorrecta. Intentá nuevamente.</p>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" id="btn-cancelar-kds" class="flex-1 px-4 py-3 rounded-xl border border-[#382333] text-stone-300 text-sm font-semibold hover:bg-stone-800 transition">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 px-4 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-md shadow-brand-600/30 transition">
+            Desbloquear
+          </button>
+        </div>
+      </form>
     </div>
-    <span class="hidden sm:inline text-sm font-semibold tracking-wide">Mi Carrito</span>
-  </button>
+  </div>
 
   <!-- ======================================================== -->
   <!-- PANEL KDS (KITCHEN DISPLAY SYSTEM)                       -->
   <!-- ======================================================== -->
-  <section id="seccion-kds" class="hidden fixed inset-0 z-50 bg-stone-900 text-stone-100 overflow-y-auto p-4 sm:p-8">
+  <section id="seccion-kds" class="hidden fixed inset-0 z-50 bg-[#0c090c] text-stone-100 overflow-y-auto p-4 sm:p-8">
     <div class="max-w-7xl mx-auto space-y-6">
       
-      <!-- Barra Superior KDS -->
-      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-stone-800/90 border border-stone-700 shadow-xl">
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#171216] border border-[#2d1e2a] shadow-xl">
         <div class="flex items-center gap-3">
           <span class="p-2 rounded-xl bg-brand-600 text-white font-bold text-xl">👨‍🍳</span>
           <div>
@@ -427,7 +633,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <button id="btn-limpiar-comandas" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-stone-700 hover:bg-stone-600 text-stone-200 transition">
+          <button id="btn-limpiar-comandas" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 transition">
             Limpiar Entregadas
           </button>
           <button id="btn-cerrar-kds" class="px-4 py-2 text-xs font-bold rounded-xl bg-red-600 hover:bg-red-700 text-white transition">
@@ -436,25 +642,23 @@
         </div>
       </div>
 
-      <!-- Filtro y Contadores KDS -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="p-4 rounded-2xl bg-stone-800/50 border border-stone-700">
+        <div class="p-4 rounded-2xl bg-[#171216] border border-[#2d1e2a]">
           <p class="text-xs uppercase text-amber-400 font-bold">Pendientes</p>
           <p id="kds-count-pendiente" class="text-3xl font-bold text-white mt-1">0</p>
         </div>
-        <div class="p-4 rounded-2xl bg-stone-800/50 border border-stone-700">
+        <div class="p-4 rounded-2xl bg-[#171216] border border-[#2d1e2a]">
           <p class="text-xs uppercase text-blue-400 font-bold">En Preparación</p>
           <p id="kds-count-preparacion" class="text-3xl font-bold text-white mt-1">0</p>
         </div>
-        <div class="p-4 rounded-2xl bg-stone-800/50 border border-stone-700">
+        <div class="p-4 rounded-2xl bg-[#171216] border border-[#2d1e2a]">
           <p class="text-xs uppercase text-emerald-400 font-bold">Listas / Entregadas</p>
           <p id="kds-count-listo" class="text-3xl font-bold text-white mt-1">0</p>
         </div>
       </div>
 
-      <!-- Grid de Comandas -->
       <div id="grid-comandas-kds" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Tarjetas de comanda generadas dinámicamente -->
+        <!-- Generado dinámicamente -->
       </div>
 
     </div>
@@ -463,121 +667,12 @@
   <!-- ======================================================== -->
   <!-- PLANTILLA IMPRESIÓN TÉRMICA (PRINT TICKETS KDS)          -->
   <!-- ======================================================== -->
-  <div id="ticket-termico-impresion" class="ticket-termico hidden">
-    <!-- Contenido inyectado al imprimir ticket de comanda -->
-  </div>
+  <div id="ticket-termico-impresion" class="ticket-termico hidden"></div>
 
   <!-- ======================================================== -->
-  <!-- FOOTER PRINCIPAL RESPONSIVE                              -->
+  <!-- CONTENEDOR DE TOAST NOTIFICATIONS                        -->
   <!-- ======================================================== -->
-  <footer class="w-full bg-[#121212] dark:bg-[#0d0d0d] text-stone-300 border-t border-stone-800 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-        
-        <!-- Columna 1: Marca y Reseña -->
-        <div class="space-y-4 lg:col-span-2">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-brand-600/30">
-              <span class="text-xl">🍰</span>
-            </div>
-            <div>
-              <span class="font-serif text-xl font-bold tracking-tight text-white block leading-none">Dulces Momentos</span>
-              <span class="text-[11px] uppercase tracking-widest text-brand-400 font-semibold">Pastelería Boutique</span>
-            </div>
-          </div>
-          <p class="text-sm text-stone-400 max-w-md leading-relaxed">
-            Elaboración artesanal de postres, tortas y creaciones gourmet en Puerto Iguazú. Transformamos ingredientes de excelencia en momentos inolvidables para tus celebraciones.
-          </p>
-          <div class="flex items-center gap-2 text-xs text-stone-400">
-            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Atención online y envíos en Puerto Iguazú, Misiones</span>
-          </div>
-        </div>
-
-        <!-- Columna 2: Enlaces Rápidos -->
-        <div class="space-y-3">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-white">Navegación</h3>
-          <ul class="space-y-2.5 text-sm">
-            <li>
-              <a href="#catalogo" class="text-stone-400 hover:text-brand-400 transition-colors flex items-center gap-1.5">
-                <span class="text-brand-500">›</span> Catálogo & Pedidos
-              </a>
-            </li>
-            <li>
-              <a href="#catalogo" class="text-stone-400 hover:text-brand-400 transition-colors flex items-center gap-1.5">
-                <span class="text-brand-500">›</span> Tortas de Autor
-              </a>
-            </li>
-            <li>
-              <button onclick="document.getElementById('btn-abrir-auth-kds')?.click()" class="text-stone-400 hover:text-brand-400 transition-colors flex items-center gap-1.5 text-left">
-                <span class="text-brand-500">›</span> Panel de Cocina (KDS)
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Columna 3: Contacto y Redes Sociales -->
-        <div class="space-y-3">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-white">Contacto Directo</h3>
-          <div class="space-y-2.5">
-            <!-- Instagram -->
-            <a 
-              href="https://www.instagram.com/dreykumozza" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              class="group flex items-center gap-3 p-2.5 rounded-xl bg-[#1e1e1e] hover:bg-[#252525] border border-stone-800 hover:border-pink-500/40 text-stone-300 hover:text-pink-400 transition-all shadow-sm"
-              aria-label="Seguinos en Instagram @dreykumozza"
-            >
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-white shrink-0 group-hover:scale-105 transition-transform">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-              </div>
-              <div class="text-left">
-                <span class="block text-xs font-semibold text-white group-hover:text-pink-400 transition-colors">@dreykumozza</span>
-                <span class="block text-[11px] text-stone-400">Seguinos en Instagram</span>
-              </div>
-            </a>
-
-            <!-- WhatsApp -->
-            <a 
-              href="https://wa.me/5493757571985?text=Hola,%20quisiera%20hacer%20una%20consulta" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              class="group flex items-center gap-3 p-2.5 rounded-xl bg-[#1e1e1e] hover:bg-[#252525] border border-stone-800 hover:border-emerald-500/40 text-stone-300 hover:text-emerald-400 transition-all shadow-sm"
-              aria-label="Escribinos por WhatsApp al +54 9 3757 571985"
-            >
-              <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shrink-0 group-hover:scale-105 transition-transform">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.158.57 4.183 1.564 5.939l-1.66 6.071 6.223-1.632c1.701.927 3.652 1.455 5.727 1.455 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z"/>
-                </svg>
-              </div>
-              <div class="text-left">
-                <span class="block text-xs font-semibold text-white group-hover:text-emerald-400 transition-colors">+54 9 3757 571985</span>
-                <span class="block text-[11px] text-stone-400">Consultas y Pedidos</span>
-              </div>
-            </a>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Barra Inferior: Derechos Reservados -->
-      <div class="border-t border-stone-800/80 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
-        <p>
-          Copyright © <span id="footer-year">2026</span> <strong class="text-stone-400 font-medium">Dulces Momentos</strong> - Todos los derechos reservados.
-        </p>
-        <p class="text-stone-500 flex items-center gap-1">
-          Hecho con <span class="text-brand-500">♥</span> para endulzar tus días
-        </p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- ======================================================== -->
-  <!-- CONTENEDOR DE TOAST NOTIFICATIONS (ESQUINA INFERIOR IZQ) -->
-  <!-- ======================================================== -->
-  <div id="toast-container" class="fixed bottom-6 left-6 z-50 flex flex-col gap-3 pointer-events-none max-w-sm w-full"></div>
+  <div id="toast-container"></div>
 
   <!-- Script Principal -->
   <script src="app.js"></script>
