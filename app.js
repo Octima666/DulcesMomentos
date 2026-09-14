@@ -23,7 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const STORAGE_KEYS = {
     COMANDAS: 'dulces_momentos_comandas_kds_v2',
-    FAVORITOS: 'dulces_momentos_favoritos_v1'
+    FAVORITOS: 'dulces_momentos_favoritos_v1',
+    TOKEN: 'dulces_momentos_auth_token_v2',
+    USUARIO: 'dulces_momentos_auth_user_v2'
   };
 
   // ========================================================
@@ -132,7 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
     categoriaSeleccionada: 'todos',
     tipoEntrega: 'takeaway',
     metodoPago: 'efectivo',
-    ubicacionValidadaIguazu: false
+    ubicacionValidadaIguazu: false,
+    auth: {
+      token: null,
+      usuario: null,
+      autenticado: false
+    }
   };
 
   // ========================================================
@@ -931,6 +938,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const drawerCarrito = document.getElementById('drawer-carrito');
 
     const abrirCarrito = () => {
+      if (!state.auth.autenticado) {
+        bloquearVistaYMostrarAuth();
+        mostrarToast('Por favor, iniciá sesión para acceder a tu carrito.', 'warning');
+        return;
+      }
       renderizarCarrito();
       drawerCarrito?.classList.remove('hidden');
       document.body.classList.add('overflow-hidden');
@@ -1077,6 +1089,422 @@ document.addEventListener('DOMContentLoaded', () => {
       guardarComandasEnStorage();
       mostrarToast('Comandas entregadas archivadas.', 'info');
     });
+
+    // ========================================================
+    // LISTENERS DEL SISTEMA DE AUTENTICACIÓN
+    // ========================================================
+    const tabBtnLogin = document.getElementById('tab-btn-login');
+    const tabBtnRegister = document.getElementById('tab-btn-register');
+    const linkIrRegistro = document.getElementById('link-ir-registro');
+    const linkIrLogin = document.getElementById('link-ir-login');
+
+    tabBtnLogin?.addEventListener('click', () => activarPestanaAuth('login'));
+    tabBtnRegister?.addEventListener('click', () => activarPestanaAuth('register'));
+    linkIrRegistro?.addEventListener('click', () => activarPestanaAuth('register'));
+    linkIrLogin?.addEventListener('click', () => activarPestanaAuth('login'));
+
+    // Botones para mostrar / ocultar contraseñas
+    const btnToggleLoginPass = document.getElementById('btn-toggle-login-pass');
+    const inputLoginPassword = document.getElementById('login-password');
+    btnToggleLoginPass?.addEventListener('click', () => {
+      if (!inputLoginPassword) return;
+      const esPassword = inputLoginPassword.type === 'password';
+      inputLoginPassword.type = esPassword ? 'text' : 'password';
+      btnToggleLoginPass.innerHTML = esPassword 
+        ? `<svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>`
+        : `<svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>`;
+    });
+
+    const btnToggleRegPass = document.getElementById('btn-toggle-reg-pass');
+    const inputRegPassword = document.getElementById('reg-password');
+    btnToggleRegPass?.addEventListener('click', () => {
+      if (!inputRegPassword) return;
+      const esPassword = inputRegPassword.type === 'password';
+      inputRegPassword.type = esPassword ? 'text' : 'password';
+      btnToggleRegPass.innerHTML = esPassword 
+        ? `<svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>`
+        : `<svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>`;
+    });
+
+    // Validación estricta en tiempo real de correo electrónico en registro
+    const inputRegCorreo = document.getElementById('reg-correo');
+    const regCorreoStatus = document.getElementById('reg-correo-status');
+    const regCorreoIcon = document.getElementById('reg-correo-icon');
+    const regCorreoHint = document.getElementById('reg-correo-hint');
+
+    const actualizarValidacionCorreo = () => {
+      if (!inputRegCorreo) return;
+      const valor = inputRegCorreo.value.trim();
+
+      if (!valor) {
+        inputRegCorreo.classList.remove('auth-input-valid', 'auth-input-invalid');
+        if (regCorreoStatus) {
+          regCorreoStatus.textContent = 'Formato requerido (@ y dominio)';
+          regCorreoStatus.className = 'text-[10px] font-semibold text-stone-500 transition-colors';
+        }
+        if (regCorreoIcon) regCorreoIcon.innerHTML = '';
+        if (regCorreoHint) regCorreoHint.classList.add('hidden');
+        return;
+      }
+
+      const esValido = validarFormatoCorreo(valor);
+
+      if (esValido) {
+        inputRegCorreo.classList.remove('auth-input-invalid');
+        inputRegCorreo.classList.add('auth-input-valid');
+        if (regCorreoStatus) {
+          regCorreoStatus.textContent = '✓ Formato de correo válido';
+          regCorreoStatus.className = 'text-[10px] font-bold text-emerald-400 transition-colors';
+        }
+        if (regCorreoIcon) {
+          regCorreoIcon.innerHTML = `
+            <svg class="w-4 h-4 text-emerald-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+          `;
+        }
+        if (regCorreoHint) regCorreoHint.classList.add('hidden');
+      } else {
+        inputRegCorreo.classList.remove('auth-input-valid');
+        inputRegCorreo.classList.add('auth-input-invalid');
+        if (regCorreoStatus) {
+          regCorreoStatus.textContent = '⚠ Requiere formato válido';
+          regCorreoStatus.className = 'text-[10px] font-bold text-red-400 transition-colors';
+        }
+        if (regCorreoIcon) {
+          regCorreoIcon.innerHTML = `
+            <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          `;
+        }
+        if (regCorreoHint) regCorreoHint.classList.remove('hidden');
+      }
+    };
+
+    inputRegCorreo?.addEventListener('input', actualizarValidacionCorreo);
+    inputRegCorreo?.addEventListener('blur', actualizarValidacionCorreo);
+
+    // Formulario de Inicio de Sesión
+    const formLogin = document.getElementById('form-login');
+    const inputLoginCorreo = document.getElementById('login-correo');
+    const alertaLogin = document.getElementById('alerta-login');
+    const alertaLoginTexto = document.getElementById('alerta-login-texto');
+    const btnSubmitLogin = document.getElementById('btn-submit-login');
+    const spinnerLogin = document.getElementById('spinner-login');
+    const textoSubmitLogin = document.getElementById('texto-submit-login');
+
+    formLogin?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const correo = (inputLoginCorreo?.value || '').trim();
+      const password = (inputLoginPassword?.value || '').trim();
+
+      if (!correo || !password) {
+        if (alertaLogin && alertaLoginTexto) {
+          alertaLoginTexto.textContent = 'Por favor, completá tu correo y contraseña.';
+          alertaLogin.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (!validarFormatoCorreo(correo)) {
+        if (alertaLogin && alertaLoginTexto) {
+          alertaLoginTexto.textContent = 'El formato de correo no es válido (debe contener @ y dominio).';
+          alertaLogin.classList.remove('hidden');
+        }
+        return;
+      }
+
+      // Estado de carga UI
+      if (btnSubmitLogin) btnSubmitLogin.disabled = true;
+      if (spinnerLogin) spinnerLogin.classList.remove('hidden');
+      if (textoSubmitLogin) textoSubmitLogin.textContent = 'Verificando credenciales...';
+      if (alertaLogin) alertaLogin.classList.add('hidden');
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ correo, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success && data.token) {
+          if (formLogin) formLogin.reset();
+          aplicarSesionActiva(data.user, data.token, true);
+        } else {
+          if (alertaLogin && alertaLoginTexto) {
+            alertaLoginTexto.textContent = data.error || 'Credenciales inválidas. Comprobá tu correo y contraseña.';
+            alertaLogin.classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        console.error('Error en login:', err);
+        if (alertaLogin && alertaLoginTexto) {
+          alertaLoginTexto.textContent = 'Error de conexión con el servidor. Verificá que el backend esté en ejecución.';
+          alertaLogin.classList.remove('hidden');
+        }
+      } finally {
+        if (btnSubmitLogin) btnSubmitLogin.disabled = false;
+        if (spinnerLogin) spinnerLogin.classList.add('hidden');
+        if (textoSubmitLogin) textoSubmitLogin.textContent = 'Ingresar a la Tienda';
+      }
+    });
+
+    // Formulario de Registro
+    const formRegister = document.getElementById('form-register');
+    const inputRegNombre = document.getElementById('reg-nombre');
+    const inputRegApellido = document.getElementById('reg-apellido');
+    const alertaRegister = document.getElementById('alerta-register');
+    const alertaRegisterTexto = document.getElementById('alerta-register-texto');
+    const btnSubmitRegister = document.getElementById('btn-submit-register');
+    const spinnerRegister = document.getElementById('spinner-register');
+    const textoSubmitRegister = document.getElementById('texto-submit-register');
+
+    formRegister?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nombre = (inputRegNombre?.value || '').trim();
+      const apellido = (inputRegApellido?.value || '').trim();
+      const correo = (inputRegCorreo?.value || '').trim();
+      const password = (inputRegPassword?.value || '').trim();
+
+      // Validación de campos
+      if (!nombre || !apellido || !correo || !password) {
+        if (alertaRegister && alertaRegisterTexto) {
+          alertaRegisterTexto.textContent = 'Todos los campos son obligatorios (Nombre, Apellido, Correo y Contraseña).';
+          alertaRegister.classList.remove('hidden');
+        }
+        return;
+      }
+
+      // Validación estricta de correo
+      if (!validarFormatoCorreo(correo)) {
+        if (alertaRegister && alertaRegisterTexto) {
+          alertaRegisterTexto.textContent = 'El correo electrónico debe tener un formato válido con "@" y dominio (ej: usuario@ejemplo.com).';
+          alertaRegister.classList.remove('hidden');
+        }
+        inputRegCorreo?.focus();
+        return;
+      }
+
+      if (password.length < 6) {
+        if (alertaRegister && alertaRegisterTexto) {
+          alertaRegisterTexto.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+          alertaRegister.classList.remove('hidden');
+        }
+        inputRegPassword?.focus();
+        return;
+      }
+
+      // Estado de carga UI
+      if (btnSubmitRegister) btnSubmitRegister.disabled = true;
+      if (spinnerRegister) spinnerRegister.classList.remove('hidden');
+      if (textoSubmitRegister) textoSubmitRegister.textContent = 'Creando tu cuenta...';
+      if (alertaRegister) alertaRegister.classList.add('hidden');
+
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, apellido, correo, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success && data.token) {
+          if (formRegister) formRegister.reset();
+          actualizarValidacionCorreo();
+          aplicarSesionActiva(data.user, data.token, true);
+        } else {
+          if (alertaRegister && alertaRegisterTexto) {
+            alertaRegisterTexto.textContent = data.error || 'Error al procesar el registro.';
+            alertaRegister.classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        console.error('Error en registro:', err);
+        if (alertaRegister && alertaRegisterTexto) {
+          alertaRegisterTexto.textContent = 'Error de conexión con el servidor. Verificá que el backend esté en ejecución.';
+          alertaRegister.classList.remove('hidden');
+        }
+      } finally {
+        if (btnSubmitRegister) btnSubmitRegister.disabled = false;
+        if (spinnerRegister) spinnerRegister.classList.add('hidden');
+        if (textoSubmitRegister) textoSubmitRegister.textContent = 'Crear Mi Cuenta & Ingresar';
+      }
+    });
+
+    // Botón de Cerrar Sesión en Navbar
+    const btnLogout = document.getElementById('btn-logout');
+    btnLogout?.addEventListener('click', () => {
+      cerrarSesion();
+    });
+  };
+
+  // ========================================================
+  // 14.5. SISTEMA DE AUTENTICACIÓN (SQL SERVER + BARRERA OBLIGATORIA)
+  // ========================================================
+  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  const validarFormatoCorreo = (email) => {
+    return EMAIL_REGEX.test(String(email || '').trim());
+  };
+
+  const bloquearVistaYMostrarAuth = () => {
+    state.auth = { token: null, usuario: null, autenticado: false };
+    
+    // Ocultar tienda principal y controles de usuario
+    const authPortal = document.getElementById('seccion-auth-portal');
+    const mainContent = document.getElementById('app-main-content');
+    const navUserContainer = document.getElementById('nav-user-container');
+    const drawerCarrito = document.getElementById('drawer-carrito');
+
+    if (authPortal) authPortal.classList.remove('hidden');
+    if (mainContent) mainContent.classList.add('hidden');
+    if (navUserContainer) {
+      navUserContainer.classList.add('hidden');
+      navUserContainer.classList.remove('flex');
+    }
+    if (drawerCarrito) drawerCarrito.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const aplicarSesionActiva = (usuario, token, conNotificacion = true) => {
+    state.auth = {
+      token,
+      usuario,
+      autenticado: true
+    };
+
+    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+    localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(usuario));
+
+    const authPortal = document.getElementById('seccion-auth-portal');
+    const mainContent = document.getElementById('app-main-content');
+    const navUserContainer = document.getElementById('nav-user-container');
+    const navUserName = document.getElementById('nav-user-name');
+    const navUserAvatar = document.getElementById('nav-user-avatar');
+    const inputNombreCliente = document.getElementById('input-nombre');
+
+    if (authPortal) authPortal.classList.add('hidden');
+    if (mainContent) mainContent.classList.remove('hidden');
+
+    if (navUserContainer) {
+      navUserContainer.classList.remove('hidden');
+      navUserContainer.classList.add('flex');
+    }
+
+    if (navUserName) {
+      navUserName.textContent = `${usuario.nombre || 'Usuario'}`;
+    }
+
+    if (navUserAvatar) {
+      const inicial = (usuario.nombre || 'U').charAt(0).toUpperCase();
+      navUserAvatar.textContent = inicial;
+    }
+
+    if (inputNombreCliente && !inputNombreCliente.value.trim()) {
+      inputNombreCliente.value = `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim();
+    }
+
+    if (conNotificacion) {
+      mostrarToast(`¡Hola, ${usuario.nombre}! Bienvenido/a a Dulces Momentos 🍰`, 'success');
+    }
+  };
+
+  const cerrarSesion = async () => {
+    try {
+      localStorage.removeItem(STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USUARIO);
+      
+      fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+
+      bloquearVistaYMostrarAuth();
+      mostrarToast('Has cerrado sesión correctamente. ¡Hasta pronto! 👋', 'info');
+
+      const formLogin = document.getElementById('form-login');
+      const formRegister = document.getElementById('form-register');
+      if (formLogin) formLogin.reset();
+      if (formRegister) formRegister.reset();
+
+      activarPestanaAuth('login');
+    } catch (e) {
+      console.error('Error al cerrar sesión:', e);
+    }
+  };
+
+  const activarPestanaAuth = (pestana) => {
+    const tabBtnLogin = document.getElementById('tab-btn-login');
+    const tabBtnRegister = document.getElementById('tab-btn-register');
+    const formLogin = document.getElementById('form-login');
+    const formRegister = document.getElementById('form-register');
+    const alertaLogin = document.getElementById('alerta-login');
+    const alertaRegister = document.getElementById('alerta-register');
+
+    if (alertaLogin) alertaLogin.classList.add('hidden');
+    if (alertaRegister) alertaRegister.classList.add('hidden');
+
+    if (pestana === 'login') {
+      tabBtnLogin?.classList.add('bg-brand-600', 'text-white', 'shadow-md', 'shadow-brand-600/30', 'font-bold');
+      tabBtnLogin?.classList.remove('text-stone-400');
+      tabBtnRegister?.classList.remove('bg-brand-600', 'text-white', 'shadow-md', 'shadow-brand-600/30', 'font-bold');
+      tabBtnRegister?.classList.add('text-stone-400');
+
+      formLogin?.classList.remove('hidden');
+      formRegister?.classList.add('hidden');
+    } else {
+      tabBtnRegister?.classList.add('bg-brand-600', 'text-white', 'shadow-md', 'shadow-brand-600/30', 'font-bold');
+      tabBtnRegister?.classList.remove('text-stone-400');
+      tabBtnLogin?.classList.remove('bg-brand-600', 'text-white', 'shadow-md', 'shadow-brand-600/30', 'font-bold');
+      tabBtnLogin?.classList.add('text-stone-400');
+
+      formRegister?.classList.remove('hidden');
+      formLogin?.classList.add('hidden');
+    }
+  };
+
+  const verificarSesionExistente = async () => {
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+    if (!token) {
+      bloquearVistaYMostrarAuth();
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.user) {
+          aplicarSesionActiva(data.user, token, false);
+          return;
+        }
+      }
+
+      localStorage.removeItem(STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USUARIO);
+      bloquearVistaYMostrarAuth();
+    } catch (error) {
+      console.warn('Error al verificar sesión en backend:', error);
+      const userGuardado = localStorage.getItem(STORAGE_KEYS.USUARIO);
+      if (userGuardado) {
+        try {
+          const userObj = JSON.parse(userGuardado);
+          aplicarSesionActiva(userObj, token, false);
+          return;
+        } catch (e) {}
+      }
+      bloquearVistaYMostrarAuth();
+    }
   };
 
   // ========================================================
@@ -1089,4 +1517,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderizarCatalogo();
   actualizarBadges();
   configurarEventListeners();
+  verificarSesionExistente();
 });
+

@@ -329,3 +329,31 @@ body {
   width: calc(100vw - 48px);
   pointer-events: none;
 }
+
+/* ======================================================== */
+/* ESTILOS Y ANIMACIONES DEL PORTAL DE AUTENTICACIÓN        */
+/* ======================================================== */
+@keyframes shakeAuth {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-7px); }
+  40%, 80% { transform: translateX(7px); }
+}
+
+.animate-shake {
+  animation: shakeAuth 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.auth-input-valid {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+}
+
+.auth-input-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+#seccion-auth-portal {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
