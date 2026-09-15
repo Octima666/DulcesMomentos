@@ -29,6 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ========================================================
+  // URL BASE DEL BACKEND - Detección automática de entorno
+  // En producción (GitHub Pages) apunta al backend en Render.
+  // En local, usa ruta relativa (el backend sirve el frontend).
+  // ========================================================
+  const API_BASE_URL = window.location.hostname === 'octima666.github.io'
+    ? 'https://dulces-momentos-api.onrender.com'  // ← Actualizar con tu URL de Render
+    : '';  // En localhost, las rutas relativas funcionan correctamente
+
+  // ========================================================
   // 2. FORMATEO CENTRALIZADO DE MONEDA ($ ARS)
   // ========================================================
   const formateadorARS = new Intl.NumberFormat('es-AR', {
@@ -1223,7 +1232,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (alertaLogin) alertaLogin.classList.add('hidden');
 
       try {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ correo, password })
@@ -1306,7 +1315,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (alertaRegister) alertaRegister.classList.add('hidden');
 
       try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ nombre, apellido, correo, password })
@@ -1422,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USUARIO);
       
-      fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+      fetch(`${API_BASE_URL}/api/auth/logout`, { method: 'POST' }).catch(() => {});
 
       bloquearVistaYMostrarAuth();
       mostrarToast('Has cerrado sesión correctamente. ¡Hasta pronto! 👋', 'info');
@@ -1476,7 +1485,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const response = await fetch('/api/auth/me', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

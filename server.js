@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  * PASTELERÍA "DULCES MOMENTOS" - SERVIDOR BACKEND (server.js)
- * Node.js + Express + SQL Server (MSSQLLocalDB) + Mercado Pago SDK v2 Official
+ * Node.js + Express + PostgreSQL + Mercado Pago SDK v2 Official
  * ============================================================================
  */
 
@@ -11,79 +11,83 @@ const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const sql = require('mssql/msnodesqlv8');
+const { Pool } = require('pg');
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configuración de Seguridad y Base de Datos
+// Configuración de Seguridad
 const JWT_SECRET = process.env.JWT_SECRET || 'dulces_momentos_secret_key_2026_super_secure_jwt_token!';
-const DB_SERVER = process.env.DB_SERVER || '(localdb)\\MSSQLLocalDB';
-const DB_NAME = process.env.DB_NAME || 'DulcesMomentos';
-const DB_DRIVER = process.env.DB_DRIVER || 'ODBC Driver 18 for SQL Server';
-
-const dbConnectionString = `Server=${DB_SERVER};Database=${DB_NAME};Trusted_Connection=Yes;Driver={${DB_DRIVER}};TrustServerCertificate=Yes;`;
 
 // ----------------------------------------------------------------------------
 // 1. MIDDLEWARES
 // ----------------------------------------------------------------------------
-app.use(cors());
+
+// CORS restrictivo: solo acepta peticiones desde GitHub Pages y localhost
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'https://octima666.github.io',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://localhost:5500',   // Live Server de VS Code
+      'http://127.0.0.1:5500'
+    ];
+    // Permitir peticiones sin origen (ej: Postman, curl, mismo servidor)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS bloqueado para origen: ${origin}`));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Servir archivos estáticos del frontend (HTML, CSS, JS, imágenes)
 app.use(express.static(path.join(__dirname, '.')));
 
 // ----------------------------------------------------------------------------
-// 2. CONEXIÓN A BASE DE DATOS SQL SERVER
+// 2. CONEXIÓN A BASE DE DATOS POSTGRESQL
 // ----------------------------------------------------------------------------
-let dbPool = null;
 
-async function getDbPool() {
-  if (!dbPool || !dbPool.connected) {
-    try {
-      console.log(`[SQL Server] Conectando a ${DB_SERVER} / Base: ${DB_NAME}...`);
-      dbPool = await new sql.ConnectionPool({
-        connectionString: dbConnectionString
-      }).connect();
-      console.log(`[SQL Server] ✅ Conexión establecida exitosamente con ${DB_NAME}.`);
-      
-      // Asegurar que la tabla Usuarios exista
-      await initDatabase();
-    } catch (err) {
-      console.error('[SQL Server Error] Error al conectar a la base de datos:', err.message);
-      throw err;
-    }
-  }
-  return dbPool;
-}
+// Configura la conexión usando DATABASE_URL (Render/Railway/Neon la proveen)
+// Para local, configurar en .env: DATABASE_URL=postgresql://user:pass@localhost:5432/dulces_momentos
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('render.com')
+    ? { rejectUnauthorized: false }
+    : false
+});
 
 async function initDatabase() {
   try {
-    const checkTableQuery = `
-      IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Usuarios')
-      BEGIN
-        CREATE TABLE Usuarios (
-          id INT IDENTITY(1,1) PRIMARY KEY,
-          nombre NVARCHAR(50) NOT NULL,
-          apellido NVARCHAR(50) NOT NULL,
-          correo NVARCHAR(100) NOT NULL UNIQUE,
-          password_hash NVARCHAR(255) NOT NULL,
-          created_at DATETIME2 DEFAULT SYSDATETIME()
-        );
-        PRINT 'Tabla Usuarios creada exitosamente.';
-      END
-    `;
-    const request = dbPool.request();
-    await request.query(checkTableQuery);
+    console.log('[PostgreSQL] Inicializando base de datos...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS usuarios (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(50) NOT NULL,
+        apellido VARCHAR(50) NOT NULL,
+        correo VARCHAR(100) NOT NULL UNIQUE,
+        password_hash VARCHAR(255) NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+    console.log('[PostgreSQL] ✅ Tabla "usuarios" verificada/creada exitosamente.');
   } catch (error) {
-    console.error('[SQL Server Error] Error al verificar/crear tabla Usuarios:', error.message);
+    console.error('[PostgreSQL Error] Error al inicializar la base de datos:', error.message);
+    throw error;
   }
 }
 
-// Inicializar conexión inmediatamente
-getDbPool().catch(err => {
-  console.warn('[SQL Server] Advertencia: La conexión inicial falló, se reintentará en cada solicitud:', err.message);
+// Inicializar la BD al arrancar el servidor
+initDatabase().catch(err => {
+  console.warn('[PostgreSQL] Advertencia: Error en inicialización inicial:', err.message);
 });
 
 // Middleware de verificación de autenticación JWT
@@ -119,7 +123,7 @@ const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 /**
  * POST /api/auth/register
- * Registra un nuevo usuario en la tabla Usuarios de SQL Server
+ * Registra un nuevo usuario en la tabla usuarios de PostgreSQL
  * Campos solicitados: nombre, apellido, correo, password
  */
 app.post('/api/auth/register', async (req, res) => {
@@ -162,15 +166,13 @@ app.post('/api/auth/register', async (req, res) => {
       });
     }
 
-    const pool = await getDbPool();
-
     // 4. Verificar si el correo ya existe en la base de datos
-    const checkQuery = `SELECT id FROM Usuarios WHERE correo = @correo`;
-    const checkResult = await pool.request()
-      .input('correo', sql.NVarChar(100), cleanCorreo)
-      .query(checkQuery);
+    const checkResult = await pool.query(
+      'SELECT id FROM usuarios WHERE correo = $1',
+      [cleanCorreo]
+    );
 
-    if (checkResult.recordset.length > 0) {
+    if (checkResult.rows.length > 0) {
       return res.status(409).json({
         success: false,
         error: 'El correo electrónico ingresado ya se encuentra registrado.'
@@ -181,21 +183,15 @@ app.post('/api/auth/register', async (req, res) => {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(cleanPassword, saltRounds);
 
-    // 6. Insertar el nuevo usuario en SQL Server
-    const insertQuery = `
-      INSERT INTO Usuarios (nombre, apellido, correo, password_hash)
-      OUTPUT INSERTED.id, INSERTED.nombre, INSERTED.apellido, INSERTED.correo, INSERTED.created_at
-      VALUES (@nombre, @apellido, @correo, @password_hash);
-    `;
+    // 6. Insertar el nuevo usuario en PostgreSQL
+    const insertResult = await pool.query(
+      `INSERT INTO usuarios (nombre, apellido, correo, password_hash)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, nombre, apellido, correo, created_at`,
+      [cleanNombre, cleanApellido, cleanCorreo, passwordHash]
+    );
 
-    const insertResult = await pool.request()
-      .input('nombre', sql.NVarChar(50), cleanNombre)
-      .input('apellido', sql.NVarChar(50), cleanApellido)
-      .input('correo', sql.NVarChar(100), cleanCorreo)
-      .input('password_hash', sql.NVarChar(255), passwordHash)
-      .query(insertQuery);
-
-    const newUser = insertResult.recordset[0];
+    const newUser = insertResult.rows[0];
 
     // 7. Generar token de sesión JWT
     const token = jwt.sign(
@@ -236,7 +232,7 @@ app.post('/api/auth/register', async (req, res) => {
 
 /**
  * POST /api/auth/login
- * Autentica al usuario consultando la tabla Usuarios en SQL Server
+ * Autentica al usuario consultando la tabla usuarios en PostgreSQL
  */
 app.post('/api/auth/login', async (req, res) => {
   try {
@@ -259,27 +255,20 @@ app.post('/api/auth/login', async (req, res) => {
       });
     }
 
-    const pool = await getDbPool();
-
     // 1. Buscar usuario por correo
-    const userQuery = `
-      SELECT id, nombre, apellido, correo, password_hash, created_at 
-      FROM Usuarios 
-      WHERE correo = @correo
-    `;
+    const userResult = await pool.query(
+      'SELECT id, nombre, apellido, correo, password_hash, created_at FROM usuarios WHERE correo = $1',
+      [cleanCorreo]
+    );
 
-    const userResult = await pool.request()
-      .input('correo', sql.NVarChar(100), cleanCorreo)
-      .query(userQuery);
-
-    if (userResult.recordset.length === 0) {
+    if (userResult.rows.length === 0) {
       return res.status(401).json({
         success: false,
         error: 'Credenciales inválidas. Correo o contraseña incorrectos.'
       });
     }
 
-    const user = userResult.recordset[0];
+    const user = userResult.rows[0];
 
     // 2. Comparar contraseña con el hash encriptado
     const isPasswordValid = await bcrypt.compare(cleanPassword, user.password_hash);
@@ -334,17 +323,12 @@ app.post('/api/auth/login', async (req, res) => {
  */
 app.get('/api/auth/me', autenticarToken, async (req, res) => {
   try {
-    const pool = await getDbPool();
-    const query = `
-      SELECT id, nombre, apellido, correo, created_at 
-      FROM Usuarios 
-      WHERE id = @id
-    `;
-    const result = await pool.request()
-      .input('id', sql.Int, req.usuario.id)
-      .query(query);
+    const result = await pool.query(
+      'SELECT id, nombre, apellido, correo, created_at FROM usuarios WHERE id = $1',
+      [req.usuario.id]
+    );
 
-    if (result.recordset.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
         error: 'Usuario no encontrado.'
@@ -353,7 +337,7 @@ app.get('/api/auth/me', autenticarToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      user: result.recordset[0]
+      user: result.rows[0]
     });
   } catch (error) {
     console.error('[Auth Error en /me]:', error);
@@ -412,9 +396,12 @@ app.post('/api/crear-preferencia', async (req, res) => {
       };
     });
 
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
     const host = req.get('host') || `localhost:${PORT}`;
     const baseUrl = `${protocol}://${host}`;
+
+    // Las back_urls apuntan siempre al frontend en GitHub Pages
+    const frontendUrl = 'https://octima666.github.io/DulcesMomentos';
 
     const preference = new Preference(client);
 
@@ -434,9 +421,9 @@ app.post('/api/crear-preferencia', async (req, res) => {
           }
         },
         back_urls: {
-          success: `${baseUrl}/index.html?status=success`,
-          failure: `${baseUrl}/index.html?status=failure`,
-          pending: `${baseUrl}/index.html?status=pending`
+          success: `${frontendUrl}/?status=success`,
+          failure: `${frontendUrl}/?status=failure`,
+          pending: `${frontendUrl}/?status=pending`
         },
         auto_return: 'approved',
         statement_descriptor: 'Dulces Momentos',
@@ -466,9 +453,8 @@ app.post('/api/crear-preferencia', async (req, res) => {
 app.get('/api/health', async (req, res) => {
   let dbStatus = 'disconnected';
   try {
-    const pool = await getDbPool();
-    const testRes = await pool.request().query('SELECT 1 as is_alive');
-    if (testRes.recordset[0].is_alive === 1) {
+    const testRes = await pool.query('SELECT 1 as is_alive');
+    if (testRes.rows[0].is_alive === 1) {
       dbStatus = 'connected';
     }
   } catch (e) {
@@ -479,8 +465,7 @@ app.get('/api/health', async (req, res) => {
     status: 'ok', 
     service: 'Dulces Momentos API',
     database: {
-      server: DB_SERVER,
-      name: DB_NAME,
+      type: 'PostgreSQL',
       status: dbStatus
     },
     timestamp: new Date().toISOString() 
@@ -494,7 +479,7 @@ app.listen(PORT, () => {
   console.log(`\n======================================================`);
   console.log(`🍰 Pastelería Dulces Momentos - Servidor Backend`);
   console.log(`🚀 Servidor ejecutándose en: http://localhost:${PORT}`);
-  console.log(`🔐 Autenticación SQL Server: http://localhost:${PORT}/api/auth/login`);
+  console.log(`🔐 Autenticación PostgreSQL: http://localhost:${PORT}/api/auth/login`);
   console.log(`💳 Endpoint Preferencias MP: http://localhost:${PORT}/api/crear-preferencia`);
   console.log(`======================================================\n`);
 });

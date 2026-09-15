@@ -14,8 +14,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.3",
     "mercadopago": "^2.0.15",
-    "msnodesqlv8": "^5.5.0",
-    "mssql": "^12.7.2"
+    "pg": "^8.13.3"
   },
   "keywords": [
     "pasteleria",
