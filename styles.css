@@ -327,7 +327,11 @@ body {
   z-index: 9999 !important;
   max-width: 360px;
   width: calc(100vw - 48px);
-  pointer-events: none;
+  pointer-events: none !important;
+}
+
+#toast-container > div {
+  pointer-events: auto !important;
 }
 
 /* ======================================================== */
@@ -356,4 +360,15 @@ body {
 #seccion-auth-portal {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
+/* Forzar cursor pointer e interactividad garantizada */
+#tab-btn-login,
+#tab-btn-register,
+#link-ir-registro,
+#link-ir-login,
+#btn-logout {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
 
