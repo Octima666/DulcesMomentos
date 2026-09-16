@@ -61,13 +61,15 @@ app.use(express.static(path.join(__dirname, '.')));
 // 2. CONEXIÓN A BASE DE DATOS POSTGRESQL
 // ----------------------------------------------------------------------------
 
-// Configura la conexión usando DATABASE_URL (Render/Railway/Neon la proveen)
-// Para local, configurar en .env: DATABASE_URL=postgresql://user:pass@localhost:5432/dulces_momentos
+// Detecta si la DB es remota (Neon, Supabase, Render, etc.) para activar SSL.
+// En local (localhost/127.0.0.1) no se usa SSL.
+const isRemoteDB = process.env.DATABASE_URL &&
+  !process.env.DATABASE_URL.includes('localhost') &&
+  !process.env.DATABASE_URL.includes('127.0.0.1');
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('render.com')
-    ? { rejectUnauthorized: false }
-    : false
+  ssl: isRemoteDB ? { rejectUnauthorized: false } : false
 });
 
 async function initDatabase() {
