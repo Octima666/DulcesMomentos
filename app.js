@@ -30,11 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ========================================================
   // URL BASE DEL BACKEND - Detección automática de entorno
-  // En producción (GitHub Pages) apunta al backend en Render.
+  // En producción (GitHub Pages) apunta al backend en Vercel.
   // En local, usa ruta relativa (el backend sirve el frontend).
   // ========================================================
   const API_BASE_URL = window.location.hostname === 'octima666.github.io'
-    ? 'https://dulces-momentos-api.onrender.com'  // ← Actualizar con tu URL de Render
+    ? 'https://dulces-momentos.vercel.app'  // ← Backend desplegado en Vercel
     : '';  // En localhost, las rutas relativas funcionan correctamente
 
   // ========================================================

@@ -24,18 +24,23 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dulces_momentos_secret_key_2026_su
 // 1. MIDDLEWARES
 // ----------------------------------------------------------------------------
 
-// CORS restrictivo: solo acepta peticiones desde GitHub Pages y localhost
+// CORS: acepta peticiones desde GitHub Pages, Vercel y localhost
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
-      'https://octima666.github.io',
+      'https://octima666.github.io',         // Frontend en GitHub Pages
+      'https://dulces-momentos.vercel.app',  // Backend/preview en Vercel
       'http://localhost:3000',
       'http://127.0.0.1:3000',
-      'http://localhost:5500',   // Live Server de VS Code
+      'http://localhost:5500',               // Live Server de VS Code
       'http://127.0.0.1:5500'
     ];
+
+    // Permitir también previews de Vercel (ej: dulces-momentos-abc123.vercel.app)
+    const isVercelPreview = origin && /^https:\/\/dulces-momentos[^.]*\.vercel\.app$/.test(origin);
+
     // Permitir peticiones sin origen (ej: Postman, curl, mismo servidor)
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || isVercelPreview) {
       callback(null, true);
     } else {
       callback(new Error(`CORS bloqueado para origen: ${origin}`));
