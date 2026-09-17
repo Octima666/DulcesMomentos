@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================================
   const API_BASE_URL = window.location.hostname === 'octima666.github.io'
     ? 'https://dulces-momentos.vercel.app'  // ← Backend desplegado en Vercel
-    : '';  // En localhost, las rutas relativas funcionan correctamente
+    : 'http://localhost:3000';  // Backend local en el puerto 3000
 
   // ========================================================
   // 2. FORMATEO CENTRALIZADO DE MONEDA ($ ARS)
@@ -1202,18 +1202,72 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSubmitLogin = document.getElementById('btn-submit-login');
     const spinnerLogin = document.getElementById('spinner-login');
     const textoSubmitLogin = document.getElementById('texto-submit-login');
+    // Estado para flujo de autenticación 2FA
+    let sesion2FAPendiente = {
+      email: '',
+      origen: 'login', // 'login' | 'register'
+      datos: null
+    };
 
+    // Referencias UI Formulario 3 (Verificación PIN)
+    const formVerifyPin = document.getElementById('form-verify-pin');
+    const pinCorreoDestino = document.getElementById('pin-correo-destino');
+    const inputCodigoPin = document.getElementById('input-codigo-pin');
+    const alertaPin = document.getElementById('alerta-pin');
+    const alertaPinTexto = document.getElementById('alerta-pin-texto');
+    const btnSubmitPin = document.getElementById('btn-submit-pin');
+    const spinnerPin = document.getElementById('spinner-pin');
+    const textoSubmitPin = document.getElementById('texto-submit-pin');
+    const btnReenviarPin = document.getElementById('btn-reenviar-pin');
+    const btnVolverAuth = document.getElementById('btn-volver-auth');
+
+    // Muestra la pantalla para ingresar el PIN de 6 dígitos
+    const mostrarPantallaPIN = (email, origen, mensajeExito) => {
+      sesion2FAPendiente.email = email;
+      sesion2FAPendiente.origen = origen;
+
+      if (formLogin) formLogin.classList.add('hidden');
+      if (formRegister) formRegister.classList.add('hidden');
+      if (formVerifyPin) formVerifyPin.classList.remove('hidden');
+
+      if (pinCorreoDestino) pinCorreoDestino.textContent = email;
+      if (inputCodigoPin) {
+        inputCodigoPin.value = '';
+        setTimeout(() => inputCodigoPin.focus(), 120);
+      }
+      if (alertaPin) alertaPin.classList.add('hidden');
+
+      mostrarToast(mensajeExito || `Código PIN de 6 dígitos enviado a ${email} ✉️`, 'info');
+    };
+
+    const ocultarPantallaPIN = () => {
+      if (formVerifyPin) formVerifyPin.classList.add('hidden');
+      if (sesion2FAPendiente.origen === 'register') {
+        activarPestanaAuth('register');
+      } else {
+        activarPestanaAuth('login');
+      }
+    };
+
+    // Filtro numérico en tiempo real para el PIN
+    inputCodigoPin?.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    });
+
+    // ----------------------------------------------------
+    // 1. Formulario de Inicio de Sesión (Login con 2FA)
+    // ----------------------------------------------------
     formLogin?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const correo = (inputLoginCorreo?.value || '').trim();
-      const password = (inputLoginPassword?.value || '').trim();
 
-      if (!correo || !password) {
+      if (!correo) {
         if (alertaLogin && alertaLoginTexto) {
-          alertaLoginTexto.textContent = 'Por favor, completá tu correo y contraseña.';
+          alertaLoginTexto.textContent = 'Por favor, ingresá tu correo electrónico.';
           alertaLogin.classList.remove('hidden');
         }
+        inputLoginCorreo?.focus();
         return;
       }
 
@@ -1222,37 +1276,37 @@ document.addEventListener('DOMContentLoaded', () => {
           alertaLoginTexto.textContent = 'El formato de correo no es válido (debe contener @ y dominio).';
           alertaLogin.classList.remove('hidden');
         }
+        inputLoginCorreo?.focus();
         return;
       }
 
       // Estado de carga UI
       if (btnSubmitLogin) btnSubmitLogin.disabled = true;
       if (spinnerLogin) spinnerLogin.classList.remove('hidden');
-      if (textoSubmitLogin) textoSubmitLogin.textContent = 'Verificando credenciales...';
+      if (textoSubmitLogin) textoSubmitLogin.textContent = 'Enviando código de acceso...';
       if (alertaLogin) alertaLogin.classList.add('hidden');
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        const response = await fetch(`${API_BASE_URL}/api/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ correo, password })
+          body: JSON.stringify({ email: correo })
         });
 
         const data = await response.json();
 
-        if (response.ok && data.success && data.token) {
-          if (formLogin) formLogin.reset();
-          aplicarSesionActiva(data.user, data.token, true);
+        if (response.ok && data.requires2FA) {
+          mostrarPantallaPIN(correo, 'login', data.message);
         } else {
           if (alertaLogin && alertaLoginTexto) {
-            alertaLoginTexto.textContent = data.error || 'Credenciales inválidas. Comprobá tu correo y contraseña.';
+            alertaLoginTexto.textContent = data.error || 'No se pudo enviar el código. Verificá el correo ingresado.';
             alertaLogin.classList.remove('hidden');
           }
         }
       } catch (err) {
-        console.error('Error en login:', err);
+        console.error('Error en login 2FA:', err);
         if (alertaLogin && alertaLoginTexto) {
-          alertaLoginTexto.textContent = 'Error de conexión con el servidor. Verificá que el backend esté en ejecución.';
+          alertaLoginTexto.textContent = `Error de conexión con el backend en ${API_BASE_URL}. Asegúrate de que el servidor esté activo.`;
           alertaLogin.classList.remove('hidden');
         }
       } finally {
@@ -1262,7 +1316,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Formulario de Registro
+    // ----------------------------------------------------
+    // 2. Formulario de Registro (Crear Cuenta con 2FA)
+    // ----------------------------------------------------
     const formRegister = document.getElementById('form-register');
     const inputRegNombre = document.getElementById('reg-nombre');
     const inputRegApellido = document.getElementById('reg-apellido');
@@ -1280,7 +1336,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const correo = (inputRegCorreo?.value || '').trim();
       const password = (inputRegPassword?.value || '').trim();
 
-      // Validación de campos
+      // Validación de campos obligatorios
       if (!nombre || !apellido || !correo || !password) {
         if (alertaRegister && alertaRegisterTexto) {
           alertaRegisterTexto.textContent = 'Todos los campos son obligatorios (Nombre, Apellido, Correo y Contraseña).';
@@ -1292,7 +1348,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Validación estricta de correo
       if (!validarFormatoCorreo(correo)) {
         if (alertaRegister && alertaRegisterTexto) {
-          alertaRegisterTexto.textContent = 'El correo electrónico debe tener un formato válido con "@" y dominio (ej: usuario@ejemplo.com).';
+          alertaRegisterTexto.textContent = 'El correo electrónico debe tener un formato válido con "@" y dominio.';
           alertaRegister.classList.remove('hidden');
         }
         inputRegCorreo?.focus();
@@ -1311,22 +1367,21 @@ document.addEventListener('DOMContentLoaded', () => {
       // Estado de carga UI
       if (btnSubmitRegister) btnSubmitRegister.disabled = true;
       if (spinnerRegister) spinnerRegister.classList.remove('hidden');
-      if (textoSubmitRegister) textoSubmitRegister.textContent = 'Creando tu cuenta...';
+      if (textoSubmitRegister) textoSubmitRegister.textContent = 'Enviando código de activación...';
       if (alertaRegister) alertaRegister.classList.add('hidden');
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        const response = await fetch(`${API_BASE_URL}/api/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nombre, apellido, correo, password })
+          body: JSON.stringify({ nombre, apellido, email: correo, password })
         });
 
         const data = await response.json();
 
-        if (response.ok && data.success && data.token) {
-          if (formRegister) formRegister.reset();
-          actualizarValidacionCorreo();
-          aplicarSesionActiva(data.user, data.token, true);
+        if (response.ok && data.requires2FA) {
+          sesion2FAPendiente.datos = { nombre, apellido, correo, password };
+          mostrarPantallaPIN(correo, 'register', data.message);
         } else {
           if (alertaRegister && alertaRegisterTexto) {
             alertaRegisterTexto.textContent = data.error || 'Error al procesar el registro.';
@@ -1336,7 +1391,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {
         console.error('Error en registro:', err);
         if (alertaRegister && alertaRegisterTexto) {
-          alertaRegisterTexto.textContent = 'Error de conexión con el servidor. Verificá que el backend esté en ejecución.';
+          alertaRegisterTexto.textContent = `Error de conexión con el backend en ${API_BASE_URL}. Asegúrate de que el servidor esté activo.`;
           alertaRegister.classList.remove('hidden');
         }
       } finally {
@@ -1344,6 +1399,122 @@ document.addEventListener('DOMContentLoaded', () => {
         if (spinnerRegister) spinnerRegister.classList.add('hidden');
         if (textoSubmitRegister) textoSubmitRegister.textContent = 'Crear Mi Cuenta & Ingresar';
       }
+    });
+
+    // ----------------------------------------------------
+    // 3. Formulario de Validación de Código PIN
+    // ----------------------------------------------------
+    formVerifyPin?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const code = (inputCodigoPin?.value || '').trim();
+      const email = sesion2FAPendiente.email;
+
+      if (!email) {
+        ocultarPantallaPIN();
+        return;
+      }
+
+      if (code.length !== 6) {
+        if (alertaPin && alertaPinTexto) {
+          alertaPinTexto.textContent = 'Por favor, ingresá el código PIN completo de 6 dígitos.';
+          alertaPin.classList.remove('hidden');
+        }
+        inputCodigoPin?.focus();
+        return;
+      }
+
+      // Estado de carga UI
+      if (btnSubmitPin) btnSubmitPin.disabled = true;
+      if (spinnerPin) spinnerPin.classList.remove('hidden');
+      if (textoSubmitPin) textoSubmitPin.textContent = 'Verificando código...';
+      if (alertaPin) alertaPin.classList.add('hidden');
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/verify-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          // Éxito: dar acceso al usuario
+          if (formVerifyPin) formVerifyPin.classList.add('hidden');
+          if (formLogin) formLogin.reset();
+          if (formRegister) formRegister.reset();
+
+          const user = data.user || {
+            nombre: sesion2FAPendiente.datos?.nombre || email.split('@')[0],
+            apellido: sesion2FAPendiente.datos?.apellido || '',
+            correo: email
+          };
+          const token = data.token || `jwt_2fa_${Date.now()}`;
+
+          aplicarSesionActiva(user, token, true);
+        } else {
+          if (alertaPin && alertaPinTexto) {
+            alertaPinTexto.textContent = data.error || 'Código incorrecto o expirado. Solicitá uno nuevo si es necesario.';
+            alertaPin.classList.remove('hidden');
+          }
+          inputCodigoPin?.select();
+        }
+      } catch (err) {
+        console.error('Error al verificar código:', err);
+        if (alertaPin && alertaPinTexto) {
+          alertaPinTexto.textContent = 'Error al comunicarse con el servidor de verificación.';
+          alertaPin.classList.remove('hidden');
+        }
+      } finally {
+        if (btnSubmitPin) btnSubmitPin.disabled = false;
+        if (spinnerPin) spinnerPin.classList.add('hidden');
+        if (textoSubmitPin) textoSubmitPin.textContent = 'Verificar Código & Entrar';
+      }
+    });
+
+    // Reenviar código PIN
+    btnReenviarPin?.addEventListener('click', async () => {
+      const email = sesion2FAPendiente.email;
+      if (!email) return;
+
+      btnReenviarPin.disabled = true;
+      btnReenviarPin.textContent = 'Enviando nuevo código...';
+
+      try {
+        const endpoint = sesion2FAPendiente.origen === 'register' ? '/api/register' : '/api/login';
+        const payload = sesion2FAPendiente.origen === 'register' && sesion2FAPendiente.datos
+          ? sesion2FAPendiente.datos
+          : { email };
+
+        const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const resData = await res.json();
+
+        if (res.ok && resData.requires2FA) {
+          if (inputCodigoPin) {
+            inputCodigoPin.value = '';
+            inputCodigoPin.focus();
+          }
+          if (alertaPin) alertaPin.classList.add('hidden');
+          mostrarToast(`Nuevo PIN de 6 dígitos enviado a ${email} ✉️`, 'success');
+        } else {
+          mostrarToast(resData.error || 'No se pudo reenviar el código.', 'error');
+        }
+      } catch (err) {
+        mostrarToast('Error de conexión al reenviar código.', 'error');
+      } finally {
+        btnReenviarPin.disabled = false;
+        btnReenviarPin.textContent = '↻ Reenviar código';
+      }
+    });
+
+    // Volver a la pantalla de correo
+    btnVolverAuth?.addEventListener('click', () => {
+      ocultarPantallaPIN();
     });
 
     // Botón de Cerrar Sesión en Navbar
@@ -1452,11 +1623,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabBtnRegister = document.getElementById('tab-btn-register');
     const formLogin = document.getElementById('form-login');
     const formRegister = document.getElementById('form-register');
+    const formVerifyPin = document.getElementById('form-verify-pin');
     const alertaLogin = document.getElementById('alerta-login');
     const alertaRegister = document.getElementById('alerta-register');
+    const alertaPin = document.getElementById('alerta-pin');
 
     if (alertaLogin) alertaLogin.classList.add('hidden');
     if (alertaRegister) alertaRegister.classList.add('hidden');
+    if (alertaPin) alertaPin.classList.add('hidden');
+    if (formVerifyPin) formVerifyPin.classList.add('hidden');
 
     if (pestana === 'login') {
       tabBtnLogin?.classList.add('bg-brand-600', 'text-white', 'shadow-md', 'shadow-brand-600/30', 'font-bold');

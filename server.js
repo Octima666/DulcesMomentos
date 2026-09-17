@@ -30,17 +30,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dulces_momentos_secret_key_2026_super_secure_jwt_token!';
 
+// Regex estricto de validación de correo
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 // ----------------------------------------------------------------------------
 // 1. MIDDLEWARES
 // ----------------------------------------------------------------------------
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Servir archivos estáticos del frontend (HTML, CSS, JS, imágenes)
 app.use(express.static(path.join(__dirname, '.')));
 
 // ----------------------------------------------------------------------------
-// 2. ENDPOINTS SOLICITADOS (2FA con Código de 6 Dígitos)
+// 2. ENDPOINTS 2FA (LOGIN, REGISTRO Y VERIFICACIÓN)
 // ----------------------------------------------------------------------------
 
 /**
@@ -56,20 +63,19 @@ app.post('/api/login', async (req, res) => {
     if (!rawEmail) {
       return res.status(400).json({
         success: false,
-        error: 'El campo de correo electrónico (email) es requerido.'
+        error: 'El correo electrónico es obligatorio.'
       });
     }
 
     const email = String(rawEmail).trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!EMAIL_REGEX.test(email)) {
       return res.status(400).json({
         success: false,
         error: 'El formato de correo electrónico no es válido.'
       });
     }
 
-    // 1. Generar código de 6 dígitos numéricos
+    // 1. Generar PIN de 6 dígitos numéricos
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     // 2. Limpiar registros viejos (del mismo email o expirados)
@@ -84,21 +90,112 @@ app.post('/api/login', async (req, res) => {
       [email, code]
     );
 
-    // 5. Enviar el correo con Nodemailer (plantilla personalizada oscura y rosa)
-    await sendVerificationCode(email, code);
+    // Obtener nombre del usuario si ya existe
+    let nombreUsuario = '';
+    const uRes = await pool.query('SELECT nombre FROM usuarios WHERE correo = $1', [email]);
+    if (uRes.rows.length > 0) {
+      nombreUsuario = uRes.rows[0].nombre;
+    }
 
-    console.log(`[2FA Login] Código generado y enviado a: ${email}`);
+    // 4. Enviar el correo con Nodemailer (tema oscuro y rosa)
+    await sendVerificationCode(email, code, { isRegister: false, nombre: nombreUsuario });
+
+    console.log(`[2FA Login] Código PIN enviado a: ${email}`);
 
     return res.status(200).json({
       requires2FA: true,
-      message: 'Código de verificación enviado correctamente a tu correo.'
+      message: 'Código de verificación de 6 dígitos enviado a tu correo.'
     });
 
   } catch (error) {
     console.error('[Error en POST /api/login]:', error);
     return res.status(500).json({
       success: false,
-      error: 'Error en el servidor al generar o enviar el código de verificación.',
+      error: 'Error al procesar el inicio de sesión o enviar el correo.',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/register
+ * Crea el PIN y envía el correo de verificación para cuentas nuevas.
+ * Si se envían datos (nombre, apellido, password), los guarda en la tabla usuarios.
+ */
+app.post('/api/register', async (req, res) => {
+  try {
+    const rawEmail = req.body.email || req.body.correo;
+    const { nombre, apellido, password } = req.body;
+
+    if (!rawEmail) {
+      return res.status(400).json({
+        success: false,
+        error: 'El correo electrónico es obligatorio para registrarse.'
+      });
+    }
+
+    const email = String(rawEmail).trim().toLowerCase();
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: 'El formato de correo ingresado no es válido.'
+      });
+    }
+
+    // Registrar o actualizar datos previos del usuario si se enviaron
+    if (nombre || apellido || password) {
+      const nom = (nombre || email.split('@')[0]).trim();
+      const ape = (apellido || 'Cliente').trim();
+      const pwd = password ? String(password) : 'auth_2fa_pass';
+      const hash = await bcrypt.hash(pwd, 10);
+
+      const checkUser = await pool.query('SELECT id FROM usuarios WHERE correo = $1', [email]);
+      if (checkUser.rows.length === 0) {
+        await pool.query(
+          'INSERT INTO usuarios (nombre, apellido, correo, password_hash) VALUES ($1, $2, $3, $4)',
+          [nom, ape, email, hash]
+        );
+      } else {
+        await pool.query(
+          'UPDATE usuarios SET nombre = $1, apellido = $2, password_hash = $3 WHERE correo = $4',
+          [nom, ape, hash, email]
+        );
+      }
+    }
+
+    // 1. Generar PIN de 6 dígitos
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 2. Limpiar registros viejos del email
+    await pool.query(
+      'DELETE FROM verification_codes WHERE email = $1 OR expires_at < NOW()',
+      [email]
+    );
+
+    // 3. Insertar nuevo código con expiración de 10 minutos
+    await pool.query(
+      "INSERT INTO verification_codes (email, code, expires_at) VALUES ($1, $2, NOW() + INTERVAL '10 minutes')",
+      [email, code]
+    );
+
+    // 4. Enviar correo de confirmación de registro
+    await sendVerificationCode(email, code, {
+      isRegister: true,
+      nombre: nombre || email.split('@')[0]
+    });
+
+    console.log(`[2FA Register] PIN de confirmación enviado a nueva cuenta: ${email}`);
+
+    return res.status(200).json({
+      requires2FA: true,
+      message: 'Código de verificación de 6 dígitos enviado para activar tu cuenta.'
+    });
+
+  } catch (error) {
+    console.error('[Error en POST /api/register]:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Error al generar o enviar el código de registro.',
       details: error.message
     });
   }
@@ -107,7 +204,7 @@ app.post('/api/login', async (req, res) => {
 /**
  * POST /api/verify-code
  * Recibe email y code, comprueba en Neon que el código exista y no esté expirado (expires_at > NOW()).
- * Si es correcto, borra el registro usado y devuelve { success: true }.
+ * Si es correcto, borra el registro usado y devuelve { success: true, token, user }.
  */
 app.post('/api/verify-code', async (req, res) => {
   try {
@@ -143,11 +240,34 @@ app.post('/api/verify-code', async (req, res) => {
     // 2. Si es correcto, borrar el registro usado
     await pool.query('DELETE FROM verification_codes WHERE email = $1', [email]);
 
-    console.log(`[2FA Verify] ✅ Código verificado exitosamente para: ${email}`);
+    // 3. Obtener o crear perfil del usuario para devolver sesión
+    let userRes = await pool.query('SELECT id, nombre, apellido, correo FROM usuarios WHERE correo = $1', [email]);
+    let user;
+
+    if (userRes.rows.length > 0) {
+      user = userRes.rows[0];
+    } else {
+      const defaultName = email.split('@')[0];
+      const inserted = await pool.query(
+        'INSERT INTO usuarios (nombre, apellido, correo, password_hash) VALUES ($1, $2, $3, $4) RETURNING id, nombre, apellido, correo',
+        [defaultName, 'Cliente', email, 'verified_via_2fa']
+      );
+      user = inserted.rows[0];
+    }
+
+    const token = jwt.sign(
+      { id: user.id, nombre: user.nombre, apellido: user.apellido, correo: user.correo },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    console.log(`[2FA Verify] ✅ PIN validado exitosamente para: ${email}`);
 
     return res.status(200).json({
       success: true,
-      message: 'Código validado exitosamente.'
+      message: 'Código validado correctamente. ¡Bienvenido/a a Dulces Momentos!',
+      token,
+      user
     });
 
   } catch (error) {
@@ -164,71 +284,23 @@ app.post('/api/verify-code', async (req, res) => {
 // 3. ENDPOINTS ADICIONALES (Compatibilidad Frontend & Checkout)
 // ----------------------------------------------------------------------------
 
-// Registro de usuario tradicional
-app.post('/api/auth/register', async (req, res) => {
-  try {
-    const { nombre, apellido, correo, password } = req.body;
-    if (!nombre || !apellido || !correo || !password) {
-      return res.status(400).json({ success: false, error: 'Todos los campos son obligatorios.' });
-    }
-
-    const cleanCorreo = String(correo).trim().toLowerCase();
-    const check = await pool.query('SELECT id FROM usuarios WHERE correo = $1', [cleanCorreo]);
-    if (check.rows.length > 0) {
-      return res.status(409).json({ success: false, error: 'El correo ya está registrado.' });
-    }
-
-    const passwordHash = await bcrypt.hash(String(password), 10);
-    const insertRes = await pool.query(
-      'INSERT INTO usuarios (nombre, apellido, correo, password_hash) VALUES ($1, $2, $3, $4) RETURNING id, nombre, apellido, correo',
-      [String(nombre).trim(), String(apellido).trim(), cleanCorreo, passwordHash]
-    );
-
-    const newUser = insertRes.rows[0];
-    const token = jwt.sign(newUser, JWT_SECRET, { expiresIn: '7d' });
-
-    return res.status(201).json({
-      success: true,
-      message: 'Usuario registrado correctamente.',
-      token,
-      user: newUser
-    });
-  } catch (error) {
-    console.error('[Error en /api/auth/register]:', error);
-    return res.status(500).json({ success: false, error: error.message });
-  }
+// Rutas de compatibilidad con /api/auth/*
+app.post('/api/auth/register', (req, res, next) => {
+  req.url = '/api/register';
+  app.handle(req, res, next);
 });
 
-// Login con contraseña tradicional
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { correo, password } = req.body;
-    if (!correo || !password) {
-      return res.status(400).json({ success: false, error: 'Ingresá correo y contraseña.' });
-    }
+app.post('/api/auth/login', (req, res, next) => {
+  req.url = '/api/login';
+  app.handle(req, res, next);
+});
 
-    const cleanCorreo = String(correo).trim().toLowerCase();
-    const userRes = await pool.query('SELECT * FROM usuarios WHERE correo = $1', [cleanCorreo]);
+app.post('/api/auth/logout', (req, res) => {
+  res.json({ success: true, message: 'Sesión cerrada.' });
+});
 
-    if (userRes.rows.length === 0) {
-      return res.status(401).json({ success: false, error: 'Credenciales inválidas.' });
-    }
-
-    const user = userRes.rows[0];
-    const valid = await bcrypt.compare(String(password), user.password_hash);
-    if (!valid) {
-      return res.status(401).json({ success: false, error: 'Credenciales inválidas.' });
-    }
-
-    const token = jwt.sign({ id: user.id, correo: user.correo, nombre: user.nombre }, JWT_SECRET, { expiresIn: '7d' });
-    return res.status(200).json({
-      success: true,
-      token,
-      user: { id: user.id, nombre: user.nombre, apellido: user.apellido, correo: user.correo }
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
-  }
+app.get('/api/auth/me', (req, res) => {
+  res.json({ success: true });
 });
 
 // Creación de preferencia de Mercado Pago
@@ -286,6 +358,7 @@ app.listen(PORT, () => {
   console.log(`🍰 Pastelería Dulces Momentos - Backend`);
   console.log(`🚀 Servidor ejecutándose en: http://localhost:${PORT}`);
   console.log(`🔑 Endpoint Login (2FA): POST http://localhost:${PORT}/api/login`);
+  console.log(`📝 Endpoint Register (2FA): POST http://localhost:${PORT}/api/register`);
   console.log(`🛡️ Endpoint Verify 2FA: POST http://localhost:${PORT}/api/verify-code`);
   console.log(`======================================================\n`);
 });
