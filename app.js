@@ -34,8 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // En local, usa ruta relativa (el backend sirve el frontend).
   // ========================================================
   const API_BASE_URL = window.location.hostname === 'octima666.github.io'
-    ? 'https://dulces-momentos.vercel.app'  // ← Backend desplegado en Vercel
-    : 'http://localhost:3000';  // Backend local en el puerto 3000
+    ? 'https://dulces-momentos-backend.onrender.com'
+    : 'http://localhost:3000';
 
   // ========================================================
   // 2. FORMATEO CENTRALIZADO DE MONEDA ($ ARS)
@@ -508,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modificarCantidadItem(key, -1);
       });
     });
-    
+
     contenedorLista.querySelectorAll('.btn-sumar').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const key = e.currentTarget.getAttribute('data-key');
@@ -580,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
       inputNombre?.focus();
       return mostrarToast('Por favor ingresá tu nombre completo.', 'error');
     }
-    
+
     const telLimpio = telefono.replace(/\D/g, '');
     if (telLimpio.length < 8) {
       errorTelefono?.classList.remove('hidden');
@@ -637,11 +637,11 @@ document.addEventListener('DOMContentLoaded', () => {
     mensaje += `👤 *Cliente:* ${nombre}\n`;
     mensaje += `📞 *Teléfono:* ${telefono}\n`;
     mensaje += `📍 *Modalidad:* ${state.tipoEntrega === 'takeaway' ? '🛍️ Retiro en Boutique' : '🛵 Delivery en Puerto Iguazú'}\n`;
-    
+
     if (state.tipoEntrega === 'delivery') {
       mensaje += `🏡 *Dirección:* ${direccion}\n`;
     }
-    
+
     if (notas) {
       mensaje += `📝 *Dedicatoria/Notas:* _${notas}_\n`;
     }
@@ -720,7 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const calle = addr.road || addr.pedestrian || addr.street || addr.avenue || 'Calle Principal';
           const numero = addr.house_number ? ` ${addr.house_number}` : '';
           const barrio = addr.neighbourhood || addr.suburb ? ` (${addr.neighbourhood || addr.suburb})` : '';
-          
+
           const direccionCompleta = `${calle}${numero}${barrio}, Puerto Iguazú, Misiones`;
 
           if (inputDireccion) {
@@ -830,7 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     gridComandas.innerHTML = state.comandasCocina.map(comanda => {
       const fecha = new Date(comanda.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-      
+
       const badgeColores = {
         pendiente: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
         preparacion: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
@@ -904,7 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================================
   window.filtrarCategoriaDesdeNav = (categoria) => {
     state.categoriaSeleccionada = categoria;
-    
+
     // Actualizar botones de filtro
     const botonesFiltro = document.querySelectorAll('.btn-filtro');
     botonesFiltro.forEach(btn => {
@@ -992,9 +992,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (termino && termino.trim()) {
         const query = termino.trim().toLowerCase();
         const contenedor = document.getElementById('catalogo-productos');
-        const resultados = PRODUCTOS.filter(p => 
-          p.nombre.toLowerCase().includes(query) || 
-          p.descripcion.toLowerCase().includes(query) || 
+        const resultados = PRODUCTOS.filter(p =>
+          p.nombre.toLowerCase().includes(query) ||
+          p.descripcion.toLowerCase().includes(query) ||
           p.categoria.toLowerCase().includes(query)
         );
 
@@ -1119,7 +1119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!inputLoginPassword) return;
       const esPassword = inputLoginPassword.type === 'password';
       inputLoginPassword.type = esPassword ? 'text' : 'password';
-      btnToggleLoginPass.innerHTML = esPassword 
+      btnToggleLoginPass.innerHTML = esPassword
         ? `<svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>`
         : `<svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>`;
     });
@@ -1130,7 +1130,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!inputRegPassword) return;
       const esPassword = inputRegPassword.type === 'password';
       inputRegPassword.type = esPassword ? 'text' : 'password';
-      btnToggleRegPass.innerHTML = esPassword 
+      btnToggleRegPass.innerHTML = esPassword
         ? `<svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>`
         : `<svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>`;
     });
@@ -1535,7 +1535,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const bloquearVistaYMostrarAuth = () => {
     state.auth = { token: null, usuario: null, autenticado: false };
-    
+
     // Ocultar tienda principal y controles de usuario
     const authPortal = document.getElementById('seccion-auth-portal');
     const mainContent = document.getElementById('app-main-content');
@@ -1601,8 +1601,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USUARIO);
-      
-      fetch(`${API_BASE_URL}/api/auth/logout`, { method: 'POST' }).catch(() => {});
+
+      fetch(`${API_BASE_URL}/api/auth/logout`, { method: 'POST' }).catch(() => { });
 
       bloquearVistaYMostrarAuth();
       mostrarToast('Has cerrado sesión correctamente. ¡Hasta pronto! 👋', 'info');
@@ -1685,7 +1685,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const userObj = JSON.parse(userGuardado);
           aplicarSesionActiva(userObj, token, false);
           return;
-        } catch (e) {}
+        } catch (e) { }
       }
       bloquearVistaYMostrarAuth();
     }
