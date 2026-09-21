@@ -155,6 +155,45 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ========================================================
+  // CONTROL DE MODAL DE AUTENTICACIÓN Y ACCIONES PENDIENTES
+  // ========================================================
+  let accionPendienteAuth = null;
+
+  const abrirModalAuth = (motivo = null, callbackPendiente = null) => {
+    if (typeof callbackPendiente === 'function') {
+      accionPendienteAuth = callbackPendiente;
+    }
+    const authPortal = document.getElementById('seccion-auth-portal');
+    const subtitulo = document.getElementById('auth-modal-subtitulo');
+    if (subtitulo && motivo) {
+      subtitulo.textContent = motivo;
+    }
+    if (authPortal) {
+      authPortal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+      const inputCorreo = document.getElementById('login-correo');
+      setTimeout(() => inputCorreo?.focus(), 150);
+    }
+  };
+
+  const cerrarModalAuth = () => {
+    const authPortal = document.getElementById('seccion-auth-portal');
+    if (authPortal) {
+      authPortal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+  };
+
+  const requerirAutenticacion = (accionCallback, motivo = 'Para continuar, por favor iniciá sesión o creá tu cuenta 🍰') => {
+    if (state.auth && state.auth.autenticado) {
+      if (typeof accionCallback === 'function') accionCallback();
+      return true;
+    }
+    abrirModalAuth(motivo, accionCallback);
+    return false;
+  };
+
+  // ========================================================
   // 5. INICIALIZACIÓN
   // ========================================================
   const cargarEstadoInicial = () => {
@@ -334,21 +373,44 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }).join('');
 
-    // Listeners para botones agregar al carrito
+    // Listeners para botones agregar al carrito con control de autenticación
     contenedor.querySelectorAll('.btn-agregar-carrito').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         const prodId = e.currentTarget.getAttribute('data-id');
-        const selectTopping = document.getElementById(`topping-${prodId}`);
-        let toppingSeleccionado = null;
 
-        if (selectTopping && selectTopping.value) {
-          const prod = PRODUCTOS.find(p => p.id === prodId);
-          const topObj = prod?.toppings?.find(t => t.id === selectTopping.value);
-          if (topObj) toppingSeleccionado = topObj;
+        const ejecutarAgregar = () => {
+          const selectTopping = document.getElementById(`topping-${prodId}`);
+          let toppingSeleccionado = null;
+
+          if (selectTopping && selectTopping.value) {
+            const prod = PRODUCTOS.find(p => p.id === prodId);
+            const topObj = prod?.toppings?.find(t => t.id === selectTopping.value);
+            if (topObj) toppingSeleccionado = topObj;
+          }
+
+          agregarProductoAlCarrito(prodId, toppingSeleccionado);
+        };
+
+        if (!state.auth || !state.auth.autenticado) {
+          requerirAutenticacion(ejecutarAgregar, 'Iniciá sesión o registrate para agregar productos a tu carrito 🍰');
+          return;
         }
 
-        agregarProductoAlCarrito(prodId, toppingSeleccionado);
+        ejecutarAgregar();
+      });
+    });
+
+    // Intercepción al intentar personalizar toppings sin autenticación
+    contenedor.querySelectorAll('.select-topping').forEach(select => {
+      select.addEventListener('mousedown', (e) => {
+        if (!state.auth || !state.auth.autenticado) {
+          e.preventDefault();
+          select.blur();
+          requerirAutenticacion(() => {
+            select.focus();
+          }, 'Iniciá sesión o registrate para personalizar tu pedido 🎂');
+        }
       });
     });
 
