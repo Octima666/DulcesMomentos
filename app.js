@@ -33,9 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // En producción (GitHub Pages) apunta al backend en Vercel.
   // En local, usa ruta relativa (el backend sirve el frontend).
   // ========================================================
-  const API_BASE_URL = window.location.hostname === 'octima666.github.io'
-    ? 'https://dulces-momentos-backend.onrender.com'
-    : 'http://localhost:3000';
+  // ========================================================
+  // URL BASE DEL BACKEND - PRODUCCIÓN DEFINITIVA EN RENDER
+  // Conexión HTTPS estricta a Render (.onrender.com) sin referencias locales
+  // ========================================================
+  const API_BASE_URL = (typeof window !== 'undefined' && (window.API_BASE_URL || (window.ENV && window.ENV.API_BASE_URL)))
+    || 'https://dulces-momentos-backend.onrender.com';
 
   // ========================================================
   // 2. FORMATEO CENTRALIZADO DE MONEDA ($ ARS)
