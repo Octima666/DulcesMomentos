@@ -1012,9 +1012,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const drawerCarrito = document.getElementById('drawer-carrito');
 
     const abrirCarrito = () => {
-      if (!state.auth.autenticado) {
-        bloquearVistaYMostrarAuth();
-        mostrarToast('Por favor, iniciá sesión para acceder a tu carrito.', 'warning');
+      if (!state.auth || !state.auth.autenticado) {
+        requerirAutenticacion(() => {
+          renderizarCarrito();
+          drawerCarrito?.classList.remove('hidden');
+          document.body.classList.add('overflow-hidden');
+        }, 'Iniciá sesión para ver y gestionar tu carrito 🛒');
         return;
       }
       renderizarCarrito();
@@ -1587,6 +1590,41 @@ document.addEventListener('DOMContentLoaded', () => {
     btnLogout?.addEventListener('click', () => {
       cerrarSesion();
     });
+
+    // --------------------------------------------------------
+    // LISTENERS DEL MODAL DE AUTENTICACIÓN (cerrar)
+    // --------------------------------------------------------
+    const btnNavLogin = document.getElementById('btn-nav-login');
+    const btnCerrarAuthModal = document.getElementById('btn-cerrar-auth-modal');
+    const overlayAuthPortal = document.getElementById('overlay-auth-portal');
+
+    // Botón X del modal
+    btnCerrarAuthModal?.addEventListener('click', () => {
+      accionPendienteAuth = null; // cancelar acción pendiente
+      cerrarModalAuth();
+    });
+
+    // Clic en el fondo oscuro
+    overlayAuthPortal?.addEventListener('click', () => {
+      accionPendienteAuth = null;
+      cerrarModalAuth();
+    });
+
+    // Botón "Ingresar" de la navbar
+    btnNavLogin?.addEventListener('click', () => {
+      abrirModalAuth('Iniciá sesión o registrate para continuar 🍰');
+    });
+
+    // Tecla Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const authPortal = document.getElementById('seccion-auth-portal');
+        if (authPortal && !authPortal.classList.contains('hidden')) {
+          accionPendienteAuth = null;
+          cerrarModalAuth();
+        }
+      }
+    });
   };
 
   // ========================================================
@@ -1599,24 +1637,21 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const bloquearVistaYMostrarAuth = () => {
+    // Solo resetea estado de auth y oculta controles de usuario logueado.
+    // NO oculta el catálogo ni la tienda — el catálogo es público.
     state.auth = { token: null, usuario: null, autenticado: false };
 
-    // Ocultar tienda principal y controles de usuario
-    const authPortal = document.getElementById('seccion-auth-portal');
-    const mainContent = document.getElementById('app-main-content');
     const navUserContainer = document.getElementById('nav-user-container');
+    const navLoginBtn = document.getElementById('btn-nav-login');
     const drawerCarrito = document.getElementById('drawer-carrito');
 
-    if (authPortal) authPortal.classList.remove('hidden');
-    if (mainContent) mainContent.classList.add('hidden');
     if (navUserContainer) {
       navUserContainer.classList.add('hidden');
       navUserContainer.classList.remove('flex');
     }
+    if (navLoginBtn) navLoginBtn.classList.remove('hidden');
     if (drawerCarrito) drawerCarrito.classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const aplicarSesionActiva = (usuario, token, conNotificacion = true) => {
@@ -1629,20 +1664,20 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem(STORAGE_KEYS.TOKEN, token);
     localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(usuario));
 
-    const authPortal = document.getElementById('seccion-auth-portal');
-    const mainContent = document.getElementById('app-main-content');
+    // Cerrar el modal de autenticación
+    cerrarModalAuth();
+
     const navUserContainer = document.getElementById('nav-user-container');
+    const navLoginBtn = document.getElementById('btn-nav-login');
     const navUserName = document.getElementById('nav-user-name');
     const navUserAvatar = document.getElementById('nav-user-avatar');
     const inputNombreCliente = document.getElementById('input-nombre');
-
-    if (authPortal) authPortal.classList.add('hidden');
-    if (mainContent) mainContent.classList.remove('hidden');
 
     if (navUserContainer) {
       navUserContainer.classList.remove('hidden');
       navUserContainer.classList.add('flex');
     }
+    if (navLoginBtn) navLoginBtn.classList.add('hidden');
 
     if (navUserName) {
       navUserName.textContent = `${usuario.nombre || 'Usuario'}`;
@@ -1660,6 +1695,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (conNotificacion) {
       mostrarToast(`¡Hola, ${usuario.nombre}! Bienvenido/a a Dulces Momentos 🍰`, 'success');
     }
+
+    // Ejecutar la acción pendiente (ej: agregar al carrito) si existe
+    if (typeof accionPendienteAuth === 'function') {
+      const accion = accionPendienteAuth;
+      accionPendienteAuth = null;
+      setTimeout(accion, 100); // pequeño delay para que el modal termine de cerrar
+    }
   };
 
   const cerrarSesion = async () => {
@@ -1669,7 +1711,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       fetch(`${API_BASE_URL}/api/auth/logout`, { method: 'POST' }).catch(() => { });
 
+      // Resetear estado pero NO abrir modal — el catálogo sigue visible
       bloquearVistaYMostrarAuth();
+      accionPendienteAuth = null;
       mostrarToast('Has cerrado sesión correctamente. ¡Hasta pronto! 👋', 'info');
 
       const formLogin = document.getElementById('form-login');
@@ -1719,8 +1763,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const verificarSesionExistente = async () => {
     const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+
+    // Sin token: el visitante es anónimo. El catálogo es público,
+    // NO se abre el modal — simplemente se muestra el botón "Ingresar".
     if (!token) {
-      bloquearVistaYMostrarAuth();
+      bloquearVistaYMostrarAuth(); // solo oculta controles de usuario logueado
       return;
     }
 
@@ -1734,11 +1781,32 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.user) {
-          aplicarSesionActiva(data.user, token, false);
+          // Sesión válida: aplicar sin abrir modal ni ejecutar acción pendiente
+          state.auth = { token, usuario: data.user, autenticado: true };
+          localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+          localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(data.user));
+
+          const navUserContainer = document.getElementById('nav-user-container');
+          const navLoginBtn = document.getElementById('btn-nav-login');
+          const navUserName = document.getElementById('nav-user-name');
+          const navUserAvatar = document.getElementById('nav-user-avatar');
+          const inputNombreCliente = document.getElementById('input-nombre');
+
+          if (navUserContainer) {
+            navUserContainer.classList.remove('hidden');
+            navUserContainer.classList.add('flex');
+          }
+          if (navLoginBtn) navLoginBtn.classList.add('hidden');
+          if (navUserName) navUserName.textContent = data.user.nombre || 'Usuario';
+          if (navUserAvatar) navUserAvatar.textContent = (data.user.nombre || 'U').charAt(0).toUpperCase();
+          if (inputNombreCliente && !inputNombreCliente.value.trim()) {
+            inputNombreCliente.value = `${data.user.nombre || ''} ${data.user.apellido || ''}`.trim();
+          }
           return;
         }
       }
 
+      // Token inválido: limpiar, dejar como anónimo (sin abrir modal)
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USUARIO);
       bloquearVistaYMostrarAuth();
@@ -1748,10 +1816,23 @@ document.addEventListener('DOMContentLoaded', () => {
       if (userGuardado) {
         try {
           const userObj = JSON.parse(userGuardado);
-          aplicarSesionActiva(userObj, token, false);
+          // Sesión local como fallback offline (sin abrir modal)
+          state.auth = { token, usuario: userObj, autenticado: true };
+          const navUserContainer = document.getElementById('nav-user-container');
+          const navLoginBtn = document.getElementById('btn-nav-login');
+          const navUserName = document.getElementById('nav-user-name');
+          const navUserAvatar = document.getElementById('nav-user-avatar');
+          if (navUserContainer) {
+            navUserContainer.classList.remove('hidden');
+            navUserContainer.classList.add('flex');
+          }
+          if (navLoginBtn) navLoginBtn.classList.add('hidden');
+          if (navUserName) navUserName.textContent = userObj.nombre || 'Usuario';
+          if (navUserAvatar) navUserAvatar.textContent = (userObj.nombre || 'U').charAt(0).toUpperCase();
           return;
         } catch (e) { }
       }
+      // Error de red sin datos locales: dejar como anónimo (sin abrir modal)
       bloquearVistaYMostrarAuth();
     }
   };
