@@ -146,6 +146,11 @@ document.addEventListener('DOMContentLoaded', () => {
     categoriaSeleccionada: 'todos',
     tipoEntrega: 'takeaway',
     metodoPago: 'efectivo',
+    pagoQr: {
+      orderId: null,
+      confirmado: false,
+      intervaloPolling: null
+    },
     ubicacionValidadaIguazu: false,
     auth: {
       token: null,
@@ -597,6 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ====================================================================
   const actualizarBotonCheckoutUI = () => {
     const btnCheckout = document.getElementById('btn-checkout-principal');
+    const btnCheckoutTexto = document.getElementById('btn-checkout-texto');
     const seccionQr = document.getElementById('seccion-qr');
 
     if (seccionQr) {
@@ -609,14 +615,123 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!btnCheckout) return;
 
-    if (state.carrito.length === 0) {
+    const carritoVacio = state.carrito.length === 0;
+    const pagoQrPendiente = state.metodoPago === 'mercadopago' && !state.pagoQr.confirmado;
+
+    if (carritoVacio || pagoQrPendiente) {
       btnCheckout.disabled = true;
       btnCheckout.classList.add('opacity-50', 'cursor-not-allowed');
-      return;
+    } else {
+      btnCheckout.disabled = false;
+      btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed');
     }
 
-    btnCheckout.disabled = false;
-    btnCheckout.classList.remove('opacity-50', 'cursor-not-allowed');
+    if (btnCheckoutTexto) {
+      btnCheckoutTexto.textContent = pagoQrPendiente
+        ? 'Esperando confirmación del pago...'
+        : 'Confirmar y Enviar Pedido por WhatsApp';
+    }
+  };
+
+  // ====================================================================
+  // 9.1 PAGO CON QR DINÁMICO DE MERCADO PAGO
+  // ====================================================================
+  const detenerPollingPagoQr = () => {
+    if (state.pagoQr.intervaloPolling) {
+      clearInterval(state.pagoQr.intervaloPolling);
+      state.pagoQr.intervaloPolling = null;
+    }
+  };
+
+  const mostrarEstadoQr = (estadoVisible) => {
+    ['qr-estado-cargando', 'qr-estado-esperando', 'qr-estado-confirmado', 'qr-estado-error'].forEach((id) => {
+      document.getElementById(id)?.classList.toggle('hidden', id !== estadoVisible);
+    });
+  };
+
+  const resetearEstadoPagoQr = () => {
+    detenerPollingPagoQr();
+    state.pagoQr = { orderId: null, confirmado: false, intervaloPolling: null };
+    mostrarEstadoQr(null);
+  };
+
+  const iniciarPollingPagoQr = (orderId) => {
+    detenerPollingPagoQr();
+    state.pagoQr.intervaloPolling = setInterval(async () => {
+      try {
+        const resp = await fetch(`${API_BASE_URL}/api/estado-pago-qr/${orderId}`);
+        const data = await resp.json();
+        if (!resp.ok) return;
+
+        if (data.status === 'processed') {
+          // La orden fue pagada y acreditada
+          state.pagoQr.confirmado = true;
+          detenerPollingPagoQr();
+          mostrarEstadoQr('qr-estado-confirmado');
+          mostrarToast('¡Pago recibido! Ya podés confirmar tu pedido.', 'success');
+          actualizarBotonCheckoutUI();
+        } else if (data.status === 'expired' || data.status === 'canceled') {
+          detenerPollingPagoQr();
+          mostrarEstadoQr('qr-estado-error');
+          mostrarToast('El QR expiró o el pago fue cancelado. Generá uno nuevo.', 'error');
+          actualizarBotonCheckoutUI();
+        }
+        // Si status === 'created', seguimos esperando sin hacer nada.
+      } catch (err) {
+        console.error('[Polling Pago QR] Error:', err);
+      }
+    }, 4000); // Consulta el estado cada 4 segundos
+  };
+
+  const generarPagoQr = async () => {
+    const subtotal = state.carrito.reduce((acc, item) => acc + item.subtotal, 0);
+    const costoEnvio = state.tipoEntrega === 'delivery' ? CONFIG.costoEnvioFijo : 0;
+    const total = subtotal + costoEnvio;
+
+    if (state.carrito.length === 0 || total <= 0) return;
+
+    resetearEstadoPagoQr();
+    mostrarEstadoQr('qr-estado-cargando');
+    actualizarBotonCheckoutUI();
+
+    try {
+      const items = state.carrito.map((item) => ({
+        title: item.nombre,
+        unit_price: Math.round(item.subtotal / item.cantidad),
+        quantity: item.cantidad
+      }));
+
+      if (costoEnvio > 0) {
+        items.push({ title: 'Envío a domicilio', unit_price: costoEnvio, quantity: 1 });
+      }
+
+      const resp = await fetch(`${API_BASE_URL}/api/crear-pago-qr`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, external_reference: `WEB-${Date.now()}` })
+      });
+      const data = await resp.json();
+
+      if (!resp.ok || !data.success) {
+        throw new Error(data.error || 'No se pudo generar el QR.');
+      }
+
+      state.pagoQr.orderId = data.order_id;
+
+      const imgQr = document.getElementById('qr-imagen-dinamica');
+      const montoTexto = document.getElementById('qr-monto-texto');
+      if (imgQr) imgQr.src = data.qr_image;
+      if (montoTexto) montoTexto.textContent = formatearMoneda(total);
+
+      mostrarEstadoQr('qr-estado-esperando');
+      iniciarPollingPagoQr(data.order_id);
+    } catch (err) {
+      console.error('[generarPagoQr] Error:', err);
+      mostrarEstadoQr('qr-estado-error');
+      mostrarToast('No pudimos generar el QR de pago. Probá de nuevo.', 'error');
+    } finally {
+      actualizarBotonCheckoutUI();
+    }
   };
 
   // ====================================================================
@@ -632,14 +747,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputTelefono = document.getElementById('input-telefono');
     const inputNotas = document.getElementById('input-notas');
     const inputDireccion = document.getElementById('input-direccion');
-    const inputComprobante = document.getElementById('input-comprobante');
     const errorTelefono = document.getElementById('error-telefono');
 
     const nombre = (inputNombre?.value || '').trim();
     const telefono = (inputTelefono?.value || '').trim();
     const notas = (inputNotas?.value || '').trim();
     const direccion = (inputDireccion?.value || '').trim();
-    const comprobante = (inputComprobante?.value || '').trim();
 
     if (!nombre) {
       inputNombre?.focus();
@@ -660,9 +773,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return mostrarToast('Por favor ingresá tu dirección en Puerto Iguazú.', 'error');
     }
 
-    if (state.metodoPago === 'mercadopago' && !comprobante) {
-      inputComprobante?.focus();
-      return mostrarToast('Por favor ingresá el número o código de comprobante.', 'error');
+    // Barrera de seguridad: aunque el botón ya está deshabilitado mientras el
+    // pago no se confirma, se valida de nuevo acá por si el estado cambió.
+    if (state.metodoPago === 'mercadopago' && !state.pagoQr.confirmado) {
+      return mostrarToast('Esperá a que se confirme el pago antes de continuar.', 'error');
     }
 
     const subtotal = state.carrito.reduce((acc, item) => acc + item.subtotal, 0);
@@ -678,7 +792,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tipoEntrega: state.tipoEntrega,
       direccion: state.tipoEntrega === 'delivery' ? direccion : 'Retiro por Boutique Dulces Momentos',
       metodoPago: state.metodoPago,
-      comprobante: state.metodoPago === 'mercadopago' ? comprobante : null,
+      comprobante: state.metodoPago === 'mercadopago' ? state.pagoQr.orderId : null,
       notas: notas || 'Sin notas especiales',
       estado: 'pendiente',
       items: state.carrito.map(item => ({
@@ -713,8 +827,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     mensaje += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
     if (state.metodoPago === 'mercadopago') {
-      mensaje += `💳 *Forma de Pago:* Mercado Pago / Transferencia\n`;
-      mensaje += `🧾 *N° Comprobante:* ${comprobante}\n`;
+      mensaje += `💳 *Forma de Pago:* Mercado Pago (QR) ✅ Pago Confirmado\n`;
+      mensaje += `🧾 *ID de Orden MP:* ${state.pagoQr.orderId}\n`;
     } else {
       mensaje += `💳 *Forma de Pago:* Efectivo al recibir\n`;
     }
@@ -742,6 +856,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlWhatsApp = `https://wa.me/${CONFIG.telefonoWhatsApp}?text=${encodeURIComponent(mensaje)}`;
 
     state.carrito = [];
+    resetearEstadoPagoQr();
+    state.metodoPago = 'efectivo';
     renderizarCarrito();
     actualizarBadges();
 
@@ -1012,22 +1128,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const drawerCarrito = document.getElementById('drawer-carrito');
 
     const abrirCarrito = () => {
+      const reanudarPollingSiCorresponde = () => {
+        if (state.metodoPago === 'mercadopago' && state.pagoQr.orderId && !state.pagoQr.confirmado) {
+          mostrarEstadoQr('qr-estado-esperando');
+          iniciarPollingPagoQr(state.pagoQr.orderId);
+        }
+      };
+
       if (!state.auth || !state.auth.autenticado) {
         requerirAutenticacion(() => {
           renderizarCarrito();
           drawerCarrito?.classList.remove('hidden');
           document.body.classList.add('overflow-hidden');
+          reanudarPollingSiCorresponde();
         }, 'Iniciá sesión para ver y gestionar tu carrito 🛒');
         return;
       }
       renderizarCarrito();
       drawerCarrito?.classList.remove('hidden');
       document.body.classList.add('overflow-hidden');
+      reanudarPollingSiCorresponde();
     };
 
     const cerrarCarrito = () => {
       drawerCarrito?.classList.add('hidden');
       document.body.classList.remove('overflow-hidden');
+      detenerPollingPagoQr(); // Se reanuda al reabrir si el pago sigue pendiente
     };
 
     btnAbrirCarrito?.addEventListener('click', abrirCarrito);
@@ -1106,9 +1232,18 @@ document.addEventListener('DOMContentLoaded', () => {
     radiosPago.forEach(radio => {
       radio.addEventListener('change', (e) => {
         state.metodoPago = e.target.value;
+        if (state.metodoPago === 'mercadopago') {
+          generarPagoQr();
+        } else {
+          resetearEstadoPagoQr();
+        }
         actualizarBotonCheckoutUI();
       });
     });
+
+    // Reintentar generación del QR si falló o expiró
+    const btnReintentarQr = document.getElementById('btn-reintentar-qr');
+    btnReintentarQr?.addEventListener('click', generarPagoQr);
 
     // Checkout WhatsApp
     const btnCheckoutPrincipal = document.getElementById('btn-checkout-principal');
@@ -1849,4 +1984,3 @@ document.addEventListener('DOMContentLoaded', () => {
   configurarEventListeners();
   verificarSesionExistente();
 });
-

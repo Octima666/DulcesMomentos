@@ -869,56 +869,61 @@
           </div>
         </div>
 
-        <!-- Sección QR Datos Bancarios -->
+        <!-- Sección QR Dinámico de Mercado Pago -->
         <div id="seccion-qr" class="hidden p-4 rounded-2xl bg-[#1c1619] border border-brand-500/30 space-y-3.5">
-          <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+
+          <!-- Estado: generando el QR -->
+          <div id="qr-estado-cargando" class="hidden flex-col items-center justify-center gap-2 py-8 text-center">
+            <div class="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-xs text-stone-400 font-medium">Generando código QR de pago...</span>
+          </div>
+
+          <!-- Estado: QR listo, esperando que el cliente pague -->
+          <div id="qr-estado-esperando" class="hidden flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
             <div class="bg-white p-2 rounded-2xl shrink-0 flex items-center justify-center">
-              <img 
-                src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=dulcesmomentos.mp" 
-                alt="Código QR Mercado Pago" 
-                class="w-32 h-32 sm:w-36 sm:h-36 rounded-xl object-contain"
-                loading="lazy"
+              <img
+                id="qr-imagen-dinamica"
+                src=""
+                alt="Código QR Mercado Pago"
+                class="w-36 h-36 sm:w-40 sm:h-40 rounded-xl object-contain"
               >
             </div>
 
-            <div class="flex-1 space-y-1.5 text-xs text-stone-200 w-full">
+            <div class="flex-1 space-y-2 text-xs text-stone-200 w-full">
               <div class="flex items-center justify-between pb-1 border-b border-[#352331]">
                 <span class="font-bold text-sm text-white flex items-center gap-1.5">
-                  <span>🏦</span> Datos de Pago
+                  <span>🏦</span> Escaneá para pagar
                 </span>
                 <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-brand-950 text-brand-300 border border-brand-800">
                   Mercado Pago
                 </span>
               </div>
-              
-              <div class="space-y-1 font-mono text-[11px] sm:text-xs pt-1">
-                <div class="flex justify-between items-center py-0.5 border-b border-[#352331]">
-                  <span class="font-sans font-medium text-stone-400">Alias MP:</span>
-                  <span class="font-bold text-brand-400 select-all">dulcesmomentos.mp</span>
-                </div>
-                <div class="flex justify-between items-center py-0.5 border-b border-[#352331]">
-                  <span class="font-sans font-medium text-stone-400">CVU / CBU:</span>
-                  <span class="font-bold text-stone-200 select-all">0000003100085472198532</span>
-                </div>
-                <div class="flex justify-between items-center py-0.5">
-                  <span class="font-sans font-medium text-stone-400">Titular:</span>
-                  <span class="font-semibold text-stone-200">Dulces Momentos Boutique</span>
-                </div>
+              <p class="text-stone-400 text-[11px] leading-relaxed pt-1">
+                Escaneá este código desde la app de Mercado Pago para pagar
+                <span id="qr-monto-texto" class="font-bold text-brand-400">$ 0</span>.
+                El pedido se habilita solo cuando confirmemos el pago.
+              </p>
+              <div class="flex items-center gap-2 pt-1 text-amber-400 font-semibold">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                <span>⏳ Esperando confirmación de pago...</span>
               </div>
             </div>
           </div>
 
-          <div class="pt-2 border-t border-[#352331]">
-            <label for="input-comprobante" class="block text-xs font-bold text-pink-300 mb-1">
-              Número / Código de Comprobante * <span class="font-normal text-[11px] text-stone-400">(Obligatorio)</span>
-            </label>
-            <input 
-              type="text" 
-              id="input-comprobante" 
-              placeholder="Ej. Operación #8945231..." 
-              class="w-full px-3.5 py-2 text-sm rounded-xl bg-[#130d12] border border-[#382333] text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition"
-            >
+          <!-- Estado: pago confirmado -->
+          <div id="qr-estado-confirmado" class="hidden items-center gap-3 py-5 justify-center text-center">
+            <span class="text-2xl">✅</span>
+            <span class="text-sm font-bold text-emerald-400">¡Pago confirmado! Ya podés enviar tu pedido.</span>
           </div>
+
+          <!-- Estado: error al generar u operación expirada -->
+          <div id="qr-estado-error" class="hidden flex-col items-center gap-2 py-5 text-center">
+            <span class="text-sm font-bold text-red-400">No pudimos generar o confirmar el QR de pago.</span>
+            <button type="button" id="btn-reintentar-qr" class="text-xs font-bold text-brand-400 hover:underline">
+              🔄 Generar un nuevo QR
+            </button>
+          </div>
+
         </div>
 
         <!-- Datos del Cliente -->
