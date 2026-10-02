@@ -122,9 +122,15 @@
           <span id="badge-carrito" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
         </button>
 
-        <!-- Acceso KDS (solo desktop, visible solo si es admin/cocina) -->
-        <button id="btn-abrir-auth-kds" title="Panel de Cocina" class="hidden md:hidden p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/50 text-xs transition cursor-pointer">
+        <!-- Acceso KDS / Cocina (solo desktop, visible solo si es admin) -->
+        <button
+          id="btn-abrir-auth-kds"
+          title="Panel de Cocina (KDS)"
+          class="items-center gap-1.5 p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/50 text-xs transition cursor-pointer hidden md:flex"
+          style="display: none;"
+        >
           <span>👨‍🍳</span>
+          <span class="font-medium hidden lg:inline">Cocina</span>
         </button>
 
         <!-- Botón Ingresar (solo desktop, controlado por JS) -->

@@ -30,6 +30,44 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dulces_momentos_secret_key_2026_super_secure_jwt_token!';
 
 // ============================================================================
+// CONFIGURACIÓN CENTRALIZADA DE ADMINISTRADORES
+// Único admin por defecto: dulcesmomentos1112@gmail.com
+// Puede configurarse con más correos separados por comas en process.env.ADMIN_EMAILS
+// ============================================================================
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'dulcesmomentos1112@gmail.com')
+  .split(',')
+  .map(email => email.trim().toLowerCase())
+  .filter(Boolean);
+
+const esAdminEmail = (email) => {
+  if (!email || typeof email !== 'string') return false;
+  return ADMIN_EMAILS.includes(email.trim().toLowerCase());
+};
+
+/**
+ * Middleware para proteger rutas de administración / cocina (KDS)
+ */
+const requireAdmin = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, error: 'No autorizado. Se requiere iniciar sesión.' });
+    }
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const cleanEmail = (decoded.correo || '').toLowerCase();
+
+    if (!esAdminEmail(cleanEmail)) {
+      return res.status(403).json({ success: false, error: 'Acceso denegado. Se requieren permisos de administrador.' });
+    }
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, error: 'Token inválido o expirado.' });
+  }
+};
+
+// ============================================================================
 // 1. MIDDLEWARES & CORS
 // ============================================================================
 app.use(cors({
@@ -276,8 +314,8 @@ const verifyHandler = async (req, res) => {
       }
     }
 
-    // 4. Determinar rol y generar token de sesión JWT
-    const rol = ['dulcesmomentos1112@gmail.com', 'joalugo45@gmail.com'].includes(cleanEmail) ? 'admin' : (user.rol || 'cliente');
+    // 4. Determinar rol y generar token de sesión JWT usando lista centralizada
+    const rol = esAdminEmail(cleanEmail) ? 'admin' : (user.rol || 'cliente');
     user.rol = rol;
 
     const token = jwt.sign(
@@ -350,12 +388,36 @@ app.get('/api/auth/me', async (req, res) => {
     }
 
     const cleanEmail = (u.correo || decoded.correo || '').toLowerCase();
-    u.rol = ['dulcesmomentos1112@gmail.com', 'joalugo45@gmail.com'].includes(cleanEmail) ? 'admin' : (u.rol || decoded.rol || 'cliente');
+    u.rol = esAdminEmail(cleanEmail) ? 'admin' : (u.rol || decoded.rol || 'cliente');
 
     return res.json({ success: true, user: u });
   } catch (err) {
     return res.status(401).json({ success: false, error: 'Token inválido o expirado' });
   }
+});
+
+/**
+ * GET /api/admin/kds/verificar
+ * Verificación protegida en backend para acceso exclusivo a Cocina (KDS).
+ */
+app.get('/api/admin/kds/verificar', requireAdmin, (req, res) => {
+  return res.json({
+    success: true,
+    message: 'Acceso autorizado a Cocina (KDS).',
+    user: {
+      id: req.user.id,
+      nombre: req.user.nombre,
+      correo: req.user.correo,
+      rol: 'admin'
+    }
+  });
+});
+
+/**
+ * Rutas de conveniencia para la URL directa de cocina / kds
+ */
+app.get(['/cocina', '/kds'], (req, res) => {
+  return res.redirect('/#cocina');
 });
 
 // ============================================================================

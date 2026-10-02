@@ -53,7 +53,17 @@ async function initTables() {
       );
     `);
 
-    console.log('[PostgreSQL] ✅ Tablas "verification_codes" y "usuarios" listas en Neon.');
+    // Asegurar columna 'rol' en usuarios
+    await pool.query(`
+      ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS rol VARCHAR(20) DEFAULT 'cliente';
+    `);
+
+    // Asignar rol admin al correo principal
+    await pool.query(`
+      UPDATE usuarios SET rol = 'admin' WHERE LOWER(correo) = 'dulcesmomentos1112@gmail.com';
+    `);
+
+    console.log('[PostgreSQL] ✅ Tablas "verification_codes" y "usuarios" (con roles) listas en Neon.');
   } catch (err) {
     console.error('[PostgreSQL Error inicializando tablas]:', err.message);
   }

@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     telefonoWhatsApp: '5493757571985',
     claveCocinaKDS: 'niledlajo',
     costoEnvioFijo: 1500, // Costo de envío en Puerto Iguazú ($ ARS)
+    adminEmails: ['dulcesmomentos1112@gmail.com'],
 
     centroIguazu: {
       lat: -25.5988,
@@ -20,6 +21,73 @@ document.addEventListener('DOMContentLoaded', () => {
       radioMaximoKm: 12.0
     }
   };
+
+  /**
+   * Determina si un usuario tiene permisos de administrador (comparación case-insensitive de email)
+   */
+  const esUsuarioAdmin = (usuario) => {
+    if (!usuario) return false;
+    if (usuario.rol === 'admin') return true;
+    const correo = (usuario.correo || usuario.email || '').trim().toLowerCase();
+    const adminEmails = (CONFIG.adminEmails || ['dulcesmomentos1112@gmail.com']).map(a => a.trim().toLowerCase());
+    return adminEmails.includes(correo);
+  };
+
+  /**
+   * Actualiza la visibilidad de los accesos a Cocina (KDS) y las etiquetas de Admin/Cliente en la UI
+   */
+  const actualizarPermisosAdminUI = (esAdmin) => {
+    const btnKdsDesktop = document.getElementById('btn-abrir-auth-kds');
+    const btnKdsDropdown = document.getElementById('btn-dropdown-kds');
+    const btnKdsMobile = document.getElementById('btn-abrir-auth-kds-mobile');
+    const dropdownBadge = document.getElementById('dropdown-user-badge');
+    const mobileBadge = document.getElementById('mobile-user-badge');
+
+    if (esAdmin) {
+      if (btnKdsDesktop) {
+        btnKdsDesktop.classList.remove('hidden');
+        btnKdsDesktop.style.display = 'flex';
+      }
+      if (btnKdsDropdown) {
+        btnKdsDropdown.classList.remove('hidden');
+        btnKdsDropdown.style.display = 'flex';
+      }
+      if (btnKdsMobile) {
+        btnKdsMobile.classList.remove('hidden');
+        btnKdsMobile.style.display = 'flex';
+      }
+      if (dropdownBadge) {
+        dropdownBadge.textContent = 'Admin';
+        dropdownBadge.className = 'inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+      }
+      if (mobileBadge) {
+        mobileBadge.textContent = 'Admin';
+        mobileBadge.className = 'inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+      }
+    } else {
+      if (btnKdsDesktop) {
+        btnKdsDesktop.classList.add('hidden');
+        btnKdsDesktop.style.display = 'none';
+      }
+      if (btnKdsDropdown) {
+        btnKdsDropdown.classList.add('hidden');
+        btnKdsDropdown.style.display = 'none';
+      }
+      if (btnKdsMobile) {
+        btnKdsMobile.classList.add('hidden');
+        btnKdsMobile.style.display = 'none';
+      }
+      if (dropdownBadge) {
+        dropdownBadge.textContent = 'Cliente';
+        dropdownBadge.className = 'inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-900/60 text-pink-300 border border-brand-800/50';
+      }
+      if (mobileBadge) {
+        mobileBadge.textContent = 'Cliente';
+        mobileBadge.className = 'inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-900/60 text-pink-300 border border-brand-800/50';
+      }
+    }
+  };
+
 
   const STORAGE_KEYS = {
     COMANDAS: 'dulces_momentos_comandas_kds_v2',
@@ -1280,14 +1348,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCerrarKds = document.getElementById('btn-cerrar-kds');
     const btnLimpiarComandas = document.getElementById('btn-limpiar-comandas');
 
-    btnAbrirAuthKds?.addEventListener('click', () => {
+    const abrirModalKdsAdmin = () => {
+      // Verificación de seguridad estricta para Cocina (KDS)
+      if (!state.auth || !state.auth.autenticado || !esUsuarioAdmin(state.auth.usuario)) {
+        mostrarToast('⛔ Sin acceso: Esta sección está reservada exclusivamente para el administrador.', 'error');
+        seccionKds?.classList.add('hidden');
+        modalAuthKds?.classList.add('hidden');
+        if (window.location.hash === '#cocina' || window.location.hash === '#kds') {
+          history.replaceState(null, '', window.location.pathname);
+        }
+        return;
+      }
       modalAuthKds?.classList.remove('hidden');
       if (inputKdsPin) {
         inputKdsPin.value = '';
         setTimeout(() => inputKdsPin.focus(), 150);
       }
       errorKdsPin?.classList.add('hidden');
-    });
+    };
+
+    btnAbrirAuthKds?.addEventListener('click', abrirModalKdsAdmin);
 
     btnCancelarKds?.addEventListener('click', () => {
       modalAuthKds?.classList.add('hidden');
@@ -1295,6 +1375,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     formAuthKds?.addEventListener('submit', (e) => {
       e.preventDefault();
+      // Verificación de sesión y permisos de admin antes de aceptar PIN
+      if (!state.auth || !state.auth.autenticado || !esUsuarioAdmin(state.auth.usuario)) {
+        modalAuthKds?.classList.add('hidden');
+        mostrarToast('⛔ Sin acceso: Debes iniciar sesión con la cuenta de administrador.', 'error');
+        return;
+      }
+
       const clave = (inputKdsPin?.value || '').trim();
       if (clave === CONFIG.claveCocinaKDS) {
         modalAuthKds?.classList.add('hidden');
@@ -1922,6 +2009,13 @@ document.addEventListener('DOMContentLoaded', () => {
       cerrarDropdownUsuario();
     });
 
+    // Abrir Panel de Cocina desde dropdown (solo visible para admin)
+    const btnDropdownKds = document.getElementById('btn-dropdown-kds');
+    btnDropdownKds?.addEventListener('click', () => {
+      cerrarDropdownUsuario();
+      abrirModalKdsAdmin();
+    });
+
     // --------------------------------------------------------
     // LISTENERS DEL MODAL DE AUTENTICACIÓN (cerrar)
     // --------------------------------------------------------
@@ -1990,11 +2084,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const chevron = document.getElementById('icon-user-chevron');
     if (chevron) chevron.style.transform = '';
     if (drawerCarrito) drawerCarrito.classList.add('hidden');
+
+    // Cerrar secciones de cocina al cerrar sesión
+    const seccionKds = document.getElementById('seccion-kds');
+    const modalAuthKds = document.getElementById('modal-auth-kds');
+    if (seccionKds) seccionKds.classList.add('hidden');
+    if (modalAuthKds) modalAuthKds.classList.add('hidden');
+
+    // Ocultar botones de Cocina y resetear etiquetas a Cliente
+    actualizarPermisosAdminUI(false);
+
     const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
     if (btnNavLoginMobile) {
       const span = btnNavLoginMobile.querySelector('span');
       if (span) span.textContent = 'Ingresar / Crear cuenta';
     }
+    const mobileGuest = document.getElementById('mobile-auth-guest');
+    const mobileUser = document.getElementById('mobile-auth-user');
+    if (mobileGuest) mobileGuest.classList.remove('hidden');
+    if (mobileUser) mobileUser.classList.add('hidden');
+
     document.body.classList.remove('overflow-hidden');
   };
 
@@ -2027,11 +2136,27 @@ document.addEventListener('DOMContentLoaded', () => {
       navLoginBtn.style.display = 'none';
     }
 
-    // Rellenar dropdown de usuario con email y rol
+    const userEmail = usuario.correo || usuario.email || '';
+    const esAdmin = esUsuarioAdmin(usuario);
+
+    // Rellenar dropdown de usuario con email
     const dropdownEmail = document.getElementById('dropdown-user-email');
-    const dropdownBadge = document.getElementById('dropdown-user-badge');
-    if (dropdownEmail) dropdownEmail.textContent = usuario.email || '';
-    if (dropdownBadge) dropdownBadge.textContent = usuario.rol === 'admin' ? 'Admin' : (usuario.rol === 'cocina' ? 'Cocina' : 'Cliente');
+    if (dropdownEmail) dropdownEmail.textContent = userEmail;
+
+    // Actualizar permisos, botones de cocina y badge (Admin / Cliente)
+    actualizarPermisosAdminUI(esAdmin);
+
+    // Actualizar cajita de usuario en drawer móvil
+    const mobileGuest = document.getElementById('mobile-auth-guest');
+    const mobileUser = document.getElementById('mobile-auth-user');
+    const mobileUserName = document.getElementById('mobile-user-name');
+    const mobileUserEmail = document.getElementById('mobile-user-email');
+    const mobileUserAvatar = document.getElementById('mobile-user-avatar');
+    if (mobileGuest) mobileGuest.classList.add('hidden');
+    if (mobileUser) mobileUser.classList.remove('hidden');
+    if (mobileUserName) mobileUserName.textContent = `${usuario.nombre || 'Usuario'}`;
+    if (mobileUserEmail) mobileUserEmail.textContent = userEmail;
+    if (mobileUserAvatar) mobileUserAvatar.textContent = (usuario.nombre || 'U').charAt(0).toUpperCase();
 
     // Cerrar el dropdown si estaba abierto
     const dropdownMenu = document.getElementById('dropdown-user-menu');
@@ -2164,10 +2289,26 @@ document.addEventListener('DOMContentLoaded', () => {
             navLoginBtn.style.display = 'none';
           }
           // Rellenar dropdown de usuario
+          const userEmail = data.user.correo || data.user.email || '';
+          const esAdmin = esUsuarioAdmin(data.user);
           const dropdownEmail = document.getElementById('dropdown-user-email');
-          const dropdownBadge = document.getElementById('dropdown-user-badge');
-          if (dropdownEmail) dropdownEmail.textContent = data.user.email || '';
-          if (dropdownBadge) dropdownBadge.textContent = data.user.rol === 'admin' ? 'Admin' : (data.user.rol === 'cocina' ? 'Cocina' : 'Cliente');
+          if (dropdownEmail) dropdownEmail.textContent = userEmail;
+
+          // Actualizar permisos, botón Cocina y badge Admin/Cliente
+          actualizarPermisosAdminUI(esAdmin);
+
+          // Actualizar cajita de usuario en drawer móvil
+          const mobileGuest = document.getElementById('mobile-auth-guest');
+          const mobileUser = document.getElementById('mobile-auth-user');
+          const mobileUserName = document.getElementById('mobile-user-name');
+          const mobileUserEmail = document.getElementById('mobile-user-email');
+          const mobileUserAvatar = document.getElementById('mobile-user-avatar');
+          if (mobileGuest) mobileGuest.classList.add('hidden');
+          if (mobileUser) mobileUser.classList.remove('hidden');
+          if (mobileUserName) mobileUserName.textContent = `${data.user.nombre || 'Usuario'}`;
+          if (mobileUserEmail) mobileUserEmail.textContent = userEmail;
+          if (mobileUserAvatar) mobileUserAvatar.textContent = (data.user.nombre || 'U').charAt(0).toUpperCase();
+
           const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
           if (btnNavLoginMobile) {
             const span = btnNavLoginMobile.querySelector('span');
@@ -2178,6 +2319,8 @@ document.addEventListener('DOMContentLoaded', () => {
           if (inputNombreCliente && !inputNombreCliente.value.trim()) {
             inputNombreCliente.value = `${data.user.nombre || ''} ${data.user.apellido || ''}`.trim();
           }
+
+          verificarRutaCocina();
           return;
         }
       }
@@ -2186,6 +2329,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USUARIO);
       bloquearVistaYMostrarAuth();
+      verificarRutaCocina();
     } catch (error) {
       console.warn('Error al verificar sesión en backend:', error);
       const userGuardado = localStorage.getItem(STORAGE_KEYS.USUARIO);
@@ -2207,23 +2351,100 @@ document.addEventListener('DOMContentLoaded', () => {
             navLoginBtn.style.display = 'none';
           }
           // Rellenar dropdown de usuario
+          const userEmail = userObj.correo || userObj.email || '';
+          const esAdmin = esUsuarioAdmin(userObj);
           const dEmail2 = document.getElementById('dropdown-user-email');
-          const dBadge2 = document.getElementById('dropdown-user-badge');
-          if (dEmail2) dEmail2.textContent = userObj.email || '';
-          if (dBadge2) dBadge2.textContent = userObj.rol === 'admin' ? 'Admin' : (userObj.rol === 'cocina' ? 'Cocina' : 'Cliente');
+          if (dEmail2) dEmail2.textContent = userEmail;
+
+          actualizarPermisosAdminUI(esAdmin);
+
+          const mobileGuest = document.getElementById('mobile-auth-guest');
+          const mobileUser = document.getElementById('mobile-auth-user');
+          const mobileUserName = document.getElementById('mobile-user-name');
+          const mobileUserEmail = document.getElementById('mobile-user-email');
+          const mobileUserAvatar = document.getElementById('mobile-user-avatar');
+          if (mobileGuest) mobileGuest.classList.add('hidden');
+          if (mobileUser) mobileUser.classList.remove('hidden');
+          if (mobileUserName) mobileUserName.textContent = `${userObj.nombre || 'Usuario'}`;
+          if (mobileUserEmail) mobileUserEmail.textContent = userEmail;
+          if (mobileUserAvatar) mobileUserAvatar.textContent = (userObj.nombre || 'U').charAt(0).toUpperCase();
+
           if (btnNavLoginMobile) {
             const span = btnNavLoginMobile.querySelector('span');
             if (span) span.textContent = `Cerrar sesión (${userObj.nombre || 'Usuario'})`;
           }
           if (navUserName) navUserName.textContent = userObj.nombre || 'Usuario';
           if (navUserAvatar) navUserAvatar.textContent = (userObj.nombre || 'U').charAt(0).toUpperCase();
+
+          verificarRutaCocina();
           return;
         } catch (e) { }
       }
       // Error de red sin datos locales: dejar como anónimo (sin abrir modal)
       bloquearVistaYMostrarAuth();
+      verificarRutaCocina();
     }
   };
+
+  /**
+   * Protección estricta de ruta directa a Cocina / KDS
+   * Si alguien no admin entra por URL (#cocina, #kds, /cocina), es bloqueado y redirigido.
+   */
+  const verificarRutaCocina = async () => {
+    const hash = (window.location.hash || '').toLowerCase();
+    const pathname = (window.location.pathname || '').toLowerCase();
+    const pideCocina = hash === '#cocina' || hash === '#kds' || pathname.endsWith('/cocina') || pathname.endsWith('/kds');
+
+    if (!pideCocina) return;
+
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+    let autorizado = false;
+
+    if (token) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/admin/kds/verificar`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            autorizado = true;
+          }
+        }
+      } catch (err) {
+        autorizado = esUsuarioAdmin(state.auth.usuario);
+      }
+    }
+
+    const seccionKds = document.getElementById('seccion-kds');
+    const modalAuthKds = document.getElementById('modal-auth-kds');
+
+    if (!autorizado) {
+      if (seccionKds) seccionKds.classList.add('hidden');
+      if (modalAuthKds) modalAuthKds.classList.add('hidden');
+
+      if (window.location.hash === '#cocina' || window.location.hash === '#kds') {
+        history.replaceState(null, '', window.location.pathname);
+      }
+      mostrarToast('⛔ Sin acceso: Esta sección está reservada exclusivamente para el administrador.', 'error');
+
+      const catalogo = document.getElementById('catalogo');
+      if (catalogo) {
+        catalogo.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      if (modalAuthKds) {
+        modalAuthKds.classList.remove('hidden');
+        const inputKdsPin = document.getElementById('input-kds-pin');
+        if (inputKdsPin) {
+          inputKdsPin.value = '';
+          setTimeout(() => inputKdsPin.focus(), 150);
+        }
+      }
+    }
+  };
+
+  window.addEventListener('hashchange', verificarRutaCocina);
 
   // ========================================================
   // 15. EJECUCIÓN INICIAL
