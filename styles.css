@@ -5,6 +5,27 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
+/* ── BASE RESET (Mobile-first) ─────────────────────────── */
+/* box-sizing global, sin afectar los fixed-size de WA/carrito */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Imágenes y videos fluidos — sin afectar SVGs con tamaño explícito */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Evitar scroll horizontal global */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 :root {
   --bg-main: #0c090c;
   --bg-surface: #140f13;
