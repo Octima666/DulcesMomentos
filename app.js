@@ -1303,6 +1303,113 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ========================================================
+    // MENÚ MÓVIL (DRAWER Y HAMBURGUESA)
+    // ========================================================
+    const btnMenuMobile = document.getElementById('btn-menu-mobile');
+    const iconHamburguesa = document.getElementById('icon-hamburguesa');
+    const iconCloseMenu = document.getElementById('icon-close-menu');
+    const menuMobileOverlay = document.getElementById('menu-mobile-overlay');
+    const menuMobileDrawer = document.getElementById('menu-mobile-drawer');
+    const btnCerrarMenuMobile = document.getElementById('btn-cerrar-menu-mobile');
+    const linksMenuMobile = document.querySelectorAll('#menu-mobile-drawer [data-close-menu]');
+    const btnBuscarMobile = document.getElementById('btn-buscar-mobile');
+    const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
+    const btnAbrirAuthKdsMobile = document.getElementById('btn-abrir-auth-kds-mobile');
+
+    const hayOtroModalAbierto = () => {
+      const modalCart = document.getElementById('drawer-carrito');
+      const modalAuth = document.getElementById('seccion-auth-portal');
+      const modalKds = document.getElementById('modal-auth-kds');
+      return (!modalCart?.classList.contains('hidden')) ||
+             (!modalAuth?.classList.contains('hidden')) ||
+             (!modalKds?.classList.contains('hidden'));
+    };
+
+    const abrirMenuMobile = () => {
+      menuMobileDrawer?.classList.add('abierto');
+      menuMobileOverlay?.classList.add('abierto');
+      btnMenuMobile?.setAttribute('aria-expanded', 'true');
+      btnMenuMobile?.setAttribute('aria-label', 'Cerrar menú');
+      iconHamburguesa?.classList.add('hidden');
+      iconCloseMenu?.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    };
+
+    const cerrarMenuMobile = () => {
+      menuMobileDrawer?.classList.remove('abierto');
+      menuMobileOverlay?.classList.remove('abierto');
+      btnMenuMobile?.setAttribute('aria-expanded', 'false');
+      btnMenuMobile?.setAttribute('aria-label', 'Abrir menú');
+      iconHamburguesa?.classList.remove('hidden');
+      iconCloseMenu?.classList.add('hidden');
+      if (!hayOtroModalAbierto()) {
+        document.body.classList.remove('overflow-hidden');
+      }
+    };
+
+    const toggleMenuMobile = () => {
+      const estaAbierto = menuMobileDrawer?.classList.contains('abierto');
+      if (estaAbierto) {
+        cerrarMenuMobile();
+      } else {
+        abrirMenuMobile();
+      }
+    };
+
+    btnMenuMobile?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenuMobile();
+    });
+
+    btnCerrarMenuMobile?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cerrarMenuMobile();
+    });
+
+    menuMobileOverlay?.addEventListener('click', () => {
+      cerrarMenuMobile();
+    });
+
+    linksMenuMobile.forEach(link => {
+      link.addEventListener('click', () => {
+        cerrarMenuMobile();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuMobileDrawer?.classList.contains('abierto')) {
+        cerrarMenuMobile();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768 && menuMobileDrawer?.classList.contains('abierto')) {
+        cerrarMenuMobile();
+      }
+    });
+
+    btnBuscarMobile?.addEventListener('click', () => {
+      cerrarMenuMobile();
+      btnBuscar?.click();
+    });
+
+    btnNavLoginMobile?.addEventListener('click', () => {
+      cerrarMenuMobile();
+      if (state.auth && state.auth.autenticado) {
+        if (confirm(`¿Deseás cerrar la sesión de ${state.auth.usuario?.nombre || 'tu cuenta'}?`)) {
+          cerrarSesion();
+        }
+      } else {
+        abrirModalAuth('Iniciá sesión o registrate para continuar 🍰');
+      }
+    });
+
+    btnAbrirAuthKdsMobile?.addEventListener('click', () => {
+      cerrarMenuMobile();
+      btnAbrirAuthKds?.click();
+    });
+
+    // ========================================================
     // LISTENERS DEL SISTEMA DE AUTENTICACIÓN
     // ========================================================
     const tabBtnLogin = document.getElementById('tab-btn-login');
@@ -1786,6 +1893,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (navLoginBtn) navLoginBtn.classList.remove('hidden');
     if (drawerCarrito) drawerCarrito.classList.add('hidden');
+    const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
+    if (btnNavLoginMobile) {
+      const span = btnNavLoginMobile.querySelector('span');
+      if (span) span.textContent = 'Ingresar / Crear cuenta';
+    }
     document.body.classList.remove('overflow-hidden');
   };
 
@@ -1806,6 +1918,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLoginBtn = document.getElementById('btn-nav-login');
     const navUserName = document.getElementById('nav-user-name');
     const navUserAvatar = document.getElementById('nav-user-avatar');
+    const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
     const inputNombreCliente = document.getElementById('input-nombre');
 
     if (navUserContainer) {
@@ -1813,6 +1926,10 @@ document.addEventListener('DOMContentLoaded', () => {
       navUserContainer.classList.add('flex');
     }
     if (navLoginBtn) navLoginBtn.classList.add('hidden');
+    if (btnNavLoginMobile) {
+      const span = btnNavLoginMobile.querySelector('span');
+      if (span) span.textContent = `Cerrar sesión (${usuario.nombre || 'Usuario'})`;
+    }
 
     if (navUserName) {
       navUserName.textContent = `${usuario.nombre || 'Usuario'}`;
@@ -1932,6 +2049,11 @@ document.addEventListener('DOMContentLoaded', () => {
             navUserContainer.classList.add('flex');
           }
           if (navLoginBtn) navLoginBtn.classList.add('hidden');
+          const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
+          if (btnNavLoginMobile) {
+            const span = btnNavLoginMobile.querySelector('span');
+            if (span) span.textContent = `Cerrar sesión (${data.user.nombre || 'Usuario'})`;
+          }
           if (navUserName) navUserName.textContent = data.user.nombre || 'Usuario';
           if (navUserAvatar) navUserAvatar.textContent = (data.user.nombre || 'U').charAt(0).toUpperCase();
           if (inputNombreCliente && !inputNombreCliente.value.trim()) {
@@ -1957,11 +2079,16 @@ document.addEventListener('DOMContentLoaded', () => {
           const navLoginBtn = document.getElementById('btn-nav-login');
           const navUserName = document.getElementById('nav-user-name');
           const navUserAvatar = document.getElementById('nav-user-avatar');
+          const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
           if (navUserContainer) {
             navUserContainer.classList.remove('hidden');
             navUserContainer.classList.add('flex');
           }
           if (navLoginBtn) navLoginBtn.classList.add('hidden');
+          if (btnNavLoginMobile) {
+            const span = btnNavLoginMobile.querySelector('span');
+            if (span) span.textContent = `Cerrar sesión (${userObj.nombre || 'Usuario'})`;
+          }
           if (navUserName) navUserName.textContent = userObj.nombre || 'Usuario';
           if (navUserAvatar) navUserAvatar.textContent = (userObj.nombre || 'U').charAt(0).toUpperCase();
           return;

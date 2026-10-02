@@ -481,3 +481,159 @@ body {
   }
 }
 
+/* ======================================================== */
+/* HERO - TAG DECORATIVO                                    */
+/* ======================================================== */
+.hero-tag-decorativo {
+  position: absolute;
+  top: -12px;
+  right: 0;
+  background-color: rgba(24, 19, 24, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(224, 58, 108, 0.4);
+  padding: 0.4rem 0.85rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+  transform: rotate(3deg);
+  max-width: calc(100% - 16px);
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .hero-tag-decorativo {
+    top: -16px;
+    right: -12px;
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* ======================================================== */
+/* MENÚ MÓVIL (DRAWER Y HAMBURGUESA)                        */
+/* ======================================================== */
+
+/* Estado por defecto / Base: panel y overlay siempre ocultos */
+.mobile-menu-overlay,
+#menu-mobile-overlay,
+.mobile-menu-drawer,
+#menu-mobile-drawer,
+#btn-menu-mobile {
+  display: none;
+}
+
+/* ── REGLAS MÓVIL (≤ 768px) ── */
+@media (max-width: 768px) {
+  #btn-menu-mobile {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 45;
+  }
+
+  /* Overlay de fondo */
+  .mobile-menu-overlay,
+  #menu-mobile-overlay {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    background-color: rgba(5, 3, 5, 0.75) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    z-index: 9998 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mobile-menu-overlay.abierto,
+  #menu-mobile-overlay.abierto {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  /* Panel lateral (Drawer) */
+  .mobile-menu-drawer,
+  #menu-mobile-drawer {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 85% !important;
+    max-width: 320px !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    background-color: #140f13 !important;
+    border-left: 1px solid #2d1e2a !important;
+    box-shadow: -10px 0 35px rgba(0, 0, 0, 0.85) !important;
+    z-index: 10000 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    transform: translateX(100%) !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.3s ease !important;
+  }
+
+  .mobile-menu-drawer.abierto,
+  #menu-mobile-drawer.abierto {
+    transform: translateX(0) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  /* Enlaces y botones de navegación dentro del drawer */
+  .mobile-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .mobile-menu-link:hover,
+  .mobile-menu-link:active {
+    background-color: rgba(224, 58, 108, 0.15);
+    color: #f472b6;
+  }
+
+  /* En móvil, el container de usuario en la barra no debe desplazar el header */
+  #nav-user-container {
+    display: none !important;
+  }
+}
+
+/* ── REGLAS ESCRITORIO (> 768px) ── */
+@media (min-width: 769px) {
+  #btn-menu-mobile {
+    display: none !important;
+  }
+
+  .mobile-menu-overlay,
+  #menu-mobile-overlay,
+  .mobile-menu-drawer,
+  #menu-mobile-drawer {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateX(100%) !important;
+  }
+}
+
+

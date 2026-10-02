@@ -39,6 +39,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Garantizar charset=utf-8 en todas las cabeceras Content-Type
+app.use((req, res, next) => {
+  res.charset = 'utf-8';
+  next();
+});
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // ============================================================================
