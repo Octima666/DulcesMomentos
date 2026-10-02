@@ -63,34 +63,39 @@
   <!-- ======================================================== -->
   <!-- 1. BARRA SUPERIOR DE ANUNCIO                             -->
   <!-- ======================================================== -->
-  <div class="bg-[#140d12] border-b border-[#2b1420] py-2 px-4 text-center text-xs font-medium text-pink-300 transition-colors">
-    <p class="flex items-center justify-center gap-2">
-      <span class="text-brand-400">✨</span>
-      <span>Pastelería Artesanal en Puerto Iguazú</span>
-      <span class="text-stone-500">•</span>
-      <span>Envíos exclusivos en Puerto Iguazú o Retiro en Boutique</span>
-      <span class="text-brand-400">✨</span>
+  <div class="bg-[#140d12] border-b border-[#2b1420] py-2 px-4 text-center text-xs font-medium text-pink-300 transition-colors overflow-hidden">
+    <!-- Desktop: dos mensajes. Móvil: uno solo -->
+    <p class="flex items-center justify-center gap-2 whitespace-nowrap overflow-hidden text-ellipsis">
+      <span class="text-brand-400 shrink-0">✨</span>
+      <span class="hidden sm:inline">Pastelería Artesanal en Puerto Iguazú</span>
+      <span class="hidden sm:inline text-stone-500">•</span>
+      <span>Envíos en Puerto Iguazú · Retiro en Boutique</span>
+      <span class="text-brand-400 shrink-0">✨</span>
     </p>
   </div>
 
   <!-- ======================================================== -->
   <!-- 2. CABECERA / NAVBAR PRINCIPAL                           -->
   <!-- ======================================================== -->
+  <!-- ======================================================== -->
+  <!-- HEADER / NAVBAR PRINCIPAL                                -->
+  <!-- ======================================================== -->
   <header class="sticky top-0 z-40 bg-[#0c090c]/90 backdrop-blur-md border-b border-[#221720] transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 min-h-16 flex items-center justify-between gap-4">
-      
-      <!-- Logotipo -->
-      <div class="w-10 h-10 rounded-full overflow-hidden shadow-lg shadow-brand-600/30 group-hover:scale-105 transition-transform shrink-0 bg-white">
-  <img src="logo.jpeg" alt="Dulces Momentos" class="w-full h-full object-cover">
-</div>
-        <div>
-          <span class="font-serif text-xl sm:text-2xl font-bold tracking-tight text-white block leading-tight">Dulces Momentos</span>
-          <span class="text-[9px] sm:text-[10px] uppercase tracking-widest text-brand-400 font-bold block">PASTELERÍA BOUTIQUE</span>
-        </div>
-      </a>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 min-h-[60px] flex items-center justify-between gap-3">
 
-      <!-- Enlaces de Navegación Central -->
-      <nav class="hidden md:flex items-center gap-1.5 lg:gap-2">
+      <!-- ── LOGO ──────────────────────────────────────── -->
+      <div class="flex items-center gap-2.5 shrink-0 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden shadow-lg shadow-brand-600/30 shrink-0 bg-white">
+          <img src="logo.jpeg" alt="Dulces Momentos" class="w-full h-full object-cover">
+        </div>
+        <div class="min-w-0">
+          <span class="font-serif text-base sm:text-xl lg:text-2xl font-bold tracking-tight text-white block leading-tight truncate">Dulces Momentos</span>
+          <span class="text-[8px] sm:text-[9px] uppercase tracking-widest text-brand-400 font-bold hidden xs:block">PASTELERÍA BOUTIQUE</span>
+        </div>
+      </div>
+
+      <!-- ── NAV DESKTOP (≥ 768px) ─────────────────────── -->
+      <nav class="hidden md:flex items-center gap-1.5 lg:gap-2" aria-label="Navegación principal">
         <a href="#catalogo" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white shadow-md shadow-brand-600/30 transition">Inicio</a>
         <button onclick="filtrarCategoriaDesdeNav('Tortas')" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition">Tortas</button>
         <button onclick="filtrarCategoriaDesdeNav('Postres')" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition">Postres</button>
@@ -98,34 +103,34 @@
         <a href="#contacto" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition">Contacto</a>
       </nav>
 
-      <!-- Acciones Derecha -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Buscador -->
-        <button id="btn-buscar" aria-label="Buscar productos" class="p-2 sm:p-2.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800/70 border border-transparent hover:border-[#352230] transition">
+      <!-- ── ACCIONES DERECHA ──────────────────────────── -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+
+        <!-- Buscador (solo desktop) -->
+        <button id="btn-buscar" aria-label="Buscar productos" class="hidden md:flex p-2 sm:p-2.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800/70 border border-transparent hover:border-[#352230] transition">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </button>
 
-        <!-- Botón Rosa Mi Carrito (único botón de carrito) -->
-        <button id="btn-abrir-carrito" aria-label="Ver carrito" class="relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-brand-600/30 transition transform active:scale-95">
-          <!-- Ícono shopping cart -->
+        <!-- Botón Mi Carrito -->
+        <button id="btn-abrir-carrito" aria-label="Ver carrito" class="relative flex items-center gap-1.5 px-3 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs shadow-lg shadow-brand-600/30 transition transform active:scale-95">
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          <span class="hidden xs:inline">Mi Carrito</span>
-          <span id="badge-carrito" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">0</span>
+          <span class="hidden sm:inline">Mi Carrito</span>
+          <span id="badge-carrito" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
         </button>
 
-        <!-- Acceso KDS Cocina -->
-        <button id="btn-abrir-auth-kds" title="Panel de Cocina" class="p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/50 text-xs transition">
+        <!-- Acceso KDS (solo desktop) -->
+        <button id="btn-abrir-auth-kds" title="Panel de Cocina" class="hidden md:flex p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/50 text-xs transition">
           <span>👨‍🍳</span>
         </button>
 
-        <!-- Botón Iniciar Sesión (para visitantes invitados) -->
-        <button 
-          id="btn-nav-login" 
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-stone-200 hover:text-white bg-[#1c141b] hover:bg-[#2c1a26] border border-[#382333] shadow-sm transition-all transform active:scale-95"
+        <!-- Botón Ingresar (solo desktop) -->
+        <button
+          id="btn-nav-login"
+          class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-stone-200 hover:text-white bg-[#1c141b] hover:bg-[#2c1a26] border border-[#382333] shadow-sm transition-all transform active:scale-95"
           title="Iniciar sesión o registrarse"
         >
           <svg class="w-3.5 h-3.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,18 +139,15 @@
           <span>Ingresar</span>
         </button>
 
-        <!-- Usuario Autenticado & Botón Cerrar Sesión -->
-        <div id="nav-user-container" class="hidden items-center gap-2 pl-2 border-l border-[#352230]">
+        <!-- Usuario Autenticado (solo desktop) -->
+        <div id="nav-user-container" class="hidden md:hidden items-center gap-2 pl-2 border-l border-[#352230]">
           <div class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 rounded-full bg-[#1c141b] border border-[#382333] shadow-inner">
-            <div id="nav-user-avatar" class="w-6 h-6 rounded-full bg-gradient-to-tr from-brand-600 to-pink-500 text-white text-[11px] font-bold flex items-center justify-center uppercase shadow-xs">
-              U
-            </div>
+            <div id="nav-user-avatar" class="w-6 h-6 rounded-full bg-gradient-to-tr from-brand-600 to-pink-500 text-white text-[11px] font-bold flex items-center justify-center uppercase">U</div>
             <span id="nav-user-name" class="text-xs font-semibold text-stone-200 max-w-[110px] truncate hidden sm:inline-block">Usuario</span>
           </div>
-
-          <button 
-            id="btn-logout" 
-            title="Cerrar sesión" 
+          <button
+            id="btn-logout"
+            title="Cerrar sesión"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-rose-300 hover:text-white bg-rose-950/50 hover:bg-rose-600 border border-rose-800/50 hover:border-rose-600 shadow-sm transition-all transform active:scale-95"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,9 +156,98 @@
             <span class="hidden md:inline">Cerrar sesión</span>
           </button>
         </div>
+
+        <!-- ── BOTÓN HAMBURGUESA (solo móvil < 768px) ── -->
+        <button
+          id="btn-menu-mobile"
+          aria-label="Abrir menú"
+          aria-expanded="false"
+          aria-controls="menu-mobile-drawer"
+          class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl text-stone-300 hover:text-white hover:bg-stone-800/70 transition"
+        >
+          <!-- Ícono hamburguesa -->
+          <svg id="icon-hamburguesa" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <!-- Ícono X (cerrar) -->
+          <svg id="icon-close-menu" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
       </div>
     </div>
   </header>
+
+  <!-- ======================================================== -->
+  <!-- DRAWER MENÚ MÓVIL                                        -->
+  <!-- ======================================================== -->
+  <!-- Overlay oscuro -->
+  <div id="menu-mobile-overlay" class="mobile-menu-overlay" aria-hidden="true"></div>
+
+  <!-- Panel lateral -->
+  <div
+    id="menu-mobile-drawer"
+    class="mobile-menu-drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Menú de navegación"
+  >
+    <!-- Cabecera del drawer -->
+    <div class="flex items-center justify-between p-4 border-b border-[#2a1e27]">
+      <span class="font-serif text-lg font-bold text-white">Menú</span>
+      <button id="btn-cerrar-menu-mobile" aria-label="Cerrar menú" class="w-10 h-10 flex items-center justify-center rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Navegación -->
+    <nav class="p-4 space-y-1" aria-label="Menú principal móvil">
+      <a href="#catalogo" class="mobile-menu-link" data-close-menu>🏠 Inicio</a>
+      <button onclick="filtrarCategoriaDesdeNav('Tortas')" class="mobile-menu-link w-full text-left" data-close-menu>🎂 Tortas</button>
+      <button onclick="filtrarCategoriaDesdeNav('Postres')" class="mobile-menu-link w-full text-left" data-close-menu>🧁 Postres</button>
+      <button onclick="filtrarCategoriaDesdeNav('Especialidades')" class="mobile-menu-link w-full text-left" data-close-menu>🍪 Especialidades</button>
+      <a href="#contacto" class="mobile-menu-link" data-close-menu>📍 Contacto</a>
+    </nav>
+
+    <!-- Separador -->
+    <div class="mx-4 border-t border-[#2a1e27]"></div>
+
+    <!-- Buscador en móvil -->
+    <div class="p-4">
+      <button id="btn-buscar-mobile" aria-label="Buscar productos" class="mobile-menu-link w-full text-left flex items-center gap-3">
+        <svg class="w-5 h-5 shrink-0 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <span>Buscar productos</span>
+      </button>
+    </div>
+
+    <!-- Acciones de cuenta -->
+    <div class="p-4 space-y-2 border-t border-[#2a1e27]">
+      <!-- Botón Ingresar (visitante) -->
+      <button
+        id="btn-nav-login-mobile"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-stone-200 bg-[#1c141b] hover:bg-[#2c1a26] border border-[#382333] transition active:scale-95"
+      >
+        <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        <span>Ingresar / Crear cuenta</span>
+      </button>
+
+      <!-- Panel Cocina -->
+      <button
+        id="btn-abrir-auth-kds-mobile"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-stone-300 bg-[#181317] hover:bg-stone-800 border border-[#2a1e27] transition active:scale-95"
+      >
+        <span class="text-lg">👨‍🍳</span>
+        <span>Panel de Cocina (KDS)</span>
+      </button>
+    </div>
+  </div>
 
   <!-- ======================================================== -->
   <!-- 2.5. MODAL DE AUTENTICACIÓN (LOGIN / REGISTRO / 2FA)     -->
@@ -576,19 +667,19 @@
           <div class="relative w-full max-w-md group">
             <!-- Imagen Hero -->
             <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-[#382232] bg-[#140e13]">
-              <img 
-                src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1000&q=85" 
-                alt="Porción de torta de chocolate gourmet con frutillas - Dulces Momentos" 
-                class="w-full h-[320px] sm:h-[380px] object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
+              <img
+                src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1000&q=85"
+                alt="Porción de torta de chocolate gourmet con frutillas - Dulces Momentos"
+                class="w-full h-[240px] sm:h-[320px] lg:h-[380px] object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
               >
               <div class="absolute inset-0 bg-gradient-to-t from-[#0c090c]/80 via-transparent to-transparent"></div>
             </div>
 
-            <!-- Anotación Manuscrita Decorativa -->
-            <div class="absolute -top-4 -right-3 sm:-right-6 bg-[#181318]/90 backdrop-blur-md border border-brand-500/40 px-4 py-2 rounded-2xl shadow-xl transform rotate-3">
-              <p class="font-handwriting text-lg sm:text-xl text-pink-300 font-bold flex items-center gap-1.5">
+            <!-- Anotación Manuscrita Decorativa (clip para que no desborde en móvil) -->
+            <div class="hero-tag-decorativo">
+              <p class="font-handwriting text-base sm:text-lg text-pink-300 font-bold flex items-center gap-1.5">
                 <span>Hecho con mucho amor</span>
-                <span class="text-brand-400 font-script text-2xl">♥</span>
+                <span class="text-brand-400 font-script text-xl">♥</span>
               </p>
             </div>
 
