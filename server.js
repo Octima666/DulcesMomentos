@@ -276,14 +276,17 @@ const verifyHandler = async (req, res) => {
       }
     }
 
-    // 4. Generar token de sesión JWT
+    // 4. Determinar rol y generar token de sesión JWT
+    const rol = ['dulcesmomentos1112@gmail.com', 'joalugo45@gmail.com'].includes(cleanEmail) ? 'admin' : (user.rol || 'cliente');
+    user.rol = rol;
+
     const token = jwt.sign(
-      { id: user.id, nombre: user.nombre, apellido: user.apellido, correo: user.correo },
+      { id: user.id, nombre: user.nombre, apellido: user.apellido, correo: user.correo, rol },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    console.log(`[2FA Verify] ✅ PIN verificado exitosamente para: ${cleanEmail}`);
+    console.log(`[2FA Verify] ✅ PIN verificado exitosamente para: ${cleanEmail} (${rol})`);
 
     return res.status(200).json({
       success: true,
@@ -320,8 +323,39 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ success: true, message: 'Sesión cerrada.' });
 });
 
-app.get('/api/auth/me', (req, res) => {
-  res.json({ success: true });
+app.get('/api/auth/me', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, error: 'No autorizado' });
+    }
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    let u = {
+      id: decoded.id,
+      nombre: decoded.nombre,
+      apellido: decoded.apellido,
+      correo: decoded.correo,
+      rol: decoded.rol
+    };
+
+    try {
+      const uRes = await pool.query('SELECT id, nombre, apellido, correo FROM usuarios WHERE id = $1', [decoded.id]);
+      if (uRes.rows.length > 0) {
+        u = { ...u, ...uRes.rows[0] };
+      }
+    } catch (e) {
+      console.warn('[auth/me] Error al consultar usuario en base de datos:', e.message);
+    }
+
+    const cleanEmail = (u.correo || decoded.correo || '').toLowerCase();
+    u.rol = ['dulcesmomentos1112@gmail.com', 'joalugo45@gmail.com'].includes(cleanEmail) ? 'admin' : (u.rol || decoded.rol || 'cliente');
+
+    return res.json({ success: true, user: u });
+  } catch (err) {
+    return res.status(401).json({ success: false, error: 'Token inválido o expirado' });
+  }
 });
 
 // ============================================================================

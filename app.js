@@ -174,8 +174,13 @@ document.addEventListener('DOMContentLoaded', () => {
       subtitulo.textContent = motivo;
     }
     if (authPortal) {
+      authPortal.style.display = 'flex';
       authPortal.classList.remove('hidden');
+      authPortal.classList.add('flex');
       document.body.classList.add('overflow-hidden');
+      if (typeof activarPestanaAuth === 'function') {
+        activarPestanaAuth('login');
+      }
       const inputCorreo = document.getElementById('login-correo');
       setTimeout(() => inputCorreo?.focus(), 150);
     }
@@ -184,9 +189,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const cerrarModalAuth = () => {
     const authPortal = document.getElementById('seccion-auth-portal');
     if (authPortal) {
+      authPortal.style.display = 'none';
       authPortal.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
+      authPortal.classList.remove('flex');
     }
+    document.body.classList.remove('overflow-hidden');
+
+    const formVerifyPin = document.getElementById('form-verify-pin');
+    const alertaPin = document.getElementById('alerta-pin');
+    const alertaLogin = document.getElementById('alerta-login');
+    const alertaRegister = document.getElementById('alerta-register');
+    if (formVerifyPin) formVerifyPin.classList.add('hidden');
+    if (alertaPin) alertaPin.classList.add('hidden');
+    if (alertaLogin) alertaLogin.classList.add('hidden');
+    if (alertaRegister) alertaRegister.classList.add('hidden');
   };
 
   const requerirAutenticacion = (accionCallback, motivo = 'Para continuar, por favor iniciá sesión o creá tu cuenta 🍰') => {

@@ -382,12 +382,56 @@ body {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
+#seccion-auth-portal.hidden {
+  display: none !important;
+}
+
+#seccion-auth-portal.flex {
+  display: flex !important;
+}
+
+/* Control estricto de visibilidad por autenticación */
+.auth-element-hidden {
+  display: none !important;
+}
+
+/* Dropdown de usuario en header */
+#dropdown-user-menu {
+  transform-origin: top right;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+#dropdown-user-menu.hidden {
+  display: none !important;
+}
+
+#dropdown-user-menu:not(.hidden) {
+  display: block !important;
+  animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* Forzar cursor pointer e interactividad garantizada */
 #tab-btn-login,
 #tab-btn-register,
 #link-ir-registro,
 #link-ir-login,
-#btn-logout {
+#btn-user-menu,
+#btn-logout,
+#btn-logout-mobile,
+#btn-dropdown-mis-pedidos,
+#btn-dropdown-kds,
+#btn-mobile-mis-pedidos {
   cursor: pointer !important;
   pointer-events: auto !important;
 }

@@ -7,7 +7,7 @@
 
 const { Resend } = require('resend');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 // Remitente: debe ser de un dominio verificado en Resend (ver instrucciones abajo).
 // Mientras el dominio no esté verificado, usá 'onboarding@resend.dev' para pruebas.
@@ -40,6 +40,11 @@ async function sendVerificationEmail(email, code, options = {}) {
       <p style="color: #777; font-size: 13px; text-align: center;">Este código expira en 10 minutos. Si no solicitaste este código, ignora este mensaje.</p>
     </div>
   `;
+
+  if (!resend) {
+    console.warn(`[Resend Dev Mode] RESEND_API_KEY no configurada. Código PIN para ${email}: ${code}`);
+    return true;
+  }
 
   try {
     const { data, error } = await resend.emails.send({
