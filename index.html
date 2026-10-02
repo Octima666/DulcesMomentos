@@ -127,10 +127,11 @@
           <span>👨‍🍳</span>
         </button>
 
-        <!-- Botón Ingresar (solo desktop) -->
+        <!-- Botón Ingresar (solo desktop, controlado por JS) -->
         <button
           id="btn-nav-login"
-          class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-stone-200 hover:text-white bg-[#1c141b] hover:bg-[#2c1a26] border border-[#382333] shadow-sm transition-all transform active:scale-95"
+          class="items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-stone-200 hover:text-white bg-[#1c141b] hover:bg-[#2c1a26] border border-[#382333] shadow-sm transition-all transform active:scale-95 hidden md:flex"
+          style="display:none"
           title="Iniciar sesión o registrarse"
         >
           <svg class="w-3.5 h-3.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1850,6 +1850,79 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --------------------------------------------------------
+    // DROPDOWN MENÚ DE USUARIO EN NAVBAR DESKTOP
+    // --------------------------------------------------------
+    const btnUserMenu = document.getElementById('btn-user-menu');
+    const dropdownUserMenu = document.getElementById('dropdown-user-menu');
+    const iconUserChevron = document.getElementById('icon-user-chevron');
+
+    const abrirDropdownUsuario = () => {
+      if (!dropdownUserMenu) return;
+      dropdownUserMenu.classList.remove('hidden');
+      dropdownUserMenu.style.opacity = '0';
+      dropdownUserMenu.style.transform = 'translateY(-8px) scale(0.96)';
+      requestAnimationFrame(() => {
+        dropdownUserMenu.style.transition = 'opacity 150ms ease, transform 150ms ease';
+        dropdownUserMenu.style.opacity = '1';
+        dropdownUserMenu.style.transform = 'translateY(0) scale(1)';
+      });
+      btnUserMenu?.setAttribute('aria-expanded', 'true');
+      if (iconUserChevron) iconUserChevron.style.transform = 'rotate(180deg)';
+    };
+
+    const cerrarDropdownUsuario = () => {
+      if (!dropdownUserMenu) return;
+      dropdownUserMenu.style.transition = 'opacity 100ms ease, transform 100ms ease';
+      dropdownUserMenu.style.opacity = '0';
+      dropdownUserMenu.style.transform = 'translateY(-8px) scale(0.96)';
+      setTimeout(() => {
+        dropdownUserMenu.classList.add('hidden');
+        dropdownUserMenu.style.transition = '';
+        dropdownUserMenu.style.opacity = '';
+        dropdownUserMenu.style.transform = '';
+      }, 100);
+      btnUserMenu?.setAttribute('aria-expanded', 'false');
+      if (iconUserChevron) iconUserChevron.style.transform = '';
+    };
+
+    const toggleDropdownUsuario = () => {
+      const estaAbierto = !dropdownUserMenu?.classList.contains('hidden');
+      if (estaAbierto) {
+        cerrarDropdownUsuario();
+      } else {
+        abrirDropdownUsuario();
+      }
+    };
+
+    btnUserMenu?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDropdownUsuario();
+    });
+
+    // Cerrar dropdown al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (dropdownUserMenu && !dropdownUserMenu.classList.contains('hidden')) {
+        const navUserContainer = document.getElementById('nav-user-container');
+        if (navUserContainer && !navUserContainer.contains(e.target)) {
+          cerrarDropdownUsuario();
+        }
+      }
+    });
+
+    // Cerrar dropdown con Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dropdownUserMenu && !dropdownUserMenu.classList.contains('hidden')) {
+        cerrarDropdownUsuario();
+      }
+    });
+
+    // Cerrar dropdown al hacer clic en "Mis Pedidos"
+    const btnDropdownMisPedidos = document.getElementById('btn-dropdown-mis-pedidos');
+    btnDropdownMisPedidos?.addEventListener('click', () => {
+      cerrarDropdownUsuario();
+    });
+
+    // --------------------------------------------------------
     // LISTENERS DEL MODAL DE AUTENTICACIÓN (cerrar)
     // --------------------------------------------------------
     const btnNavLogin = document.getElementById('btn-nav-login');
@@ -1907,7 +1980,15 @@ document.addEventListener('DOMContentLoaded', () => {
       navUserContainer.classList.add('hidden');
       navUserContainer.classList.remove('flex');
     }
-    if (navLoginBtn) navLoginBtn.classList.remove('hidden');
+    // Mostrar botón Ingresar en desktop (limpiar style.display para que md:flex aplique)
+    if (navLoginBtn) {
+      navLoginBtn.style.display = '';
+    }
+    // Cerrar el dropdown de usuario si estaba abierto
+    const dropdownMenu = document.getElementById('dropdown-user-menu');
+    if (dropdownMenu) dropdownMenu.classList.add('hidden');
+    const chevron = document.getElementById('icon-user-chevron');
+    if (chevron) chevron.style.transform = '';
     if (drawerCarrito) drawerCarrito.classList.add('hidden');
     const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
     if (btnNavLoginMobile) {
@@ -1941,7 +2022,22 @@ document.addEventListener('DOMContentLoaded', () => {
       navUserContainer.classList.remove('hidden');
       navUserContainer.classList.add('flex');
     }
-    if (navLoginBtn) navLoginBtn.classList.add('hidden');
+    // Ocultar botón Ingresar (style.display para vencer md:flex de Tailwind)
+    if (navLoginBtn) {
+      navLoginBtn.style.display = 'none';
+    }
+
+    // Rellenar dropdown de usuario con email y rol
+    const dropdownEmail = document.getElementById('dropdown-user-email');
+    const dropdownBadge = document.getElementById('dropdown-user-badge');
+    if (dropdownEmail) dropdownEmail.textContent = usuario.email || '';
+    if (dropdownBadge) dropdownBadge.textContent = usuario.rol === 'admin' ? 'Admin' : (usuario.rol === 'cocina' ? 'Cocina' : 'Cliente');
+
+    // Cerrar el dropdown si estaba abierto
+    const dropdownMenu = document.getElementById('dropdown-user-menu');
+    if (dropdownMenu) dropdownMenu.classList.add('hidden');
+    const chevron = document.getElementById('icon-user-chevron');
+    if (chevron) chevron.style.transform = '';
     if (btnNavLoginMobile) {
       const span = btnNavLoginMobile.querySelector('span');
       if (span) span.textContent = `Cerrar sesión (${usuario.nombre || 'Usuario'})`;
@@ -2064,7 +2160,14 @@ document.addEventListener('DOMContentLoaded', () => {
             navUserContainer.classList.remove('hidden');
             navUserContainer.classList.add('flex');
           }
-          if (navLoginBtn) navLoginBtn.classList.add('hidden');
+          if (navLoginBtn) {
+            navLoginBtn.style.display = 'none';
+          }
+          // Rellenar dropdown de usuario
+          const dropdownEmail = document.getElementById('dropdown-user-email');
+          const dropdownBadge = document.getElementById('dropdown-user-badge');
+          if (dropdownEmail) dropdownEmail.textContent = data.user.email || '';
+          if (dropdownBadge) dropdownBadge.textContent = data.user.rol === 'admin' ? 'Admin' : (data.user.rol === 'cocina' ? 'Cocina' : 'Cliente');
           const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
           if (btnNavLoginMobile) {
             const span = btnNavLoginMobile.querySelector('span');
@@ -2100,7 +2203,14 @@ document.addEventListener('DOMContentLoaded', () => {
             navUserContainer.classList.remove('hidden');
             navUserContainer.classList.add('flex');
           }
-          if (navLoginBtn) navLoginBtn.classList.add('hidden');
+          if (navLoginBtn) {
+            navLoginBtn.style.display = 'none';
+          }
+          // Rellenar dropdown de usuario
+          const dEmail2 = document.getElementById('dropdown-user-email');
+          const dBadge2 = document.getElementById('dropdown-user-badge');
+          if (dEmail2) dEmail2.textContent = userObj.email || '';
+          if (dBadge2) dBadge2.textContent = userObj.rol === 'admin' ? 'Admin' : (userObj.rol === 'cocina' ? 'Cocina' : 'Cliente');
           if (btnNavLoginMobile) {
             const span = btnNavLoginMobile.querySelector('span');
             if (span) span.textContent = `Cerrar sesión (${userObj.nombre || 'Usuario'})`;
