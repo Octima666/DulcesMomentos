@@ -107,20 +107,14 @@
           </svg>
         </button>
 
-        <!-- Icono Carrito con Badge -->
-        <button id="btn-icono-carrito" aria-label="Ver carrito" class="relative p-2 sm:p-2.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800/70 border border-transparent hover:border-[#352230] transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-          </svg>
-          <span id="badge-carrito" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">0</span>
-        </button>
-
-        <!-- Botón Rosa Mi Carrito -->
-        <button id="btn-abrir-carrito" class="relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-brand-600/30 transition transform active:scale-95">
+        <!-- Botón Rosa Mi Carrito (único botón de carrito) -->
+        <button id="btn-abrir-carrito" aria-label="Ver carrito" class="relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-brand-600/30 transition transform active:scale-95">
+          <!-- Ícono shopping cart -->
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
           <span class="hidden xs:inline">Mi Carrito</span>
+          <span id="badge-carrito" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">0</span>
         </button>
 
         <!-- Acceso KDS Cocina -->
@@ -562,18 +556,12 @@
 
           <div class="pt-2 flex flex-wrap items-center gap-4">
             <a href="#catalogo" class="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-xl shadow-brand-600/35 transform hover:-translate-y-0.5 transition-all">
+              <!-- Ícono shopping cart -->
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               <span>Ver Menú & Pedir</span>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-            </a>
-
-            <a href="https://wa.me/5493757571985?text=Hola!%20Quiero%20hacer%20una%20consulta%20para%20un%20pedido%20en%20Dulces%20Momentos." target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm text-stone-200 bg-transparent border-2 border-stone-700 hover:border-brand-500 hover:bg-brand-600/10 transition-all">
-              <svg class="w-4 h-4 text-emerald-400 fill-current" viewBox="0 0 24 24">
-                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.158.57 4.183 1.564 5.939l-1.66 6.071 6.223-1.632c1.701.927 3.652 1.455 5.727 1.455 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z"/>
-              </svg>
-              <span>Consultas WhatsApp</span>
             </a>
           </div>
 
@@ -1083,6 +1071,22 @@
   <!-- CONTENEDOR DE TOAST NOTIFICATIONS                        -->
   <!-- ======================================================== -->
   <div id="toast-container"></div>
+
+  <!-- ======================================================== -->
+  <!-- BOTÓN FLOTANTE DE WHATSAPP                               -->
+  <!-- ======================================================== -->
+  <a
+    id="btn-whatsapp-flotante"
+    href="https://wa.me/5493757571985?text=Hola!%20Quiero%20hacer%20una%20consulta%20para%20un%20pedido%20en%20Dulces%20Momentos."
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Consultas por WhatsApp"
+    title="Consultas por WhatsApp"
+  >
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.158.57 4.183 1.564 5.939l-1.66 6.071 6.223-1.632c1.701.927 3.652 1.455 5.727 1.455 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z"/>
+    </svg>
+  </a>
 
   <!-- Script Principal -->
   <script src="app.js"></script>
