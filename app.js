@@ -1936,6 +1936,21 @@ document.addEventListener('DOMContentLoaded', () => {
       cerrarSesion();
     });
 
+    // Botón de Cerrar Sesión en Menú Móvil
+    const btnLogoutMobile = document.getElementById('btn-logout-mobile');
+    btnLogoutMobile?.addEventListener('click', () => {
+      cerrarMenuMobile();
+      cerrarSesion();
+    });
+
+    // Botón Mis Pedidos en Menú Móvil
+    const btnMobileMisPedidos = document.getElementById('btn-mobile-mis-pedidos');
+    btnMobileMisPedidos?.addEventListener('click', () => {
+      cerrarMenuMobile();
+      const btnAbrirCarrito = document.getElementById('btn-abrir-carrito');
+      btnAbrirCarrito?.click();
+    });
+
     // --------------------------------------------------------
     // DROPDOWN MENÚ DE USUARIO EN NAVBAR DESKTOP
     // --------------------------------------------------------
