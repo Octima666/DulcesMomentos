@@ -212,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     comandasCocina: [],
     favoritos: new Set(),
     categoriaSeleccionada: 'todos',
+    terminoBusqueda: '',
     tipoEntrega: 'takeaway',
     metodoPago: 'efectivo',
     pagoQr: {
@@ -365,21 +366,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const contenedor = document.getElementById('catalogo-productos');
     if (!contenedor) return;
 
-    const productosFiltrados = state.categoriaSeleccionada === 'todos'
+    // Filtrar primero por categoria
+    let productosFiltrados = state.categoriaSeleccionada === 'todos'
       ? PRODUCTOS
       : PRODUCTOS.filter(p => p.categoria.toLowerCase() === state.categoriaSeleccionada.toLowerCase());
 
+    // Luego filtrar por término de búsqueda
+    const query = (state.terminoBusqueda || '').trim().toLowerCase();
+    if (query) {
+      productosFiltrados = productosFiltrados.filter(p =>
+        p.nombre.toLowerCase().includes(query) ||
+        p.descripcion.toLowerCase().includes(query) ||
+        p.categoria.toLowerCase().includes(query)
+      );
+    }
+
     if (productosFiltrados.length === 0) {
-      contenedor.innerHTML = `
-        <div class="col-span-full py-16 text-center text-stone-400 bg-[#161115] rounded-3xl border border-[#2b1e29] p-8">
-          <p class="text-4xl mb-3">🍰</p>
-          <p class="font-serif text-xl font-bold text-white">No encontramos productos en esta categoría.</p>
-          <p class="text-xs text-stone-400 mt-1">Explorá nuestras otras delicias o mirá toda la colección.</p>
-          <button onclick="window.filtrarCategoriaDesdeNav('todos')" class="mt-4 px-5 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs shadow-md transition">
-            Ver Todos los Productos
-          </button>
-        </div>
-      `;
+      // Mensaje diferenciado: búsqueda sin resultados vs. categoría vacía
+      if (query) {
+        contenedor.innerHTML = `
+          <div class="col-span-full search-no-results-card">
+            <div class="search-no-results-icon">&#128269;</div>
+            <p class="search-no-results-title">No encontramos productos para <span class="search-no-results-term">&ldquo;${state.terminoBusqueda}&rdquo;</span></p>
+            <p class="search-no-results-subtitle">¡Probá con otro término o contactános para un pedido personalizado!</p>
+            <div class="search-no-results-actions">
+              <button onclick="window.limpiarBusqueda()" class="search-no-results-btn-primary">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                Limpiar búsqueda
+              </button>
+              <button onclick="window.filtrarCategoriaDesdeNav('todos')" class="search-no-results-btn-secondary">
+                Ver todo el catálogo
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        contenedor.innerHTML = `
+          <div class="col-span-full py-16 text-center text-stone-400 bg-[#161115] rounded-3xl border border-[#2b1e29] p-8">
+            <p class="text-4xl mb-3">🍰</p>
+            <p class="font-serif text-xl font-bold text-white">No encontramos productos en esta categoría.</p>
+            <p class="text-xs text-stone-400 mt-1">Explorá nuestras otras delicias o mirá toda la colección.</p>
+            <button onclick="window.filtrarCategoriaDesdeNav('todos')" class="mt-4 px-5 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs shadow-md transition">
+              Ver Todos los Productos
+            </button>
+          </div>
+        `;
+      }
       return;
     }
 
@@ -1169,6 +1201,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================================
   window.filtrarCategoriaDesdeNav = (categoria) => {
     state.categoriaSeleccionada = categoria;
+    // Limpiar búsqueda activa al cambiar de categoría
+    state.terminoBusqueda = '';
+    const inputDesktop = document.getElementById('input-buscar-desktop');
+    const inputMobile = document.getElementById('input-buscar-mobile');
+    if (inputDesktop) inputDesktop.value = '';
+    if (inputMobile) inputMobile.value = '';
+    document.getElementById('btn-limpiar-busqueda')?.style && (document.getElementById('btn-limpiar-busqueda').style.display = 'none');
+    document.getElementById('btn-limpiar-busqueda-mobile')?.style && (document.getElementById('btn-limpiar-busqueda-mobile').style.display = 'none');
 
     // Actualizar botones de filtro
     const botonesFiltro = document.querySelectorAll('.btn-filtro');
@@ -1263,37 +1303,152 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Buscador
+    // ── BUSCADOR DESKTOP ────────────────────────────────────
     const btnBuscar = document.getElementById('btn-buscar');
-    btnBuscar?.addEventListener('click', () => {
-      const termino = prompt('🔍 ¿Qué delicia estás buscando? (ej. Chocolate, Frutos, Macarons, Cheesecake):');
-      if (termino && termino.trim()) {
-        const query = termino.trim().toLowerCase();
-        const contenedor = document.getElementById('catalogo-productos');
-        const resultados = PRODUCTOS.filter(p =>
-          p.nombre.toLowerCase().includes(query) ||
-          p.descripcion.toLowerCase().includes(query) ||
-          p.categoria.toLowerCase().includes(query)
-        );
+    const buscadorCampo = document.getElementById('buscador-desktop-campo');
+    const inputBuscarDesktop = document.getElementById('input-buscar-desktop');
+    const btnLimpiarBusqueda = document.getElementById('btn-limpiar-busqueda');
 
-        if (contenedor) {
-          if (resultados.length === 0) {
-            contenedor.innerHTML = `
-              <div class="col-span-full py-16 text-center text-stone-400 bg-[#161115] rounded-3xl border border-[#2b1e29] p-8">
-                <p class="text-4xl mb-3">🔍</p>
-                <p class="font-serif text-xl font-bold text-white">No encontramos resultados para "${termino}".</p>
-                <button onclick="window.filtrarCategoriaDesdeNav('todos')" class="mt-4 px-5 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs shadow-md transition">
-                  Ver Todos los Productos
-                </button>
-              </div>
-            `;
-          } else {
-            mostrarToast(`Encontramos ${resultados.length} resultado(s) para "${termino}".`, 'info');
-            state.categoriaSeleccionada = 'todos';
-            renderizarCatalogo();
-          }
+    // Función compartida de búsqueda
+    const ejecutarBusqueda = (termino) => {
+      state.terminoBusqueda = (termino || '').trim();
+      // Al buscar, resetear el filtro de categoría
+      state.categoriaSeleccionada = 'todos';
+      renderizarCatalogo();
+      // Scroll suave al catálogo
+      const catalogoEl = document.getElementById('catalogo');
+      if (catalogoEl) catalogoEl.scrollIntoView({ behavior: 'smooth' });
+      // Mostrar toast solo si hay resultados
+      if (state.terminoBusqueda) {
+        const total = document.querySelectorAll('#catalogo-productos article').length;
+        if (total > 0) {
+          mostrarToast(`🔍 ${total} resultado(s) para “${state.terminoBusqueda}”`, 'info');
         }
       }
+    };
+
+    // Función global para limpiar la búsqueda
+    window.limpiarBusqueda = () => {
+      state.terminoBusqueda = '';
+      if (inputBuscarDesktop) inputBuscarDesktop.value = '';
+      const inputMobile = document.getElementById('input-buscar-mobile');
+      if (inputMobile) inputMobile.value = '';
+      const btnLimpiarMobile = document.getElementById('btn-limpiar-busqueda-mobile');
+      if (btnLimpiarMobile) btnLimpiarMobile.style.display = 'none';
+      if (btnLimpiarBusqueda) btnLimpiarBusqueda.style.display = 'none';
+      renderizarCatalogo();
+    };
+
+    // Toggle del buscador desktop (expandir / colapsar)
+    let buscadorDesktopAbierto = false;
+    const abrirBuscadorDesktop = () => {
+      buscadorDesktopAbierto = true;
+      buscadorCampo?.classList.add('activo');
+      btnBuscar?.classList.add('activo');
+      setTimeout(() => inputBuscarDesktop?.focus(), 200);
+    };
+    const cerrarBuscadorDesktop = () => {
+      buscadorDesktopAbierto = false;
+      buscadorCampo?.classList.remove('activo');
+      btnBuscar?.classList.remove('activo');
+    };
+
+    btnBuscar?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (buscadorDesktopAbierto) {
+        // Si hay texto, ejecutar búsqueda al hacer clic de nuevo
+        if (inputBuscarDesktop?.value.trim()) {
+          ejecutarBusqueda(inputBuscarDesktop.value);
+        } else {
+          cerrarBuscadorDesktop();
+        }
+      } else {
+        abrirBuscadorDesktop();
+      }
+    });
+
+    // Buscar al presionar Enter
+    inputBuscarDesktop?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        ejecutarBusqueda(inputBuscarDesktop.value);
+      }
+      if (e.key === 'Escape') {
+        if (inputBuscarDesktop.value.trim()) {
+          window.limpiarBusqueda();
+        } else {
+          cerrarBuscadorDesktop();
+        }
+      }
+    });
+
+    // Mostrar/ocultar botón limpiar según haya texto
+    inputBuscarDesktop?.addEventListener('input', () => {
+      if (btnLimpiarBusqueda) {
+        btnLimpiarBusqueda.style.display = inputBuscarDesktop.value ? 'flex' : 'none';
+      }
+      // Búsqueda en tiempo real (debounce leve)
+      clearTimeout(inputBuscarDesktop._searchTimer);
+      inputBuscarDesktop._searchTimer = setTimeout(() => {
+        ejecutarBusqueda(inputBuscarDesktop.value);
+      }, 350);
+    });
+
+    btnLimpiarBusqueda?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.limpiarBusqueda();
+      inputBuscarDesktop?.focus();
+    });
+
+    // Cerrar al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      const wrapper = document.getElementById('buscador-desktop-wrapper');
+      if (buscadorDesktopAbierto && wrapper && !wrapper.contains(e.target)) {
+        if (!inputBuscarDesktop?.value.trim()) {
+          cerrarBuscadorDesktop();
+        }
+      }
+    });
+
+    // ── BUSCADOR MÓVIL ─────────────────────────────────────
+    const inputBuscarMobile = document.getElementById('input-buscar-mobile');
+    const btnLimpiarMobile = document.getElementById('btn-limpiar-busqueda-mobile');
+    const btnBuscarMobileAction = document.getElementById('btn-buscar-mobile-action');
+
+    inputBuscarMobile?.addEventListener('input', () => {
+      if (btnLimpiarMobile) {
+        btnLimpiarMobile.style.display = inputBuscarMobile.value ? 'flex' : 'none';
+      }
+    });
+
+    inputBuscarMobile?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        ejecutarBusqueda(inputBuscarMobile.value);
+        // Sincronizar input desktop
+        if (inputBuscarDesktop) inputBuscarDesktop.value = inputBuscarMobile.value;
+        // Cerrar drawer
+        const cerrarMenuMobileEvent = new CustomEvent('cerrar-menu-mobile');
+        document.dispatchEvent(cerrarMenuMobileEvent);
+      }
+    });
+
+    btnBuscarMobileAction?.addEventListener('click', () => {
+      ejecutarBusqueda(inputBuscarMobile?.value || '');
+      if (inputBuscarDesktop) inputBuscarDesktop.value = inputBuscarMobile?.value || '';
+      // Cerrar drawer
+      const cerrarMenuMobileEvent = new CustomEvent('cerrar-menu-mobile');
+      document.dispatchEvent(cerrarMenuMobileEvent);
+    });
+
+    btnLimpiarMobile?.addEventListener('click', () => {
+      window.limpiarBusqueda();
+      inputBuscarMobile?.focus();
+    });
+
+    // Escuchar evento personalizado de cierre del drawer desde móvil
+    document.addEventListener('cerrar-menu-mobile', () => {
+      // Esta función se llama desde el listener de búsqueda móvil
+      // La función cerrarMenuMobile está en scope de configurarMenuMobile, disparamos un clic al botón de cerrar
+      document.getElementById('btn-cerrar-menu-mobile')?.click();
     });
 
     // Modalidad de Entrega
@@ -1415,7 +1570,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuMobileDrawer = document.getElementById('menu-mobile-drawer');
     const btnCerrarMenuMobile = document.getElementById('btn-cerrar-menu-mobile');
     const linksMenuMobile = document.querySelectorAll('#menu-mobile-drawer [data-close-menu]');
-    const btnBuscarMobile = document.getElementById('btn-buscar-mobile');
+    const btnBuscarMobile = null; // Eliminado: el buscador móvil ahora tiene su propio input
     const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
     const btnAbrirAuthKdsMobile = document.getElementById('btn-abrir-auth-kds-mobile');
 
@@ -1491,10 +1646,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    btnBuscarMobile?.addEventListener('click', () => {
-      cerrarMenuMobile();
-      btnBuscar?.click();
-    });
+    // El buscador móvil ahora maneja sus propios eventos (ver sección Buscador arriba).
 
     btnNavLoginMobile?.addEventListener('click', () => {
       cerrarMenuMobile();

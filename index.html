@@ -106,12 +106,34 @@
       <!-- ── ACCIONES DERECHA ──────────────────────────── -->
       <div class="flex items-center gap-1.5 sm:gap-2">
 
-        <!-- Buscador (solo desktop) -->
-        <button id="btn-buscar" aria-label="Buscar productos" class="hidden md:flex p-2 sm:p-2.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800/70 border border-transparent hover:border-[#352230] transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </button>
+        <!-- Buscador expandible (desktop ≥ 768px) -->
+        <div id="buscador-desktop-wrapper" class="hidden md:flex items-center relative search-bar-wrapper">
+          <!-- Campo de texto (oculto por defecto, se expande al activar) -->
+          <div id="buscador-desktop-campo" class="search-input-container">
+            <svg class="search-input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              id="input-buscar-desktop"
+              placeholder="Buscar tortas, postres..."
+              autocomplete="off"
+              aria-label="Buscar productos"
+              class="search-input"
+            >
+            <button id="btn-limpiar-busqueda" class="search-clear-btn" aria-label="Limpiar búsqueda" title="Limpiar">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Botón lupa para activar/colapsar -->
+          <button id="btn-buscar" aria-label="Abrir buscador" class="search-toggle-btn">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+        </div>
 
         <!-- Botón Mi Carrito -->
         <button id="btn-abrir-carrito" aria-label="Ver carrito" class="relative flex items-center gap-1.5 px-3 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs shadow-lg shadow-brand-600/30 transition transform active:scale-95">
@@ -269,11 +291,30 @@
 
     <!-- Buscador en móvil -->
     <div class="p-4">
-      <button id="btn-buscar-mobile" aria-label="Buscar productos" class="mobile-menu-link w-full text-left flex items-center gap-3">
-        <svg class="w-5 h-5 shrink-0 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="search-mobile-container">
+        <svg class="search-mobile-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <span>Buscar productos</span>
+        <input
+          type="text"
+          id="input-buscar-mobile"
+          placeholder="Buscar tortas, postres..."
+          autocomplete="off"
+          aria-label="Buscar productos en móvil"
+          class="search-mobile-input"
+        >
+        <button id="btn-limpiar-busqueda-mobile" class="search-mobile-clear" aria-label="Limpiar búsqueda móvil" title="Limpiar" style="display:none;">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <!-- Botón de búsqueda (acción explícita) -->
+      <button id="btn-buscar-mobile-action" class="search-mobile-action-btn">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        Buscar
       </button>
     </div>
 
