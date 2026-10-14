@@ -124,6 +124,31 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ========================================================
+  // 2.1 UTILIDADES DE TEXTO Y NORMALIZACIÓN (BÚSQUEDA INTELIGENTE)
+  // ========================================================
+  const normalizarTexto = (str) => {
+    if (!str) return '';
+    return str
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Elimina acentos/tildes
+      .replace(/[^a-z0-9\s]/g, ' ')     // Reemplaza caracteres especiales por espacios
+      .replace(/\s+/g, ' ')            // Colapsa múltiples espacios
+      .trim();
+  };
+
+  const escapeHtml = (str) => {
+    if (!str) return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
+  // ========================================================
   // 3. CATÁLOGO DE PRODUCTOS (EXACTO AL DISEÑO DE ALTA FIDELIDAD)
   // ========================================================
   const PRODUCTOS = [
@@ -135,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
       descripcion: 'Masa sableé crocante rellena de suave crema pastelera artesanal y decorada con frutos rojos.',
       imagen: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=700&q=85',
       badge: 'MÁS VENDIDO',
+      tags: ['tarta', 'torta', 'frutos rojos', 'frutos del bosque', 'frutilla', 'arandanos', 'pastel'],
       toppings: [
         { id: 'top-arandanos', nombre: 'Extra Arándanos Frescos', precio: 1200 },
         { id: 'top-choco-blanco', nombre: 'Rulos de Chocolate Blanco Belga', precio: 900 }
@@ -148,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
       descripcion: 'Textura ultra cremosa homemade a base de Mafá con base de galletas Graham y coulis de frutos silvestres.',
       imagen: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=700&q=85',
       badge: 'FAVORITO',
+      tags: ['cheesecake', 'cheese', 'tarta de queso', 'torta de queso', 'postre'],
       toppings: [
         { id: 'top-maracuya', nombre: 'Salsa Reducción de Maracuyá', precio: 1500 },
         { id: 'top-frutillas', nombre: 'Frutillas maceradas', precio: 1100 }
@@ -161,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
       descripcion: 'Intensa bizcocho de cacao 70% con ganache de chocolate semi amargo y un toque de café espresso.',
       imagen: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=700&q=85',
       badge: 'GOURMET',
+      tags: ['torta', 'tarta', 'chocolate', 'belga', 'cacao', 'dulce de leche', 'pastel'],
       toppings: [
         { id: 'top-avellanas', nombre: 'Praliné de Avellanas Tostadas', precio: 1400 },
         { id: 'top-ddl', nombre: 'Corazón de Dulce de Leche Repostero', precio: 1000 }
@@ -174,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
       descripcion: 'Suaves, crujientes y rellenos de ganache de sabores unicos.',
       imagen: 'https://images.unsplash.com/photo-1569864358642-9d1684040f43?auto=format&fit=crop&w=700&q=85',
       badge: 'ESPECIAL',
+      tags: ['macaron', 'macarons', 'dulce', 'merengue', 'especialidad'],
       toppings: [
         { id: 'top-caja-regalo', nombre: 'Packaging de Regalo + Moño de Seda', precio: 800 }
       ]
@@ -186,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
       descripcion: 'Hojaldre artesanal 100% manteca con crema de almendras tostadas y azúcar impalpable.',
       imagen: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=700&q=85',
       badge: 'ARTESANAL',
+      tags: ['croissant', 'medialuna', 'masas', 'panaderia', 'almendras', 'factura'],
       toppings: [
         { id: 'top-chocolate', nombre: 'Baño de Chocolate Belga', precio: 700 }
       ]
@@ -198,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
       descripcion: 'Surtido exclusivo de 2 porciones de torta, 4 macarons y 2 mini postres para compartir.',
       imagen: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=700&q=85',
       badge: 'PROMO DULCE',
+      tags: ['box', 'caja', 'degustacion', 'fiesta', 'promo', 'promocion', 'combo', 'surtido', 'regalo'],
       toppings: [
         { id: 'top-tarjeta', nombre: 'Tarjeta de Felicitaciones Artesanal', precio: 500 }
       ]
@@ -366,36 +397,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const contenedor = document.getElementById('catalogo-productos');
     if (!contenedor) return;
 
-    // Filtrar primero por categoria
+    const searchResultsBar = document.getElementById('search-results-bar');
+    const searchResultsText = document.getElementById('search-results-text');
+
+    // Filtrar primero por categoria (si no es 'todos')
     let productosFiltrados = state.categoriaSeleccionada === 'todos'
       ? PRODUCTOS
-      : PRODUCTOS.filter(p => p.categoria.toLowerCase() === state.categoriaSeleccionada.toLowerCase());
+      : PRODUCTOS.filter(p => normalizarTexto(p.categoria) === normalizarTexto(state.categoriaSeleccionada));
 
-    // Luego filtrar por término de búsqueda
-    const query = (state.terminoBusqueda || '').trim().toLowerCase();
-    if (query) {
-      productosFiltrados = productosFiltrados.filter(p =>
-        p.nombre.toLowerCase().includes(query) ||
-        p.descripcion.toLowerCase().includes(query) ||
-        p.categoria.toLowerCase().includes(query)
-      );
+    // Luego filtrar por término de búsqueda inteligente
+    const queryOriginal = (state.terminoBusqueda || '').trim();
+    const queryNorm = normalizarTexto(queryOriginal);
+
+    if (queryNorm) {
+      const queryWords = queryNorm.split(' ').filter(Boolean);
+
+      productosFiltrados = productosFiltrados.filter(p => {
+        const nombreNorm = normalizarTexto(p.nombre);
+        const categoriaNorm = normalizarTexto(p.categoria);
+        const tagsNorm = (p.tags || []).map(t => normalizarTexto(t));
+        const camposRelevantes = [nombreNorm, categoriaNorm, ...tagsNorm].join(' ');
+
+        // Coincidencia parcial directa en TÍTULO, CATEGORÍA o TAGS
+        if (nombreNorm.includes(queryNorm) ||
+            categoriaNorm.includes(queryNorm) ||
+            tagsNorm.some(t => t.includes(queryNorm))) {
+          return true;
+        }
+
+        // Si son múltiples palabras, verificar que cada palabra coincida con los campos relevantes
+        // (NO busca en descripción para evitar falsos positivos)
+        return queryWords.length > 1 && queryWords.every(word => camposRelevantes.includes(word));
+      });
     }
 
     if (productosFiltrados.length === 0) {
+      // Ocultar barra de contador cuando no hay resultados
+      if (searchResultsBar) {
+        searchResultsBar.classList.add('hidden');
+        searchResultsBar.classList.remove('flex');
+      }
+
       // Mensaje diferenciado: búsqueda sin resultados vs. categoría vacía
-      if (query) {
+      if (queryNorm) {
         contenedor.innerHTML = `
           <div class="col-span-full search-no-results-card">
             <div class="search-no-results-icon">&#128269;</div>
-            <p class="search-no-results-title">No encontramos productos para <span class="search-no-results-term">&ldquo;${state.terminoBusqueda}&rdquo;</span></p>
-            <p class="search-no-results-subtitle">¡Probá con otro término o contactános para un pedido personalizado!</p>
+            <h3 class="search-no-results-title">No encontramos coincidencias para &ldquo;<span class="search-no-results-term">${escapeHtml(queryOriginal)}</span>&rdquo;</h3>
+            <p class="search-no-results-subtitle">Intenta buscando con otro nombre (ej. Cheesecake, Torta, Alfajor) o explora nuestras categorías.</p>
             <div class="search-no-results-actions">
               <button onclick="window.limpiarBusqueda()" class="search-no-results-btn-primary">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                Limpiar búsqueda
-              </button>
-              <button onclick="window.filtrarCategoriaDesdeNav('todos')" class="search-no-results-btn-secondary">
-                Ver todo el catálogo
+                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                Ver todo el menú
               </button>
             </div>
           </div>
@@ -407,12 +460,28 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="font-serif text-xl font-bold text-white">No encontramos productos en esta categoría.</p>
             <p class="text-xs text-stone-400 mt-1">Explorá nuestras otras delicias o mirá toda la colección.</p>
             <button onclick="window.filtrarCategoriaDesdeNav('todos')" class="mt-4 px-5 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs shadow-md transition">
-              Ver Todos los Productos
+              Ver todo el menú
             </button>
           </div>
         `;
       }
       return;
+    }
+
+    // Actualizar indicador discreto de resultados encima de la grilla
+    if (queryNorm) {
+      if (searchResultsBar && searchResultsText) {
+        searchResultsBar.classList.remove('hidden');
+        searchResultsBar.classList.add('flex');
+        const count = productosFiltrados.length;
+        const countTxt = count === 1 ? '1 resultado' : `${count} resultados`;
+        searchResultsText.innerHTML = `Mostrando <strong class="text-white">${countTxt}</strong> para <span class="text-brand-300 font-medium">&ldquo;${escapeHtml(queryOriginal)}&rdquo;</span>`;
+      }
+    } else {
+      if (searchResultsBar) {
+        searchResultsBar.classList.add('hidden');
+        searchResultsBar.classList.remove('flex');
+      }
     }
 
     contenedor.innerHTML = productosFiltrados.map(prod => {
@@ -1312,30 +1381,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función compartida de búsqueda
     const ejecutarBusqueda = (termino) => {
       state.terminoBusqueda = (termino || '').trim();
-      // Al buscar, resetear el filtro de categoría
+      // Al buscar, resetear el filtro de categoría para buscar en todo el catálogo
       state.categoriaSeleccionada = 'todos';
       renderizarCatalogo();
       // Scroll suave al catálogo
       const catalogoEl = document.getElementById('catalogo');
       if (catalogoEl) catalogoEl.scrollIntoView({ behavior: 'smooth' });
-      // Mostrar toast solo si hay resultados
-      if (state.terminoBusqueda) {
-        const total = document.querySelectorAll('#catalogo-productos article').length;
-        if (total > 0) {
-          mostrarToast(`🔍 ${total} resultado(s) para “${state.terminoBusqueda}”`, 'info');
-        }
-      }
+      // Se eliminó la notificación flotante (toast) para evitar duplicados molestos;
+      // la cantidad de resultados se muestra de forma limpia directamente encima de la grilla.
     };
 
-    // Función global para limpiar la búsqueda
+    // Función global para limpiar la búsqueda y restaurar el catálogo completo
     window.limpiarBusqueda = () => {
       state.terminoBusqueda = '';
+      state.categoriaSeleccionada = 'todos';
       if (inputBuscarDesktop) inputBuscarDesktop.value = '';
       const inputMobile = document.getElementById('input-buscar-mobile');
       if (inputMobile) inputMobile.value = '';
       const btnLimpiarMobile = document.getElementById('btn-limpiar-busqueda-mobile');
       if (btnLimpiarMobile) btnLimpiarMobile.style.display = 'none';
       if (btnLimpiarBusqueda) btnLimpiarBusqueda.style.display = 'none';
+
+      // Restaurar estado visual de los botones de categoría a 'todos'
+      const botonesFiltro = document.querySelectorAll('.btn-filtro');
+      botonesFiltro.forEach(btn => {
+        const btnCat = btn.getAttribute('data-categoria');
+        if (btnCat?.toLowerCase() === 'todos') {
+          btn.className = 'btn-filtro active px-5 py-2 text-xs sm:text-sm font-semibold rounded-full bg-brand-600 text-white shadow-md shadow-brand-600/30 transition';
+        } else {
+          btn.className = 'btn-filtro px-5 py-2 text-xs sm:text-sm font-semibold rounded-full bg-[#181318] text-stone-300 hover:text-white hover:bg-[#231a22] border border-[#2b1f28] transition';
+        }
+      });
+      const tarjetasCat = document.querySelectorAll('.card-categoria-nav');
+      tarjetasCat.forEach(card => card.classList.remove('active'));
+
       renderizarCatalogo();
     };
 
