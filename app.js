@@ -1343,20 +1343,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let buscadorDesktopAbierto = false;
     const abrirBuscadorDesktop = () => {
       buscadorDesktopAbierto = true;
-      buscadorCampo?.classList.add('activo');
-      btnBuscar?.classList.add('activo');
+      buscadorCampo?.classList.add('activo');   // solo el pill
       setTimeout(() => inputBuscarDesktop?.focus(), 200);
     };
     const cerrarBuscadorDesktop = () => {
       buscadorDesktopAbierto = false;
       buscadorCampo?.classList.remove('activo');
-      btnBuscar?.classList.remove('activo');
+      if (btnLimpiarBusqueda) btnLimpiarBusqueda.style.display = 'none';
     };
+
+    // Clic en el pill colapsado lo abre; clic en la lupa dentro del pill expandido busca o cierra
+    buscadorCampo?.addEventListener('click', (e) => {
+      if (!buscadorDesktopAbierto) {
+        abrirBuscadorDesktop();
+        e.stopPropagation();
+      }
+    });
 
     btnBuscar?.addEventListener('click', (e) => {
       e.stopPropagation();
       if (buscadorDesktopAbierto) {
-        // Si hay texto, ejecutar búsqueda al hacer clic de nuevo
         if (inputBuscarDesktop?.value.trim()) {
           ejecutarBusqueda(inputBuscarDesktop.value);
         } else {
