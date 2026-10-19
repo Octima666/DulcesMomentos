@@ -1379,16 +1379,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLimpiarBusqueda = document.getElementById('btn-limpiar-busqueda');
 
     // Función compartida de búsqueda
-    const ejecutarBusqueda = (termino) => {
+    // desplazar = false por defecto para evitar auto-scroll mientras el usuario escribe
+    const ejecutarBusqueda = (termino, desplazar = false) => {
       state.terminoBusqueda = (termino || '').trim();
       // Al buscar, resetear el filtro de categoría para buscar en todo el catálogo
       state.categoriaSeleccionada = 'todos';
       renderizarCatalogo();
-      // Scroll suave al catálogo
-      const catalogoEl = document.getElementById('catalogo');
-      if (catalogoEl) catalogoEl.scrollIntoView({ behavior: 'smooth' });
-      // Se eliminó la notificación flotante (toast) para evitar duplicados molestos;
-      // la cantidad de resultados se muestra de forma limpia directamente encima de la grilla.
+
+      // Scroll suave al catálogo ÚNICAMENTE si se solicita explícitamente (ej. presionar Enter o botón de búsqueda)
+      if (desplazar) {
+        const catalogoEl = document.getElementById('catalogo');
+        if (catalogoEl) catalogoEl.scrollIntoView({ behavior: 'smooth' });
+      }
     };
 
     // Función global para limpiar la búsqueda y restaurar el catálogo completo
@@ -1443,7 +1445,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       if (buscadorDesktopAbierto) {
         if (inputBuscarDesktop?.value.trim()) {
-          ejecutarBusqueda(inputBuscarDesktop.value);
+          ejecutarBusqueda(inputBuscarDesktop.value, true);
         } else {
           cerrarBuscadorDesktop();
         }
@@ -1452,10 +1454,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Buscar al presionar Enter
+    // Buscar al presionar Enter (ejecuta búsqueda y desplaza al catálogo)
     inputBuscarDesktop?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        ejecutarBusqueda(inputBuscarDesktop.value);
+        e.preventDefault();
+        clearTimeout(inputBuscarDesktop._searchTimer);
+        ejecutarBusqueda(inputBuscarDesktop.value, true);
       }
       if (e.key === 'Escape') {
         if (inputBuscarDesktop.value.trim()) {
@@ -1466,16 +1470,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Mostrar/ocultar botón limpiar según haya texto
+    // Búsqueda fluida en vivo (debounce): filtra resultados sin desplazar la pantalla ni perder foco
     inputBuscarDesktop?.addEventListener('input', () => {
       if (btnLimpiarBusqueda) {
         btnLimpiarBusqueda.style.display = inputBuscarDesktop.value ? 'flex' : 'none';
       }
-      // Búsqueda en tiempo real (debounce leve)
+      // Actualiza en tiempo real de forma silenciosa sin hacer scroll
       clearTimeout(inputBuscarDesktop._searchTimer);
       inputBuscarDesktop._searchTimer = setTimeout(() => {
-        ejecutarBusqueda(inputBuscarDesktop.value);
-      }, 350);
+        ejecutarBusqueda(inputBuscarDesktop.value, false);
+      }, 300);
     });
 
     btnLimpiarBusqueda?.addEventListener('click', (e) => {
@@ -1507,7 +1511,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     inputBuscarMobile?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        ejecutarBusqueda(inputBuscarMobile.value);
+        e.preventDefault();
+        ejecutarBusqueda(inputBuscarMobile.value, true);
         // Sincronizar input desktop
         if (inputBuscarDesktop) inputBuscarDesktop.value = inputBuscarMobile.value;
         // Cerrar drawer
@@ -1517,7 +1522,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnBuscarMobileAction?.addEventListener('click', () => {
-      ejecutarBusqueda(inputBuscarMobile?.value || '');
+      ejecutarBusqueda(inputBuscarMobile?.value || '', true);
       if (inputBuscarDesktop) inputBuscarDesktop.value = inputBuscarMobile?.value || '';
       // Cerrar drawer
       const cerrarMenuMobileEvent = new CustomEvent('cerrar-menu-mobile');
