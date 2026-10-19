@@ -1420,37 +1420,31 @@ document.addEventListener('DOMContentLoaded', () => {
       renderizarCatalogo();
     };
 
-    // Toggle del buscador desktop (expandir / colapsar)
-    let buscadorDesktopAbierto = false;
-    const abrirBuscadorDesktop = () => {
-      buscadorDesktopAbierto = true;
-      buscadorCampo?.classList.add('activo');   // solo el pill
-      setTimeout(() => inputBuscarDesktop?.focus(), 200);
-    };
-    const cerrarBuscadorDesktop = () => {
-      buscadorDesktopAbierto = false;
-      buscadorCampo?.classList.remove('activo');
-      if (btnLimpiarBusqueda) btnLimpiarBusqueda.style.display = 'none';
-    };
+    // ── CONTROL DEL BUSCADOR DESKTOP (ANCHO ESTABLE, SIN LAYOUT SHIFT) ────
+    inputBuscarDesktop?.addEventListener('focus', () => {
+      buscadorCampo?.classList.add('activo');
+    });
 
-    // Clic en el pill colapsado lo abre; clic en la lupa dentro del pill expandido busca o cierra
+    inputBuscarDesktop?.addEventListener('blur', () => {
+      buscadorCampo?.classList.remove('activo');
+    });
+
+    // Clic en cualquier parte del pill enfoca el input de inmediato
     buscadorCampo?.addEventListener('click', (e) => {
-      if (!buscadorDesktopAbierto) {
-        abrirBuscadorDesktop();
-        e.stopPropagation();
+      if (e.target !== btnBuscar && !btnBuscar?.contains(e.target) &&
+          e.target !== btnLimpiarBusqueda && !btnLimpiarBusqueda?.contains(e.target)) {
+        inputBuscarDesktop?.focus();
       }
     });
 
+    // Clic en la lupa ejecuta la búsqueda si hay texto o da foco al input
     btnBuscar?.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (buscadorDesktopAbierto) {
-        if (inputBuscarDesktop?.value.trim()) {
-          ejecutarBusqueda(inputBuscarDesktop.value, true);
-        } else {
-          cerrarBuscadorDesktop();
-        }
+      if (inputBuscarDesktop?.value.trim()) {
+        clearTimeout(inputBuscarDesktop._searchTimer);
+        ejecutarBusqueda(inputBuscarDesktop.value, true);
       } else {
-        abrirBuscadorDesktop();
+        inputBuscarDesktop?.focus();
       }
     });
 
@@ -1465,7 +1459,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputBuscarDesktop.value.trim()) {
           window.limpiarBusqueda();
         } else {
-          cerrarBuscadorDesktop();
+          inputBuscarDesktop?.blur();
         }
       }
     });
@@ -1486,16 +1480,6 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       window.limpiarBusqueda();
       inputBuscarDesktop?.focus();
-    });
-
-    // Cerrar al hacer clic fuera
-    document.addEventListener('click', (e) => {
-      const wrapper = document.getElementById('buscador-desktop-wrapper');
-      if (buscadorDesktopAbierto && wrapper && !wrapper.contains(e.target)) {
-        if (!inputBuscarDesktop?.value.trim()) {
-          cerrarBuscadorDesktop();
-        }
-      }
     });
 
     // ── BUSCADOR MÓVIL ─────────────────────────────────────
