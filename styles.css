@@ -692,74 +692,92 @@ body {
  * - Sin position:absolute, sin elements flotando
  */
 
+/* ======================================================== */
+/* BUSCADOR DESKTOP UNIFICADO (CERO LAYOUT SHIFT)           */
+/* ======================================================== */
+/*
+ * Diseño con ancho reservado estable:
+ * - Ancho constante y predecible (no salta ni empuja al recibir foco/clic)
+ * - flex-shrink: 0 para evitar compresiones de los elementos adyacentes
+ * - box-sizing: border-box con borde constante de 1px
+ * - El estado activo/focus utiliza box-shadow para el glow sin modificar las dimensiones físicas
+ */
+
 .search-bar-wrapper {
   display: flex;
   align-items: center;
-  /* orden: el pill crece hacia la izquierda porque el wrapper
-     ocupa el espacio en el flex row del navbar */
+  flex-shrink: 0;
+  position: relative;
 }
 
 /* Contenedor pill unificado (lupa + input + X) */
 .search-pill {
   display: flex;
   align-items: center;
-  gap: 0;
-  /* Estado COLAPSADO: solo el ancho del botón lupa */
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  background: transparent;
-  border: 1px solid transparent;
-  /* overflow:hidden eliminado — el input usa width:0 para ocultarse */
-  transition:
-    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    background 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    padding 0.25s ease;
-  cursor: pointer;
-}
-
-/* Hover en estado colapsado */
-.search-pill:not(.activo):hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: #2d1e2a;
-}
-
-.search-pill:not(.activo):hover .search-pill-icon {
-  color: #ffffff;
-}
-
-/* Estado EXPANDIDO */
-.search-pill.activo {
-  width: 240px;
-  background: #0d0810;
-  border-color: rgba(224, 58, 108, 0.5);
-  box-shadow: 0 0 0 3px rgba(224, 58, 108, 0.1),
-              0 8px 28px -6px rgba(0, 0, 0, 0.7);
-  cursor: default;
   gap: 0.35rem;
-  padding: 0 0.6rem 0 0.1rem;
+  width: 200px;
+  height: 38px;
+  border-radius: 9999px;
+  background: #110c10;
+  border: 1px solid #2d1f2a;
+  box-sizing: border-box;
+  padding: 0 0.65rem 0 0.45rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+  cursor: text;
 }
 
-/* Ícono lupa dentro del pill (siempre visible) */
+@media (min-width: 1024px) {
+  .search-pill {
+    width: 235px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .search-pill {
+    width: 260px;
+  }
+}
+
+/* Hover */
+.search-pill:hover {
+  background-color: #170f16;
+  border-color: #3d2838;
+}
+
+/* Estado FOCUS / ACTIVO: Usa border-color y box-shadow para evitar cambios dimensionales */
+.search-pill:focus-within,
+.search-pill.activo {
+  background-color: #0d0810;
+  border-color: rgba(224, 58, 108, 0.6);
+  box-shadow: 0 0 0 3px rgba(224, 58, 108, 0.15),
+              0 4px 16px -2px rgba(0, 0, 0, 0.6);
+}
+
+/* Ícono lupa dentro del pill */
 .search-pill-icon {
   flex-shrink: 0;
-  width: 36px;       /* en estado colapsado ocupa todo el pill */
-  height: 34px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #a8a29e;
-  transition: color 0.2s ease, width 0.2s ease;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 .search-pill:hover .search-pill-icon {
   color: #ffffff;
 }
 
+.search-pill:focus-within .search-pill-icon,
 .search-pill.activo .search-pill-icon {
-  width: 20px;      /* en estado expandido, se reduce al tamaño del ícono */
   color: #f472b6;
 }
 
@@ -767,29 +785,23 @@ body {
 .search-input {
   flex: 1;
   min-width: 0;
+  width: 100%;
   -webkit-appearance: none;
   appearance: none;
   background: transparent !important;
   background-color: transparent !important;
-  border: none;
-  outline: none !important;        /* elimina el borde azul del navegador */
+  border: none !important;
+  outline: none !important;
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
   color: #f8fafc;
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 500;
   caret-color: #e03a6c;
   padding: 0;
-  /* Oculto cuando colapsado */
-  width: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease 0.1s, width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.search-pill.activo .search-input {
-  width: 100%;
+  margin: 0;
+  line-height: 1.25;
   opacity: 1;
   pointer-events: auto;
 }
@@ -797,12 +809,12 @@ body {
 .search-input::placeholder {
   color: #6b7280;
   font-weight: 400;
-  opacity: 1; /* Firefox sometimes makes placeholder semi-transparent */
+  opacity: 1;
 }
 
 /* Botón limpiar (X) */
 .search-clear-btn {
-  display: none;   /* JS lo muestra cuando hay texto (display:flex) */
+  display: none;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
@@ -813,20 +825,14 @@ body {
   border: none;
   cursor: pointer;
   color: #9ca3af;
-  transition: background 0.18s, color 0.18s;
   padding: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-}
-
-.search-pill.activo .search-clear-btn {
+  transition: background-color 0.18s ease, color 0.18s ease;
   opacity: 1;
   pointer-events: auto;
 }
 
 .search-clear-btn:hover {
-  background: rgba(224, 58, 108, 0.3);
+  background-color: rgba(224, 58, 108, 0.3);
   color: #f472b6;
 }
 
