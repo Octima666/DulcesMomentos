@@ -56,6 +56,12 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
+header {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+
 /* Tipografías especiales */
 .font-serif {
   font-family: 'Playfair Display', Georgia, serif;
@@ -565,8 +571,8 @@ body {
   display: none;
 }
 
-/* ── REGLAS MÓVIL (≤ 768px) ── */
-@media (max-width: 768px) {
+/* ── REGLAS MÓVIL Y TABLET (< 1024px) ── */
+@media (max-width: 1023px) {
   #btn-menu-mobile {
     display: flex !important;
     align-items: center;
@@ -656,15 +662,17 @@ body {
     background-color: rgba(224, 58, 108, 0.15);
     color: #f472b6;
   }
+}
 
-  /* En móvil, el container de usuario en la barra no debe desplazar el header */
+/* En teléfonos (< 768px), el container de usuario en la barra no debe desplazar el header */
+@media (max-width: 767px) {
   #nav-user-container {
     display: none !important;
   }
 }
 
-/* ── REGLAS ESCRITORIO (> 768px) ── */
-@media (min-width: 769px) {
+/* ── REGLAS ESCRITORIO (≥ 1024px) ── */
+@media (min-width: 1024px) {
   #btn-menu-mobile {
     display: none !important;
   }
@@ -706,7 +714,8 @@ body {
 .search-bar-wrapper {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
   position: relative;
 }
 
@@ -715,7 +724,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  width: 200px;
+  width: 170px;
+  max-width: 100%;
   height: 38px;
   border-radius: 9999px;
   background: #110c10;
@@ -725,19 +735,20 @@ body {
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
-    background-color 0.2s ease;
+    background-color 0.2s ease,
+    width 0.2s ease;
   cursor: text;
 }
 
 @media (min-width: 1024px) {
   .search-pill {
-    width: 235px;
+    width: 190px;
   }
 }
 
 @media (min-width: 1280px) {
   .search-pill {
-    width: 260px;
+    width: 220px;
   }
 }
 

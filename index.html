@@ -80,31 +80,31 @@
   <!-- ======================================================== -->
   <!-- HEADER / NAVBAR PRINCIPAL                                -->
   <!-- ======================================================== -->
-  <header class="sticky top-0 z-40 bg-[#0c090c]/90 backdrop-blur-md border-b border-[#221720] transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 min-h-[60px] flex items-center justify-between gap-3">
+  <header class="w-full sticky top-0 z-40 bg-[#0c090c]/90 backdrop-blur-md border-b border-[#221720] transition-colors box-border">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 min-h-[60px] flex items-center justify-between gap-3 lg:gap-4 box-border">
 
       <!-- ── LOGO ──────────────────────────────────────── -->
-      <div class="flex items-center gap-2.5 shrink-0 min-w-0">
-        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden shadow-lg shadow-brand-600/30 shrink-0 bg-white">
+      <a href="#catalogo" class="flex items-center gap-2 sm:gap-2.5 shrink-0 min-w-0">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full overflow-hidden shadow-lg shadow-brand-600/30 shrink-0 bg-white">
           <img src="logo.jpeg" alt="Dulces Momentos" class="w-full h-full object-cover">
         </div>
         <div class="min-w-0">
-          <span class="font-serif text-base sm:text-xl lg:text-2xl font-bold tracking-tight text-white block leading-tight truncate">Dulces Momentos</span>
+          <span class="font-serif text-sm sm:text-lg lg:text-xl font-bold tracking-tight text-white block leading-tight truncate">Dulces Momentos</span>
           <span class="text-[8px] sm:text-[9px] uppercase tracking-widest text-brand-400 font-bold hidden xs:block">PASTELERÍA BOUTIQUE</span>
         </div>
-      </div>
+      </a>
 
       <!-- ── NAV DESKTOP (≥ 1024px) ─────────────────────── -->
-      <nav class="hidden lg:flex items-center gap-1.5 xl:gap-2 shrink-0" aria-label="Navegación principal">
-        <a href="#catalogo" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white shadow-md shadow-brand-600/30 transition shrink-0">Inicio</a>
-        <button onclick="filtrarCategoriaDesdeNav('Tortas')" class="px-3 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition shrink-0">Tortas</button>
-        <button onclick="filtrarCategoriaDesdeNav('Postres')" class="px-3 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition shrink-0">Postres</button>
-        <button onclick="filtrarCategoriaDesdeNav('Especialidades')" class="px-3 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition shrink-0">Especialidades</button>
-        <a href="#contacto" class="px-3 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition shrink-0">Contacto</a>
+      <nav class="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0" aria-label="Navegación principal">
+        <a href="#catalogo" class="px-2.5 xl:px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white shadow-md shadow-brand-600/30 transition shrink-0">Inicio</a>
+        <button onclick="filtrarCategoriaDesdeNav('Tortas')" class="px-2 xl:px-3 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition shrink-0">Tortas</button>
+        <button onclick="filtrarCategoriaDesdeNav('Postres')" class="px-2 xl:px-3 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition shrink-0">Postres</button>
+        <button onclick="filtrarCategoriaDesdeNav('Especialidades')" class="px-2 xl:px-3 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition shrink-0">Especialidades</button>
+        <a href="#contacto" class="px-2 xl:px-3 py-1.5 rounded-full text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800/60 transition shrink-0">Contacto</a>
       </nav>
 
       <!-- ── ACCIONES DERECHA ──────────────────────────── -->
-      <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+      <div class="flex items-center gap-2 sm:gap-3 md:gap-4 shrink-0 min-w-0">
 
         <!-- Buscador desktop (desktop ≥ 768px, con espacio reservado estable) -->
         <div id="buscador-desktop-wrapper" class="hidden md:flex items-center search-bar-wrapper shrink-0">
@@ -148,11 +148,11 @@
           id="btn-abrir-auth-kds"
           type="button"
           title="Panel de Cocina (KDS)"
-          class="items-center gap-1.5 p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/50 text-xs transition cursor-pointer hidden md:flex shrink-0 whitespace-nowrap"
+          class="items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-stone-300 hover:text-white hover:bg-stone-800/60 text-xs transition cursor-pointer hidden md:flex shrink-0 whitespace-nowrap"
           style="display: none;"
         >
           <span>👨‍🍳</span>
-          <span class="font-medium hidden lg:inline">Cocina</span>
+          <span class="font-medium hidden xl:inline">Cocina</span>
         </button>
 
         <!-- Botón Ingresar (solo desktop, controlado por JS) -->
@@ -170,7 +170,7 @@
         </button>
 
         <!-- Usuario Autenticado (solo desktop con dropdown) -->
-        <div id="nav-user-container" class="relative hidden items-center pl-1 sm:pl-2 border-l border-[#352230] shrink-0" style="display: none;">
+        <div id="nav-user-container" class="relative hidden items-center shrink-0" style="display: none;">
           <button
             id="btn-user-menu"
             type="button"
@@ -179,7 +179,7 @@
             class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1c141b] hover:bg-[#2a1a25] border border-[#382333] text-stone-200 hover:text-white shadow-sm transition-all cursor-pointer group shrink-0 whitespace-nowrap"
           >
             <div id="nav-user-avatar" class="w-6 h-6 rounded-full bg-gradient-to-tr from-brand-600 to-pink-500 text-white text-[11px] font-bold flex items-center justify-center uppercase shadow-sm shrink-0">U</div>
-            <span id="nav-user-name" class="text-xs font-semibold text-stone-200 max-w-[120px] truncate">Usuario</span>
+            <span id="nav-user-name" class="text-xs font-semibold text-stone-200 max-w-[80px] sm:max-w-[100px] xl:max-w-[120px] truncate">Usuario</span>
             <svg id="icon-user-chevron" class="w-3.5 h-3.5 text-stone-400 group-hover:text-white transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
