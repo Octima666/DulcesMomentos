@@ -664,13 +664,6 @@ header {
   }
 }
 
-/* En teléfonos (< 768px), el container de usuario en la barra no debe desplazar el header */
-@media (max-width: 767px) {
-  #nav-user-container {
-    display: none !important;
-  }
-}
-
 /* ── REGLAS ESCRITORIO (≥ 1024px) ── */
 @media (min-width: 1024px) {
   #btn-menu-mobile {
@@ -690,32 +683,21 @@ header {
 
 
 /* ======================================================== */
-/* BUSCADOR EXPANDIBLE (DESKTOP)                            */
-/* ======================================================== */
-
-/*
- * La barra de búsqueda es un único contenedor pill que:
- * - Empieza colapsado (solo muestra el ícono lupa como botón)
- * - Al activarse, se expande horizontalmente en flow normal
- * - Sin position:absolute, sin elements flotando
- */
-
-/* ======================================================== */
-/* BUSCADOR DESKTOP UNIFICADO (CERO LAYOUT SHIFT)           */
+/* BUSCADOR EXPANDIBLE Y FLEXIBLE (DESKTOP / RESPONSIVE)    */
 /* ======================================================== */
 /*
- * Diseño con ancho reservado estable:
- * - Ancho constante y predecible (no salta ni empuja al recibir foco/clic)
- * - flex-shrink: 0 para evitar compresiones de los elementos adyacentes
- * - box-sizing: border-box con borde constante de 1px
- * - El estado activo/focus utiliza box-shadow para el glow sin modificar las dimensiones físicas
+ * Diseño flexible y proporcional:
+ * - flex: 1 1 auto con min-width: 0 y max-width definido
+ * - Se encoge en pantallas pequeñas antes de empujar otros botones
+ * - box-sizing: border-box constante
  */
 
 .search-bar-wrapper {
   display: flex;
   align-items: center;
-  flex-shrink: 1;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: 120px;
+  max-width: 280px;
   position: relative;
 }
 
@@ -724,8 +706,8 @@ header {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  width: 170px;
-  max-width: 100%;
+  width: 100%;
+  min-width: 0;
   height: 38px;
   border-radius: 9999px;
   background: #110c10;
@@ -735,21 +717,8 @@ header {
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
-    background-color 0.2s ease,
-    width 0.2s ease;
+    background-color 0.2s ease;
   cursor: text;
-}
-
-@media (min-width: 1024px) {
-  .search-pill {
-    width: 190px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .search-pill {
-    width: 220px;
-  }
 }
 
 /* Hover */

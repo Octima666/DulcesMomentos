@@ -43,11 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropdownBadge = document.getElementById('dropdown-user-badge');
     const mobileBadge = document.getElementById('mobile-user-badge');
 
+    // Botón Cocina siempre presente en la barra para acceso a KDS
+    if (btnKdsDesktop) {
+      btnKdsDesktop.classList.remove('hidden');
+      btnKdsDesktop.style.display = 'flex';
+    }
+
     if (esAdmin) {
-      if (btnKdsDesktop) {
-        btnKdsDesktop.classList.remove('hidden');
-        btnKdsDesktop.style.display = 'flex';
-      }
       if (btnKdsDropdown) {
         btnKdsDropdown.classList.remove('hidden');
         btnKdsDropdown.style.display = 'flex';
@@ -65,17 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileBadge.className = 'inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
       }
     } else {
-      if (btnKdsDesktop) {
-        btnKdsDesktop.classList.add('hidden');
-        btnKdsDesktop.style.display = 'none';
-      }
       if (btnKdsDropdown) {
         btnKdsDropdown.classList.add('hidden');
         btnKdsDropdown.style.display = 'none';
       }
       if (btnKdsMobile) {
-        btnKdsMobile.classList.add('hidden');
-        btnKdsMobile.style.display = 'none';
+        btnKdsMobile.classList.remove('hidden');
+        btnKdsMobile.style.display = 'flex';
       }
       if (dropdownBadge) {
         dropdownBadge.textContent = 'Cliente';
@@ -2314,10 +2312,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navUserContainer) {
       navUserContainer.classList.add('hidden');
       navUserContainer.classList.remove('flex');
+      navUserContainer.style.display = 'none';
     }
-    // Mostrar botón Ingresar en desktop (limpiar style.display para que md:flex aplique)
+    // Mostrar botón Cuenta en la barra
     if (navLoginBtn) {
-      navLoginBtn.style.display = '';
+      navLoginBtn.classList.remove('hidden');
+      navLoginBtn.style.display = 'flex';
+      const span = navLoginBtn.querySelector('span');
+      if (span) span.textContent = 'Cuenta';
     }
     // Cerrar el dropdown de usuario si estaba abierto
     const dropdownMenu = document.getElementById('dropdown-user-menu');
@@ -2371,9 +2373,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navUserContainer) {
       navUserContainer.classList.remove('hidden');
       navUserContainer.classList.add('flex');
+      navUserContainer.style.display = 'flex';
     }
-    // Ocultar botón Ingresar (style.display para vencer md:flex de Tailwind)
+    // Ocultar botón Cuenta (invitado) cuando hay sesión activa
     if (navLoginBtn) {
+      navLoginBtn.classList.add('hidden');
       navLoginBtn.style.display = 'none';
     }
 
