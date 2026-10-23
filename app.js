@@ -2326,11 +2326,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navUserContainer) {
       navUserContainer.classList.add('hidden');
       navUserContainer.classList.remove('flex');
-      navUserContainer.style.display = 'none';
+      navUserContainer.style.setProperty('display', 'none', 'important');
     }
     // Mostrar botón Cuenta en la barra
     if (navLoginBtn) {
       navLoginBtn.classList.remove('hidden');
+      navLoginBtn.style.removeProperty('display');
       navLoginBtn.style.display = 'flex';
       const span = navLoginBtn.querySelector('span');
       if (span) span.textContent = 'Cuenta';
@@ -2387,12 +2388,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navUserContainer) {
       navUserContainer.classList.remove('hidden');
       navUserContainer.classList.add('flex');
-      navUserContainer.style.display = 'flex';
+      navUserContainer.style.setProperty('display', 'flex', 'important');
     }
     // Ocultar botón Cuenta (invitado) cuando hay sesión activa
     if (navLoginBtn) {
       navLoginBtn.classList.add('hidden');
-      navLoginBtn.style.display = 'none';
+      navLoginBtn.style.setProperty('display', 'none', 'important');
     }
 
     const userEmail = usuario.correo || usuario.email || '';
@@ -2543,9 +2544,11 @@ document.addEventListener('DOMContentLoaded', () => {
           if (navUserContainer) {
             navUserContainer.classList.remove('hidden');
             navUserContainer.classList.add('flex');
+            navUserContainer.style.setProperty('display', 'flex', 'important');
           }
           if (navLoginBtn) {
-            navLoginBtn.style.display = 'none';
+            navLoginBtn.classList.add('hidden');
+            navLoginBtn.style.setProperty('display', 'none', 'important');
           }
           // Rellenar dropdown de usuario
           const userEmail = data.user.correo || data.user.email || '';
@@ -2605,9 +2608,11 @@ document.addEventListener('DOMContentLoaded', () => {
           if (navUserContainer) {
             navUserContainer.classList.remove('hidden');
             navUserContainer.classList.add('flex');
+            navUserContainer.style.setProperty('display', 'flex', 'important');
           }
           if (navLoginBtn) {
-            navLoginBtn.style.display = 'none';
+            navLoginBtn.classList.add('hidden');
+            navLoginBtn.style.setProperty('display', 'none', 'important');
           }
           // Rellenar dropdown de usuario
           const userEmail = userObj.correo || userObj.email || '';

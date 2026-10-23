@@ -952,7 +952,7 @@ header {
     height: 38px !important;
     min-width: 38px !important;
     padding: 0 !important;
-    display: flex !important;
+    display: flex;
     align-items: center !important;
     justify-content: center !important;
     border-radius: 9999px !important;
@@ -963,7 +963,31 @@ header {
     display: none !important;
   }
 
-  /* Usuario autenticado: avatar circular sin texto ni chevron */
+  /* Ocultar estrictamente el botón genérico de Cuenta si el usuario está autenticado */
+  #btn-nav-login.hidden,
+  #btn-nav-login[style*="display: none"],
+  #btn-nav-login[style*="display:none"] {
+    display: none !important;
+  }
+
+  /* Usuario autenticado: contenedor y avatar */
+  #nav-user-container {
+    flex-shrink: 0 !important;
+  }
+
+  #nav-user-container.hidden,
+  #nav-user-container[style*="display: none"],
+  #nav-user-container[style*="display:none"] {
+    display: none !important;
+  }
+
+  #nav-user-container.flex,
+  #nav-user-container:not(.hidden) {
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* Avatar circular sin texto ni chevron */
   #btn-user-menu {
     width: 38px !important;
     height: 38px !important;
