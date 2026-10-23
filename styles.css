@@ -826,6 +826,172 @@ header {
 }
 
 /* ======================================================== */
+/* CABECERA / HEADER EN DISPOSITIVOS MÓVILES (≤ 768px)      */
+/* Reestructuración Flexbox: fila única sin superposiciones */
+/* ======================================================== */
+@media (max-width: 768px) {
+  /* Contenedor principal: una sola fila estricta sin salto ni wrap */
+  header > div {
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    min-height: 56px !important;
+  }
+
+  /* Logo: ajustado con elipsis para evitar que empuje elementos */
+  header a[href="#catalogo"] {
+    flex-shrink: 1 !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 175px) !important;
+  }
+
+  header a[href="#catalogo"] span.font-serif {
+    font-size: 0.95rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Contenedor de acciones: flex horizontal alineado a la derecha */
+  #header-acciones-derecha,
+  header .justify-end {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.35rem !important;
+    min-width: 0 !important;
+  }
+
+  /* 1. Buscador: reducido a un ícono circular uniforme */
+  #buscador-desktop-wrapper,
+  .search-bar-wrapper {
+    flex: 0 0 auto !important;
+    min-width: unset !important;
+    max-width: unset !important;
+    width: 38px !important;
+    height: 38px !important;
+    margin: 0 !important;
+  }
+
+  #buscador-desktop-campo,
+  .search-pill {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    border-radius: 9999px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+  }
+
+  /* Ocultar input y botón limpiar en la barra superior móvil */
+  #input-buscar-desktop,
+  .search-input {
+    display: none !important;
+  }
+
+  #btn-limpiar-busqueda,
+  .search-clear-btn {
+    display: none !important;
+  }
+
+  #btn-buscar,
+  .search-pill-icon {
+    width: 38px !important;
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #e2e8f0 !important;
+  }
+
+  /* 2. Botón del Carrito: circular simétrico 38x38 con badge */
+  #btn-abrir-carrito {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 9999px !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+  }
+
+  #btn-abrir-carrito span:not(#badge-carrito) {
+    display: none !important;
+  }
+
+  #badge-carrito {
+    top: -2px !important;
+    right: -2px !important;
+    width: 17px !important;
+    height: 17px !important;
+    font-size: 9px !important;
+  }
+
+  /* 3. Acceso Cocina: oculto en barra superior móvil (disponible en drawer) */
+  #btn-abrir-auth-kds {
+    display: none !important;
+  }
+
+  /* 4. Botón Cuenta / Login: botón circular de 38x38 con ícono */
+  #btn-nav-login {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 9999px !important;
+    flex-shrink: 0 !important;
+  }
+
+  #btn-nav-login span {
+    display: none !important;
+  }
+
+  /* Usuario autenticado: avatar circular sin texto ni chevron */
+  #btn-user-menu {
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 9999px !important;
+  }
+
+  #nav-user-name,
+  #icon-user-chevron {
+    display: none !important;
+  }
+
+  /* 5. Botón Hamburguesa: dimensiones consistentes 38x38 */
+  #btn-menu-mobile {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    border-radius: 9999px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+/* ======================================================== */
 /* BUSCADOR MÓVIL (DENTRO DEL DRAWER)                       */
 /* ======================================================== */
 

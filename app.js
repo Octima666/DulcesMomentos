@@ -1427,17 +1427,31 @@ document.addEventListener('DOMContentLoaded', () => {
       buscadorCampo?.classList.remove('activo');
     });
 
-    // Clic en cualquier parte del pill enfoca el input de inmediato
+    // Clic en cualquier parte del pill enfoca el input de inmediato (en móvil abre el buscador del drawer)
     buscadorCampo?.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) {
+        document.getElementById('btn-menu-mobile')?.click();
+        setTimeout(() => {
+          document.getElementById('input-buscar-mobile')?.focus();
+        }, 250);
+        return;
+      }
       if (e.target !== btnBuscar && !btnBuscar?.contains(e.target) &&
           e.target !== btnLimpiarBusqueda && !btnLimpiarBusqueda?.contains(e.target)) {
         inputBuscarDesktop?.focus();
       }
     });
 
-    // Clic en la lupa ejecuta la búsqueda si hay texto o da foco al input
+    // Clic en la lupa ejecuta la búsqueda si hay texto o da foco al input (en móvil abre drawer)
     btnBuscar?.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (window.innerWidth <= 768) {
+        document.getElementById('btn-menu-mobile')?.click();
+        setTimeout(() => {
+          document.getElementById('input-buscar-mobile')?.focus();
+        }, 250);
+        return;
+      }
       if (inputBuscarDesktop?.value.trim()) {
         clearTimeout(inputBuscarDesktop._searchTimer);
         ejecutarBusqueda(inputBuscarDesktop.value, true);
