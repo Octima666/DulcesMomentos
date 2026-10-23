@@ -681,6 +681,25 @@ header {
   }
 }
 
+/* Reglas globales de sesión activa (aplica a desktop y móvil) */
+body.is-logged-in #btn-nav-login,
+body.user-logged-in #btn-nav-login,
+.is-logged-in #btn-nav-login,
+.user-logged-in #btn-nav-login {
+  display: none !important;
+}
+
+body.is-logged-in #nav-user-container,
+body.user-logged-in #nav-user-container,
+.is-logged-in #nav-user-container,
+.user-logged-in #nav-user-container {
+  display: flex !important;
+}
+
+body:not(.is-logged-in):not(.user-logged-in) #nav-user-container {
+  display: none !important;
+}
+
 
 /* ======================================================== */
 /* BUSCADOR EXPANDIBLE Y FLEXIBLE (DESKTOP / RESPONSIVE)    */
@@ -946,7 +965,7 @@ header {
     display: none !important;
   }
 
-  /* 4. Botón Cuenta / Login: botón circular de 38x38 con ícono */
+  /* 4. Botón Cuenta / Login (invitado) */
   #btn-nav-login {
     width: 38px !important;
     height: 38px !important;
@@ -963,11 +982,29 @@ header {
     display: none !important;
   }
 
-  /* Ocultar estrictamente el botón genérico de Cuenta si el usuario está autenticado */
+  /* Si el usuario está autenticado, OCULTAR el ícono genérico con máxima precedencia */
+  body.is-logged-in #btn-nav-login,
+  body.user-logged-in #btn-nav-login,
+  header.is-logged-in #btn-nav-login,
+  header.user-logged-in #btn-nav-login,
+  #header-acciones-derecha.is-logged-in #btn-nav-login,
+  #header-acciones-derecha.user-logged-in #btn-nav-login,
+  .is-logged-in #btn-nav-login,
+  .user-logged-in #btn-nav-login,
   #btn-nav-login.hidden,
+  #btn-nav-login.auth-hidden,
+  #btn-nav-login[hidden],
   #btn-nav-login[style*="display: none"],
   #btn-nav-login[style*="display:none"] {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
   }
 
   /* Usuario autenticado: contenedor y avatar */
@@ -975,16 +1012,28 @@ header {
     flex-shrink: 0 !important;
   }
 
+  /* Si NO está autenticado, ocultar avatar */
+  body:not(.is-logged-in):not(.user-logged-in) #nav-user-container,
   #nav-user-container.hidden,
+  #nav-user-container[hidden],
   #nav-user-container[style*="display: none"],
   #nav-user-container[style*="display:none"] {
     display: none !important;
+    visibility: hidden !important;
   }
 
+  /* Si ESTÁ autenticado, mostrar avatar */
+  body.is-logged-in #nav-user-container,
+  body.user-logged-in #nav-user-container,
+  header.is-logged-in #nav-user-container,
+  header.user-logged-in #nav-user-container,
+  #header-acciones-derecha.is-logged-in #nav-user-container,
   #nav-user-container.flex,
   #nav-user-container:not(.hidden) {
     display: flex !important;
     align-items: center !important;
+    justify-content: center !important;
+    visibility: visible !important;
   }
 
   /* Avatar circular sin texto ni chevron */

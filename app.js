@@ -2314,29 +2314,113 @@ document.addEventListener('DOMContentLoaded', () => {
     return EMAIL_REGEX.test(String(email || '').trim());
   };
 
+  // --------------------------------------------------------
+  // CONTROLADOR UNIFICADO DE VISIBILIDAD DE SESIÓN EN NAVBAR
+  // --------------------------------------------------------
+  const actualizarRenderizadoAuthNav = (autenticado, usuario = null) => {
+    const navUserContainer = document.getElementById('nav-user-container');
+    const navLoginBtn = document.getElementById('btn-nav-login');
+    const headerAcciones = document.getElementById('header-acciones-derecha');
+    const headerEl = document.querySelector('header');
+    const mobileGuest = document.getElementById('mobile-auth-guest');
+    const mobileUser = document.getElementById('mobile-auth-user');
+    const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
+
+    if (autenticado) {
+      // 1. Clases en body, header y contenedor de acciones
+      document.body.classList.add('is-logged-in', 'user-logged-in');
+      if (headerEl) headerEl.classList.add('is-logged-in', 'user-logged-in');
+      if (headerAcciones) headerAcciones.classList.add('is-logged-in', 'user-logged-in');
+
+      // 2. Ocultar estrictamente el botón genérico de login (en DOM, clases y estilo)
+      if (navLoginBtn) {
+        navLoginBtn.classList.add('hidden', 'auth-hidden');
+        navLoginBtn.setAttribute('hidden', '');
+        navLoginBtn.setAttribute('aria-hidden', 'true');
+        navLoginBtn.style.setProperty('display', 'none', 'important');
+      }
+
+      // 3. Mostrar el avatar del usuario logueado en el header
+      if (navUserContainer) {
+        navUserContainer.classList.remove('hidden');
+        navUserContainer.classList.add('flex');
+        navUserContainer.removeAttribute('hidden');
+        navUserContainer.removeAttribute('aria-hidden');
+        navUserContainer.style.setProperty('display', 'flex', 'important');
+      }
+
+      // 4. Actualizar sección de cuenta en el drawer móvil
+      if (mobileGuest) mobileGuest.classList.add('hidden');
+      if (mobileUser) mobileUser.classList.remove('hidden');
+
+      if (usuario) {
+        const nombre = usuario.nombre || 'Usuario';
+        const inicial = nombre.charAt(0).toUpperCase();
+        const email = usuario.correo || usuario.email || '';
+
+        const navUserName = document.getElementById('nav-user-name');
+        const navUserAvatar = document.getElementById('nav-user-avatar');
+        const mobileUserName = document.getElementById('mobile-user-name');
+        const mobileUserEmail = document.getElementById('mobile-user-email');
+        const mobileUserAvatar = document.getElementById('mobile-user-avatar');
+        const dropdownEmail = document.getElementById('dropdown-user-email');
+
+        if (navUserName) navUserName.textContent = nombre;
+        if (navUserAvatar) navUserAvatar.textContent = inicial;
+        if (mobileUserName) mobileUserName.textContent = nombre;
+        if (mobileUserEmail) mobileUserEmail.textContent = email;
+        if (mobileUserAvatar) mobileUserAvatar.textContent = inicial;
+        if (dropdownEmail) dropdownEmail.textContent = email;
+
+        if (btnNavLoginMobile) {
+          const span = btnNavLoginMobile.querySelector('span');
+          if (span) span.textContent = `Cerrar sesión (${nombre})`;
+        }
+      }
+    } else {
+      // 1. Quitar clases de usuario autenticado
+      document.body.classList.remove('is-logged-in', 'user-logged-in');
+      if (headerEl) headerEl.classList.remove('is-logged-in', 'user-logged-in');
+      if (headerAcciones) headerAcciones.classList.remove('is-logged-in', 'user-logged-in');
+
+      // 2. Ocultar el avatar del usuario
+      if (navUserContainer) {
+        navUserContainer.classList.add('hidden');
+        navUserContainer.classList.remove('flex');
+        navUserContainer.setAttribute('hidden', '');
+        navUserContainer.setAttribute('aria-hidden', 'true');
+        navUserContainer.style.setProperty('display', 'none', 'important');
+      }
+
+      // 3. Mostrar el botón genérico de login
+      if (navLoginBtn) {
+        navLoginBtn.classList.remove('hidden', 'auth-hidden');
+        navLoginBtn.removeAttribute('hidden');
+        navLoginBtn.removeAttribute('aria-hidden');
+        navLoginBtn.style.removeProperty('display');
+        navLoginBtn.style.display = 'flex';
+        const span = navLoginBtn.querySelector('span');
+        if (span) span.textContent = 'Cuenta';
+      }
+
+      // 4. Actualizar sección de cuenta en el drawer móvil
+      if (mobileGuest) mobileGuest.classList.remove('hidden');
+      if (mobileUser) mobileUser.classList.add('hidden');
+      if (btnNavLoginMobile) {
+        const span = btnNavLoginMobile.querySelector('span');
+        if (span) span.textContent = 'Ingresar / Crear cuenta';
+      }
+    }
+  };
+
   const bloquearVistaYMostrarAuth = () => {
     // Solo resetea estado de auth y oculta controles de usuario logueado.
     // NO oculta el catálogo ni la tienda — el catálogo es público.
     state.auth = { token: null, usuario: null, autenticado: false };
 
-    const navUserContainer = document.getElementById('nav-user-container');
-    const navLoginBtn = document.getElementById('btn-nav-login');
-    const drawerCarrito = document.getElementById('drawer-carrito');
+    actualizarRenderizadoAuthNav(false);
 
-    if (navUserContainer) {
-      navUserContainer.classList.add('hidden');
-      navUserContainer.classList.remove('flex');
-      navUserContainer.style.setProperty('display', 'none', 'important');
-    }
-    // Mostrar botón Cuenta en la barra
-    if (navLoginBtn) {
-      navLoginBtn.classList.remove('hidden');
-      navLoginBtn.style.removeProperty('display');
-      navLoginBtn.style.display = 'flex';
-      const span = navLoginBtn.querySelector('span');
-      if (span) span.textContent = 'Cuenta';
-    }
-    // Cerrar el dropdown de usuario si estaba abierto
+    const drawerCarrito = document.getElementById('drawer-carrito');
     const dropdownMenu = document.getElementById('dropdown-user-menu');
     if (dropdownMenu) dropdownMenu.classList.add('hidden');
     const chevron = document.getElementById('icon-user-chevron');
@@ -2351,16 +2435,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ocultar botones de Cocina y resetear etiquetas a Cliente
     actualizarPermisosAdminUI(false);
-
-    const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
-    if (btnNavLoginMobile) {
-      const span = btnNavLoginMobile.querySelector('span');
-      if (span) span.textContent = 'Ingresar / Crear cuenta';
-    }
-    const mobileGuest = document.getElementById('mobile-auth-guest');
-    const mobileUser = document.getElementById('mobile-auth-user');
-    if (mobileGuest) mobileGuest.classList.remove('hidden');
-    if (mobileUser) mobileUser.classList.add('hidden');
 
     document.body.classList.remove('overflow-hidden');
   };
@@ -2378,32 +2452,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cerrar el modal de autenticación
     cerrarModalAuth();
 
-    const navUserContainer = document.getElementById('nav-user-container');
-    const navLoginBtn = document.getElementById('btn-nav-login');
-    const navUserName = document.getElementById('nav-user-name');
-    const navUserAvatar = document.getElementById('nav-user-avatar');
-    const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
+    // Actualizar navbar móvil y desktop con estado autenticado
+    actualizarRenderizadoAuthNav(true, usuario);
+
     const inputNombreCliente = document.getElementById('input-nombre');
-
-    if (navUserContainer) {
-      navUserContainer.classList.remove('hidden');
-      navUserContainer.classList.add('flex');
-      navUserContainer.style.setProperty('display', 'flex', 'important');
-    }
-    // Ocultar botón Cuenta (invitado) cuando hay sesión activa
-    if (navLoginBtn) {
-      navLoginBtn.classList.add('hidden');
-      navLoginBtn.style.setProperty('display', 'none', 'important');
+    if (inputNombreCliente && !inputNombreCliente.value.trim()) {
+      inputNombreCliente.value = `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim();
     }
 
-    const userEmail = usuario.correo || usuario.email || '';
     const esAdmin = esUsuarioAdmin(usuario);
-
-    // Rellenar dropdown de usuario con email
-    const dropdownEmail = document.getElementById('dropdown-user-email');
-    if (dropdownEmail) dropdownEmail.textContent = userEmail;
-
-    // Actualizar permisos, botones de cocina y badge (Admin / Cliente)
     actualizarPermisosAdminUI(esAdmin);
 
     // Actualizar cajita de usuario en drawer móvil
@@ -2520,6 +2577,15 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Pre-activar visualmente si hay usuario en caché para evitar cualquier parpadeo
+    const userGuardadoInicial = localStorage.getItem(STORAGE_KEYS.USUARIO);
+    if (userGuardadoInicial) {
+      try {
+        const userObjInicial = JSON.parse(userGuardadoInicial);
+        actualizarRenderizadoAuthNav(true, userObjInicial);
+      } catch (e) {}
+    }
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: {
@@ -2535,49 +2601,12 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.setItem(STORAGE_KEYS.TOKEN, token);
           localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(data.user));
 
-          const navUserContainer = document.getElementById('nav-user-container');
-          const navLoginBtn = document.getElementById('btn-nav-login');
-          const navUserName = document.getElementById('nav-user-name');
-          const navUserAvatar = document.getElementById('nav-user-avatar');
-          const inputNombreCliente = document.getElementById('input-nombre');
+          actualizarRenderizadoAuthNav(true, data.user);
 
-          if (navUserContainer) {
-            navUserContainer.classList.remove('hidden');
-            navUserContainer.classList.add('flex');
-            navUserContainer.style.setProperty('display', 'flex', 'important');
-          }
-          if (navLoginBtn) {
-            navLoginBtn.classList.add('hidden');
-            navLoginBtn.style.setProperty('display', 'none', 'important');
-          }
-          // Rellenar dropdown de usuario
-          const userEmail = data.user.correo || data.user.email || '';
           const esAdmin = esUsuarioAdmin(data.user);
-          const dropdownEmail = document.getElementById('dropdown-user-email');
-          if (dropdownEmail) dropdownEmail.textContent = userEmail;
-
-          // Actualizar permisos, botón Cocina y badge Admin/Cliente
           actualizarPermisosAdminUI(esAdmin);
 
-          // Actualizar cajita de usuario en drawer móvil
-          const mobileGuest = document.getElementById('mobile-auth-guest');
-          const mobileUser = document.getElementById('mobile-auth-user');
-          const mobileUserName = document.getElementById('mobile-user-name');
-          const mobileUserEmail = document.getElementById('mobile-user-email');
-          const mobileUserAvatar = document.getElementById('mobile-user-avatar');
-          if (mobileGuest) mobileGuest.classList.add('hidden');
-          if (mobileUser) mobileUser.classList.remove('hidden');
-          if (mobileUserName) mobileUserName.textContent = `${data.user.nombre || 'Usuario'}`;
-          if (mobileUserEmail) mobileUserEmail.textContent = userEmail;
-          if (mobileUserAvatar) mobileUserAvatar.textContent = (data.user.nombre || 'U').charAt(0).toUpperCase();
-
-          const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
-          if (btnNavLoginMobile) {
-            const span = btnNavLoginMobile.querySelector('span');
-            if (span) span.textContent = `Cerrar sesión (${data.user.nombre || 'Usuario'})`;
-          }
-          if (navUserName) navUserName.textContent = data.user.nombre || 'Usuario';
-          if (navUserAvatar) navUserAvatar.textContent = (data.user.nombre || 'U').charAt(0).toUpperCase();
+          const inputNombreCliente = document.getElementById('input-nombre');
           if (inputNombreCliente && !inputNombreCliente.value.trim()) {
             inputNombreCliente.value = `${data.user.nombre || ''} ${data.user.apellido || ''}`.trim();
           }
@@ -2600,49 +2629,14 @@ document.addEventListener('DOMContentLoaded', () => {
           const userObj = JSON.parse(userGuardado);
           // Sesión local como fallback offline (sin abrir modal)
           state.auth = { token, usuario: userObj, autenticado: true };
-          const navUserContainer = document.getElementById('nav-user-container');
-          const navLoginBtn = document.getElementById('btn-nav-login');
-          const navUserName = document.getElementById('nav-user-name');
-          const navUserAvatar = document.getElementById('nav-user-avatar');
-          const btnNavLoginMobile = document.getElementById('btn-nav-login-mobile');
-          if (navUserContainer) {
-            navUserContainer.classList.remove('hidden');
-            navUserContainer.classList.add('flex');
-            navUserContainer.style.setProperty('display', 'flex', 'important');
-          }
-          if (navLoginBtn) {
-            navLoginBtn.classList.add('hidden');
-            navLoginBtn.style.setProperty('display', 'none', 'important');
-          }
-          // Rellenar dropdown de usuario
-          const userEmail = userObj.correo || userObj.email || '';
+          actualizarRenderizadoAuthNav(true, userObj);
+
           const esAdmin = esUsuarioAdmin(userObj);
-          const dEmail2 = document.getElementById('dropdown-user-email');
-          if (dEmail2) dEmail2.textContent = userEmail;
-
           actualizarPermisosAdminUI(esAdmin);
-
-          const mobileGuest = document.getElementById('mobile-auth-guest');
-          const mobileUser = document.getElementById('mobile-auth-user');
-          const mobileUserName = document.getElementById('mobile-user-name');
-          const mobileUserEmail = document.getElementById('mobile-user-email');
-          const mobileUserAvatar = document.getElementById('mobile-user-avatar');
-          if (mobileGuest) mobileGuest.classList.add('hidden');
-          if (mobileUser) mobileUser.classList.remove('hidden');
-          if (mobileUserName) mobileUserName.textContent = `${userObj.nombre || 'Usuario'}`;
-          if (mobileUserEmail) mobileUserEmail.textContent = userEmail;
-          if (mobileUserAvatar) mobileUserAvatar.textContent = (userObj.nombre || 'U').charAt(0).toUpperCase();
-
-          if (btnNavLoginMobile) {
-            const span = btnNavLoginMobile.querySelector('span');
-            if (span) span.textContent = `Cerrar sesión (${userObj.nombre || 'Usuario'})`;
-          }
-          if (navUserName) navUserName.textContent = userObj.nombre || 'Usuario';
-          if (navUserAvatar) navUserAvatar.textContent = (userObj.nombre || 'U').charAt(0).toUpperCase();
 
           verificarRutaCocina();
           return;
-        } catch (e) { }
+        } catch (e) {}
       }
       // Error de red sin datos locales: dejar como anónimo (sin abrir modal)
       bloquearVistaYMostrarAuth();
