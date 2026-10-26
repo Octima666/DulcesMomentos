@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth overflow-x-hidden w-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Privacidad | Dulces Momentos</title>
+  <meta name="description" content="Política de Privacidad de Dulces Momentos, pastelería artesanal en Puerto Iguazú. Conocé cómo protegemos tus datos personales.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Política de Privacidad | Dulces Momentos">
+  <meta property="og:description" content="Conocé cómo Dulces Momentos protege y trata tus datos personales.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dulcesmomentos.com.ar/privacidad">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e03a6c',
+              700: '#be123c',
+              800: '#9f1239',
+              900: '#881337',
+              950: '#4c0519',
+            },
+            dark: {
+              bg: '#0c090c',
+              surface: '#140f13',
+              card: '#181317',
+              border: '#2a1e27',
+              borderLight: '#382534'
+            }
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            script: ['"Alex Brush"', 'cursive'],
+            handwriting: ['"Caveat"', 'cursive'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"Space Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="logo.jpeg">
+  <link rel="apple-touch-icon" href="logo.jpeg">
+  <meta name="theme-color" content="#0c090c">
+
+  <style>
+    /* ── Estilos exclusivos de esta página ── */
+    .privacy-section {
+      border-left: 3px solid rgba(224, 58, 108, 0.5);
+      padding-left: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .privacy-section:last-child {
+      margin-bottom: 0;
+    }
+    .privacy-section h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .privacy-section p,
+    .privacy-section li {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      line-height: 1.75;
+    }
+    .privacy-section ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .privacy-section ul li::before {
+      content: '✦';
+      color: rgba(224, 58, 108, 0.7);
+      margin-right: 0.5rem;
+      font-size: 0.6rem;
+      vertical-align: middle;
+    }
+    .privacy-section a {
+      color: #fb7185;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color 0.2s;
+    }
+    .privacy-section a:hover {
+      color: #f43f5e;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .chip-pink {
+      background: rgba(224, 58, 108, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(224, 58, 108, 0.3);
+    }
+    .chip-emerald {
+      background: rgba(16, 185, 129, 0.12);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    /* Smooth scroll to top button */
+    #btn-top {
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #btn-top.hidden-top {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+    }
+  </style>
+</head>
+
+<body class="overflow-x-hidden w-full bg-[#0c090c] text-stone-100 font-sans antialiased selection:bg-brand-600 selection:text-white">
+
+  <!-- ======================================================== -->
+  <!-- BARRA SUPERIOR DE ANUNCIO                                 -->
+  <!-- ======================================================== -->
+  <div class="bg-[#140d12] border-b border-[#2b1420] py-2 px-4 text-center text-xs font-medium text-pink-300 transition-colors overflow-hidden">
+    <p class="flex items-center justify-center gap-2 whitespace-nowrap overflow-hidden text-ellipsis">
+      <span class="text-brand-400 shrink-0">✨</span>
+      <span class="hidden sm:inline">Pastelería Artesanal en Puerto Iguazú</span>
+      <span class="hidden sm:inline text-stone-500">•</span>
+      <span>Envíos en Puerto Iguazú · Retiro en Boutique</span>
+      <span class="text-brand-400 shrink-0">✨</span>
+    </p>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- HEADER / NAVBAR                                           -->
+  <!-- ======================================================== -->
+  <header class="w-full sticky top-0 z-40 bg-[#0c090c]/90 backdrop-blur-md border-b border-[#221720] transition-colors box-border">
+    <div class="w-full max-w-7xl mx-auto px-4 py-2.5 sm:py-3 min-h-[60px] flex items-center justify-between gap-2 sm:gap-3 box-border">
+
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2 sm:gap-2.5 shrink-0 min-w-0" title="Volver a la tienda">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full overflow-hidden shadow-lg shadow-brand-600/30 shrink-0 bg-white">
+          <img src="logo.jpeg" alt="Dulces Momentos" class="w-full h-full object-cover">
+        </div>
+        <div class="min-w-0">
+          <span class="font-serif text-sm sm:text-lg lg:text-xl font-bold tracking-tight text-white block leading-tight truncate">Dulces Momentos</span>
+          <span class="text-[8px] sm:text-[9px] uppercase tracking-widest text-brand-400 font-bold">PASTELERÍA BOUTIQUE</span>
+        </div>
+      </a>
+
+      <!-- Volver a la tienda -->
+      <a
+        href="/"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#382333] bg-[#1a1118] text-stone-300 hover:text-white hover:border-brand-500/60 text-xs font-semibold transition-all duration-200 shrink-0"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Volver a la tienda
+      </a>
+
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- HERO DECORATIVO                                           -->
+  <!-- ======================================================== -->
+  <section class="relative overflow-hidden pt-12 pb-10 border-b border-[#221720] bg-gradient-to-b from-[#140d12]/60 via-[#0c090c] to-[#0c090c]">
+    <!-- Elementos decorativos -->
+    <div class="absolute -top-24 -left-24 w-72 h-72 bg-brand-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-1/2 -right-20 w-64 h-64 bg-pink-600/8 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
+      <!-- Chip de categoría -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-950/70 border border-brand-800/60 text-brand-400 text-xs font-bold uppercase tracking-widest mb-5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+        Información legal
+      </div>
+
+      <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+        Política de <span class="font-script text-brand-400 italic text-4xl sm:text-5xl lg:text-6xl font-normal">Privacidad</span>
+      </h1>
+      <p class="text-sm sm:text-base text-stone-400 max-w-2xl mx-auto leading-relaxed">
+        En <strong class="text-stone-200">Dulces Momentos</strong> nos importa que sepas cómo usamos tus datos. Acá te lo explicamos de forma clara y sin vueltas.
+      </p>
+      <div class="mt-5 flex flex-wrap items-center justify-center gap-2">
+        <span class="chip chip-pink">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Última actualización: 26 de octubre de 2026
+        </span>
+        <span class="chip chip-emerald">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Ley 25.326 — Argentina
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- CONTENIDO PRINCIPAL                                       -->
+  <!-- ======================================================== -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+
+    <!-- Índice de navegación rápida -->
+    <nav
+      aria-label="Índice de secciones"
+      class="mb-12 p-5 rounded-2xl bg-[#140f13] border border-[#2a1e27] shadow-xl"
+    >
+      <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-3 flex items-center gap-2">
+        <svg class="w-3.5 h-3.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+        </svg>
+        Contenido
+      </p>
+      <ol class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
+        <li><a href="#responsable" class="text-stone-400 hover:text-brand-400 transition flex items-center gap-1.5"><span class="text-brand-600 font-mono text-xs">01</span> Responsable del tratamiento</a></li>
+        <li><a href="#datos" class="text-stone-400 hover:text-brand-400 transition flex items-center gap-1.5"><span class="text-brand-600 font-mono text-xs">02</span> Datos que recopilamos</a></li>
+        <li><a href="#finalidad" class="text-stone-400 hover:text-brand-400 transition flex items-center gap-1.5"><span class="text-brand-600 font-mono text-xs">03</span> Para qué los usamos</a></li>
+        <li><a href="#terceros" class="text-stone-400 hover:text-brand-400 transition flex items-center gap-1.5"><span class="text-brand-600 font-mono text-xs">04</span> Con quién los compartimos</a></li>
+        <li><a href="#seguridad" class="text-stone-400 hover:text-brand-400 transition flex items-center gap-1.5"><span class="text-brand-600 font-mono text-xs">05</span> Seguridad</a></li>
+        <li><a href="#conservacion" class="text-stone-400 hover:text-brand-400 transition flex items-center gap-1.5"><span class="text-brand-600 font-mono text-xs">06</span> Conservación</a></li>
+        <li><a href="#derechos" class="text-stone-400 hover:text-brand-400 transition flex items-center gap-1.5"><span class="text-brand-600 font-mono text-xs">07</span> Tus derechos</a></li>
+        <li><a href="#cookies" class="text-stone-400 hover:text-brand-400 transition flex items-center gap-1.5"><span class="text-brand-600 font-mono text-xs">08</span> Cookies y almacenamiento</a></li>
+        <li><a href="#menores" class="text-stone-400 hover:text-brand-400 transition flex items-center gap-1.5"><span class="text-brand-600 font-mono text-xs">09</span> Menores de edad</a></li>
+        <li><a href="#cambios" class="text-stone-400 hover:text-brand-400 transition flex items-center gap-1.5"><span class="text-brand-600 font-mono text-xs">10</span> Cambios en esta política</a></li>
+      </ol>
+    </nav>
+
+    <!-- ── Secciones ── -->
+
+    <!-- 1. Responsable -->
+    <div id="responsable" class="privacy-section">
+      <h2>
+        <span class="w-7 h-7 rounded-lg bg-brand-950 border border-brand-800/60 flex items-center justify-center text-brand-400 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        </span>
+        Responsable del tratamiento de datos
+      </h2>
+      <p>
+        El responsable del tratamiento de tus datos personales es <strong class="text-stone-200">Dulces Momentos</strong>, pastelería artesanal con sede en Puerto Iguazú, Misiones, Argentina.
+      </p>
+      <p class="mt-2">
+        Podés contactarnos por cualquier consulta relacionada con tu privacidad escribiéndonos a:
+        <a href="mailto:dulcesmomentos1112@gmail.com" class="font-semibold">dulcesmomentos1112@gmail.com</a>
+      </p>
+    </div>
+
+    <!-- 2. Datos que recopilamos -->
+    <div id="datos" class="privacy-section">
+      <h2>
+        <span class="w-7 h-7 rounded-lg bg-brand-950 border border-brand-800/60 flex items-center justify-center text-brand-400 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </span>
+        Datos que recopilamos
+      </h2>
+      <p>Cuando creás una cuenta o realizás un pedido en nuestro sitio, podemos recopilar los siguientes datos:</p>
+      <ul>
+        <li><strong class="text-stone-300">Nombre y apellido</strong></li>
+        <li><strong class="text-stone-300">Correo electrónico</strong></li>
+        <li><strong class="text-stone-300">Contraseña</strong> — almacenada con hash (encriptada). Nunca la guardamos en texto plano.</li>
+        <li><strong class="text-stone-300">Datos de los pedidos</strong> — productos elegidos, forma de pago, dirección de entrega y notas.</li>
+        <li><strong class="text-stone-300">Teléfono</strong> — para coordinar la entrega o retiro.</li>
+      </ul>
+      <p class="mt-3 p-3 rounded-xl bg-[#1a1015] border border-[#2a1e27] text-xs text-stone-400 leading-relaxed">
+        <strong class="text-stone-300">¿Usás Google para iniciar sesión?</strong><br>
+        Si elegís iniciar sesión con tu cuenta de Google, recibimos únicamente tu <strong class="text-stone-300">nombre</strong> y <strong class="text-stone-300">correo electrónico</strong> desde los servidores de Google. No almacenamos tu foto de perfil ni tu contraseña de Google.
+      </p>
+    </div>
+
+    <!-- 3. Para qué los usamos -->
+    <div id="finalidad" class="privacy-section">
+      <h2>
+        <span class="w-7 h-7 rounded-lg bg-brand-950 border border-brand-800/60 flex items-center justify-center text-brand-400 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </span>
+        Para qué usamos tus datos
+      </h2>
+      <p>Usamos tu información únicamente para los siguientes fines:</p>
+      <ul>
+        <li>Crear y mantener tu cuenta en Dulces Momentos.</li>
+        <li>Permitirte iniciar sesión, incluyendo el envío de códigos de verificación por correo (2FA).</li>
+        <li>Gestionar, preparar y entregar tus pedidos.</li>
+        <li>Procesar los pagos de forma segura.</li>
+        <li>Comunicarnos con vos sobre el estado de tu pedido.</li>
+      </ul>
+      <p class="mt-3">No usamos tus datos para publicidad de terceros ni los vendemos bajo ninguna circunstancia.</p>
+    </div>
+
+    <!-- 4. Con quién los compartimos -->
+    <div id="terceros" class="privacy-section">
+      <h2>
+        <span class="w-7 h-7 rounded-lg bg-brand-950 border border-brand-800/60 flex items-center justify-center text-brand-400 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        </span>
+        Con quién compartimos tus datos
+      </h2>
+      <p>Compartimos tus datos solo con los proveedores estrictamente necesarios para brindarte el servicio:</p>
+      <ul>
+        <li>
+          <strong class="text-stone-300">Google</strong> — para el inicio de sesión con Google (OAuth 2.0). Aplica la
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Política de Privacidad de Google</a>.
+        </li>
+        <li>
+          <strong class="text-stone-300">Mercado Pago</strong> — para procesar los pagos online. Aplica la
+          <a href="https://www.mercadopago.com.ar/privacidad" target="_blank" rel="noopener noreferrer">Política de Privacidad de Mercado Pago</a>.
+        </li>
+        <li>
+          <strong class="text-stone-300">Render</strong> — proveedor de infraestructura donde corre nuestro servidor.
+        </li>
+        <li>
+          <strong class="text-stone-300">Neon</strong> — base de datos PostgreSQL en la nube donde guardamos la información de cuentas y pedidos.
+        </li>
+        <li>
+          <strong class="text-stone-300">Resend</strong> — servicio de envío de correos transaccionales (códigos de verificación, confirmaciones de pedido).
+        </li>
+      </ul>
+      <p class="mt-3 font-semibold text-stone-300">No vendemos ni cedemos tus datos personales a ningún tercero con fines comerciales.</p>
+    </div>
+
+    <!-- 5. Seguridad -->
+    <div id="seguridad" class="privacy-section">
+      <h2>
+        <span class="w-7 h-7 rounded-lg bg-brand-950 border border-brand-800/60 flex items-center justify-center text-brand-400 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </span>
+        Seguridad de tus datos
+      </h2>
+      <p>Implementamos medidas técnicas para proteger tu información:</p>
+      <ul>
+        <li><strong class="text-stone-300">Conexión cifrada (HTTPS)</strong> en todas las comunicaciones con nuestro sitio.</li>
+        <li><strong class="text-stone-300">Hash de contraseñas</strong> — las contraseñas se almacenan usando algoritmos de encriptación robustos (bcrypt). Nosotros mismos no podemos leer tu contraseña.</li>
+        <li><strong class="text-stone-300">Códigos de verificación de un solo uso</strong> que expiran automáticamente para proteger el acceso a tu cuenta.</li>
+      </ul>
+      <p class="mt-3 text-xs text-stone-500">
+        Ningún sistema es 100% infalible. Si detectás alguna actividad sospechosa en tu cuenta, escribinos de inmediato a <a href="mailto:dulcesmomentos1112@gmail.com">dulcesmomentos1112@gmail.com</a>.
+      </p>
+    </div>
+
+    <!-- 6. Conservación -->
+    <div id="conservacion" class="privacy-section">
+      <h2>
+        <span class="w-7 h-7 rounded-lg bg-brand-950 border border-brand-800/60 flex items-center justify-center text-brand-400 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </span>
+        ¿Por cuánto tiempo conservamos tus datos?
+      </h2>
+      <p>
+        Conservamos tus datos personales mientras tu cuenta esté activa en Dulces Momentos o mientras sea necesario para cumplir con obligaciones legales, resolver disputas o hacer cumplir nuestros acuerdos.
+      </p>
+      <p class="mt-2">
+        Si querés eliminar tu cuenta y todos tus datos, escribinos a <a href="mailto:dulcesmomentos1112@gmail.com">dulcesmomentos1112@gmail.com</a> y lo gestionamos a la brevedad.
+      </p>
+    </div>
+
+    <!-- 7. Derechos del usuario -->
+    <div id="derechos" class="privacy-section">
+      <h2>
+        <span class="w-7 h-7 rounded-lg bg-brand-950 border border-brand-800/60 flex items-center justify-center text-brand-400 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </span>
+        Tus derechos sobre tus datos
+      </h2>
+      <p>
+        De acuerdo con la <strong class="text-stone-200">Ley 25.326 de Protección de Datos Personales</strong> de Argentina, tenés derecho a:
+      </p>
+      <ul>
+        <li><strong class="text-stone-300">Acceder</strong> a los datos personales que tengamos sobre vos.</li>
+        <li><strong class="text-stone-300">Rectificar</strong> datos incorrectos, incompletos o desactualizados.</li>
+        <li><strong class="text-stone-300">Eliminar</strong> tus datos personales de nuestros sistemas.</li>
+      </ul>
+      <p class="mt-3">
+        Para ejercer cualquiera de estos derechos, escribinos a <a href="mailto:dulcesmomentos1112@gmail.com" class="font-semibold">dulcesmomentos1112@gmail.com</a> con el asunto <em>"Derechos ARCO"</em> y te respondemos a la brevedad.
+      </p>
+
+      <!-- Bloque AAIP -->
+      <div class="mt-4 p-4 rounded-2xl bg-[#1a1015] border border-[#2a1e27]">
+        <p class="text-sm text-stone-400 leading-relaxed">
+          <strong class="text-stone-200">Órgano de control:</strong> La
+          <a href="https://www.argentina.gob.ar/aaip" target="_blank" rel="noopener noreferrer" class="font-semibold">Agencia de Acceso a la Información Pública (AAIP)</a>
+          es el organismo público encargado de velar por el cumplimiento de la Ley 25.326 en Argentina. Si considerás que tus derechos no fueron atendidos correctamente, podés presentar una denuncia ante la AAIP.
+        </p>
+      </div>
+    </div>
+
+    <!-- 8. Cookies -->
+    <div id="cookies" class="privacy-section">
+      <h2>
+        <span class="w-7 h-7 rounded-lg bg-brand-950 border border-brand-800/60 flex items-center justify-center text-brand-400 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        </span>
+        Cookies y almacenamiento local
+      </h2>
+      <p>
+        Nuestro sitio utiliza el almacenamiento del navegador (<code class="text-xs bg-[#1a1015] px-1.5 py-0.5 rounded text-stone-300 font-mono">localStorage</code>) exclusivamente para mantener tu sesión iniciada entre visitas. No instalamos cookies de rastreo ni de publicidad.
+      </p>
+      <p class="mt-2">
+        Podés borrar este almacenamiento en cualquier momento desde la configuración de tu navegador. Esto cerrará tu sesión activa en el sitio.
+      </p>
+    </div>
+
+    <!-- 9. Menores -->
+    <div id="menores" class="privacy-section">
+      <h2>
+        <span class="w-7 h-7 rounded-lg bg-brand-950 border border-brand-800/60 flex items-center justify-center text-brand-400 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </span>
+        Menores de edad
+      </h2>
+      <p>
+        El servicio de Dulces Momentos no está dirigido a personas menores de 13 años. No recopilamos datos personales de menores de manera intencionada. Si creés que un menor nos proveyó información sin autorización, contactanos a <a href="mailto:dulcesmomentos1112@gmail.com">dulcesmomentos1112@gmail.com</a> para eliminarla.
+      </p>
+    </div>
+
+    <!-- 10. Cambios -->
+    <div id="cambios" class="privacy-section">
+      <h2>
+        <span class="w-7 h-7 rounded-lg bg-brand-950 border border-brand-800/60 flex items-center justify-center text-brand-400 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </span>
+        Cambios en esta política
+      </h2>
+      <p>
+        Podemos actualizar esta Política de Privacidad cuando sea necesario. Cuando lo hagamos, actualizaremos la fecha de "Última actualización" que aparece al inicio de esta página. Te recomendamos revisarla periódicamente.
+      </p>
+      <p class="mt-2">
+        Si los cambios son significativos, te lo haremos saber por correo electrónico.
+      </p>
+      <p class="mt-3 text-xs text-stone-500">
+        <strong class="text-stone-400">Última actualización:</strong> 26 de octubre de 2026.
+      </p>
+    </div>
+
+    <!-- ── Botón de contacto ── -->
+    <div class="mt-10 text-center">
+      <p class="text-sm text-stone-400 mb-4">¿Tenés alguna pregunta sobre esta política?</p>
+      <a
+        href="mailto:dulcesmomentos1112@gmail.com"
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        Escribinos al correo
+      </a>
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- FOOTER                                                    -->
+  <!-- ======================================================== -->
+  <footer class="border-t border-[#231721] bg-[#0a070a] mt-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 text-center space-y-4">
+
+      <!-- Logo pequeño -->
+      <a href="/" class="inline-flex items-center gap-2 group" title="Volver a la tienda">
+        <div class="w-7 h-7 rounded-full overflow-hidden bg-white shadow-md shadow-brand-600/20 group-hover:scale-105 transition-transform">
+          <img src="logo.jpeg" alt="Dulces Momentos" class="w-full h-full object-cover">
+        </div>
+        <span class="font-script text-xl text-pink-300 group-hover:text-pink-200 transition-colors">Dulces Momentos <span class="text-brand-400">♥</span></span>
+      </a>
+
+      <!-- Links legales -->
+      <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-stone-500">
+        <a href="/privacidad" class="hover:text-brand-400 transition font-semibold text-brand-500" aria-current="page">Política de Privacidad</a>
+        <span>•</span>
+        <a href="https://wa.me/5493757571985" target="_blank" rel="noopener" class="hover:text-emerald-400 transition">WhatsApp</a>
+        <span>•</span>
+        <a href="https://instagram.com/dreykumozza" target="_blank" rel="noopener" class="hover:text-pink-400 transition">Instagram</a>
+      </div>
+
+      <p class="text-xs text-stone-600">
+        © <span id="footer-year-privacidad">2026</span> Dulces Momentos · Puerto Iguazú, Misiones, Argentina
+      </p>
+    </div>
+  </footer>
+
+  <!-- Botón volver arriba -->
+  <button
+    id="btn-top"
+    aria-label="Volver al inicio de la página"
+    title="Volver arriba"
+    class="hidden-top fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-xl shadow-brand-600/30 flex items-center justify-center transition-all"
+  >
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+    </svg>
+  </button>
+
+  <script>
+    // Año dinámico en footer
+    const yearEl = document.getElementById('footer-year-privacidad');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    // Botón volver arriba
+    const btnTop = document.getElementById('btn-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        btnTop.classList.remove('hidden-top');
+      } else {
+        btnTop.classList.add('hidden-top');
+      }
+    }, { passive: true });
+    btnTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>

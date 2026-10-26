@@ -113,6 +113,11 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Política de Privacidad — accesible sin autenticación
+app.get('/privacidad', (req, res) => {
+  res.sendFile(__dirname + '/privacidad.html');
+});
+
 // ============================================================================
 // 3. AUTENTICACIÓN Y 2FA
 // ============================================================================

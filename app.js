@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // https://console.cloud.google.com/apis/credentials
   // ========================================================
   const GOOGLE_CLIENT_ID = (typeof window !== 'undefined' && window.GOOGLE_CLIENT_ID)
-    || 'TU_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+    || '436470325939-98vns2tmbt6i3atu15gil0d78molpeml.apps.googleusercontent.com';
 
   // ========================================================
   // 2. FORMATEO CENTRALIZADO DE MONEDA ($ ARS)
@@ -2448,70 +2448,45 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.remove('overflow-hidden');
   };
 
+  /**
+   * Aplica la sesión activa tras login exitoso (PIN o Google).
+   * Guarda token y usuario en localStorage, actualiza la UI de navbar,
+   * autocompletaría el campo de nombre y ejecuta cualquier acción pendiente.
+   */
   const aplicarSesionActiva = (usuario, token, conNotificacion = true) => {
-    state.auth = {
-      token,
-      usuario,
-      autenticado: true
-    };
-
+    // 1. Guardar estado en memoria y en localStorage
+    state.auth = { token, usuario, autenticado: true };
     localStorage.setItem(STORAGE_KEYS.TOKEN, token);
     localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(usuario));
 
-    // Cerrar el modal de autenticación
+    // 2. Cerrar el modal de autenticación
     cerrarModalAuth();
 
-    // Actualizar navbar móvil y desktop con estado autenticado
+    // 3. Actualizar navbar desktop y drawer móvil con datos del usuario
+    //    (maneja: avatar, nombre, email, botón login/logout)
     actualizarRenderizadoAuthNav(true, usuario);
 
+    // 4. Autocompletar el campo de nombre del checkout si está vacío
     const inputNombreCliente = document.getElementById('input-nombre');
     if (inputNombreCliente && !inputNombreCliente.value.trim()) {
       inputNombreCliente.value = `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim();
     }
 
-    const esAdmin = esUsuarioAdmin(usuario);
-    actualizarPermisosAdminUI(esAdmin);
+    // 5. Actualizar permisos de admin en la UI (botón Cocina KDS, badge)
+    actualizarPermisosAdminUI(esUsuarioAdmin(usuario));
 
-    // Actualizar cajita de usuario en drawer móvil
-    const mobileGuest = document.getElementById('mobile-auth-guest');
-    const mobileUser = document.getElementById('mobile-auth-user');
-    const mobileUserName = document.getElementById('mobile-user-name');
-    const mobileUserEmail = document.getElementById('mobile-user-email');
-    const mobileUserAvatar = document.getElementById('mobile-user-avatar');
-    if (mobileGuest) mobileGuest.classList.add('hidden');
-    if (mobileUser) mobileUser.classList.remove('hidden');
-    if (mobileUserName) mobileUserName.textContent = `${usuario.nombre || 'Usuario'}`;
-    if (mobileUserEmail) mobileUserEmail.textContent = userEmail;
-    if (mobileUserAvatar) mobileUserAvatar.textContent = (usuario.nombre || 'U').charAt(0).toUpperCase();
-
-    // Cerrar el dropdown si estaba abierto
+    // 6. Cerrar el dropdown de usuario si estaba abierto
     const dropdownMenu = document.getElementById('dropdown-user-menu');
     if (dropdownMenu) dropdownMenu.classList.add('hidden');
     const chevron = document.getElementById('icon-user-chevron');
     if (chevron) chevron.style.transform = '';
-    if (btnNavLoginMobile) {
-      const span = btnNavLoginMobile.querySelector('span');
-      if (span) span.textContent = `Cerrar sesión (${usuario.nombre || 'Usuario'})`;
-    }
 
-    if (navUserName) {
-      navUserName.textContent = `${usuario.nombre || 'Usuario'}`;
-    }
-
-    if (navUserAvatar) {
-      const inicial = (usuario.nombre || 'U').charAt(0).toUpperCase();
-      navUserAvatar.textContent = inicial;
-    }
-
-    if (inputNombreCliente && !inputNombreCliente.value.trim()) {
-      inputNombreCliente.value = `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim();
-    }
-
+    // 7. Toast de bienvenida (solo si se solicita)
     if (conNotificacion) {
-      mostrarToast(`¡Hola, ${usuario.nombre}! Bienvenido/a a Dulces Momentos 🍰`, 'success');
+      mostrarToast(`¡Hola, ${usuario.nombre || 'Usuario'}! Bienvenido/a a Dulces Momentos 🍰`, 'success');
     }
 
-    // Ejecutar la acción pendiente (ej: agregar al carrito) si existe
+    // 8. Ejecutar la acción pendiente (ej: agregar al carrito) si existe
     if (typeof accionPendienteAuth === 'function') {
       const accion = accionPendienteAuth;
       accionPendienteAuth = null;
