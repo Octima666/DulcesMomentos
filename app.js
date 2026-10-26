@@ -107,6 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
     || 'https://dulces-momentos-backend.onrender.com';
 
   // ========================================================
+  // GOOGLE IDENTITY SERVICES (OAuth 2.0)
+  // Reemplazá este valor con tu Client ID obtenido en Google Cloud Console:
+  // https://console.cloud.google.com/apis/credentials
+  // ========================================================
+  const GOOGLE_CLIENT_ID = (typeof window !== 'undefined' && window.GOOGLE_CLIENT_ID)
+    || 'TU_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+
+  // ========================================================
   // 2. FORMATEO CENTRALIZADO DE MONEDA ($ ARS)
   // ========================================================
   const formateadorARS = new Intl.NumberFormat('es-AR', {
@@ -281,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const inputCorreo = document.getElementById('login-correo');
       setTimeout(() => inputCorreo?.focus(), 150);
+      setTimeout(() => inicializarGoogleSignIn(), 100);
     }
   };
 
@@ -2510,6 +2519,124 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // ========================================================
+  // 12.1 AUTENTICACIÓN CON GOOGLE IDENTITY SERVICES
+  // ========================================================
+
+  /**
+   * Callback oficial de Google Identity Services.
+   * Recibe { credential } (ID Token de Google), lo envía a POST /api/auth/google
+   * y reutiliza exactamente la lógica de sesión del frontend.
+   */
+  const handleGoogleLogin = async (googleResponse) => {
+    const alertaLogin = document.getElementById('alerta-login');
+    const alertaLoginTexto = document.getElementById('alerta-login-texto');
+    const formLogin = document.getElementById('form-login');
+    const formRegister = document.getElementById('form-register');
+    const formVerifyPin = document.getElementById('form-verify-pin');
+
+    if (!googleResponse || !googleResponse.credential) {
+      console.warn('[Google Auth] No se recibió credencial de Google.');
+      if (alertaLogin && alertaLoginTexto) {
+        alertaLoginTexto.textContent = 'No se recibió la credencial de autenticación de Google.';
+        alertaLogin.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (alertaLogin) alertaLogin.classList.add('hidden');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: googleResponse.credential })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success && data.user && data.token) {
+        if (formLogin) formLogin.reset();
+        if (formRegister) formRegister.reset();
+        if (formVerifyPin) formVerifyPin.classList.add('hidden');
+
+        // Reutilizar EXACTAMENTE la misma función que tras verificar el PIN
+        aplicarSesionActiva(data.user, data.token, true);
+      } else {
+        const errorMsg = data.error || 'Error al iniciar sesión con Google. Intentá nuevamente.';
+        if (alertaLogin && alertaLoginTexto) {
+          alertaLoginTexto.textContent = errorMsg;
+          alertaLogin.classList.remove('hidden');
+        } else {
+          mostrarToast(errorMsg, 'error');
+        }
+      }
+    } catch (err) {
+      console.error('[Google Auth] Error en la petición con el backend:', err);
+      const errorMsg = `Error de conexión con el backend en ${API_BASE_URL}. Asegúrate de que el servidor esté activo.`;
+      if (alertaLogin && alertaLoginTexto) {
+        alertaLoginTexto.textContent = errorMsg;
+        alertaLogin.classList.remove('hidden');
+      } else {
+        mostrarToast(errorMsg, 'error');
+      }
+    }
+  };
+
+  // Exponer callback en el ámbito global para el SDK de Google
+  window.handleGoogleLogin = handleGoogleLogin;
+
+  /**
+   * Inicializa Google Identity Services y renderiza el botón oficial en el contenedor del modal
+   */
+  const inicializarGoogleSignIn = () => {
+    const contenedor = document.getElementById('google-login-btn-container');
+    if (!contenedor) return;
+
+    const renderBoton = () => {
+      if (typeof window.google === 'undefined' || !window.google.accounts || !window.google.accounts.id) {
+        return false;
+      }
+
+      try {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleLogin,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+
+        contenedor.innerHTML = '';
+        const anchoCalculado = Math.min(360, Math.max(240, contenedor.offsetWidth || 320));
+
+        window.google.accounts.id.renderButton(contenedor, {
+          theme: 'filled_black',
+          shape: 'pill',
+          text: 'continue_with',
+          size: 'large',
+          locale: 'es',
+          logo_alignment: 'left',
+          width: anchoCalculado
+        });
+
+        return true;
+      } catch (err) {
+        console.warn('[Google Auth] Error al renderizar botón de Google:', err);
+        return false;
+      }
+    };
+
+    if (!renderBoton()) {
+      let intentos = 0;
+      const timer = setInterval(() => {
+        intentos++;
+        if (renderBoton() || intentos > 30) {
+          clearInterval(timer);
+        }
+      }, 150);
+    }
+  };
+
   const cerrarSesion = async () => {
     try {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
@@ -2556,6 +2683,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       formLogin?.classList.remove('hidden');
       formRegister?.classList.add('hidden');
+      setTimeout(() => inicializarGoogleSignIn(), 50);
     } else {
       tabBtnRegister?.classList.add('bg-brand-600', 'text-white', 'shadow-md', 'shadow-brand-600/30', 'font-bold');
       tabBtnRegister?.classList.remove('text-stone-400');
@@ -2715,4 +2843,5 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarBadges();
   configurarEventListeners();
   verificarSesionExistente();
+  inicializarGoogleSignIn();
 });

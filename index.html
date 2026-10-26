@@ -53,6 +53,9 @@
   </script>
   <link rel="stylesheet" href="styles.css">
 
+  <!-- Google Identity Services (Sign In with Google) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- Favicon / ícono de pestaña y de "agregar a pantalla de inicio" -->
   <link rel="icon" type="image/jpeg" href="logo.jpeg">
   <link rel="apple-touch-icon" href="logo.jpeg">
@@ -509,6 +512,25 @@
             <span id="spinner-login" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
             <span id="texto-submit-login">Ingresar a la Tienda</span>
           </button>
+
+          <!-- Separador "— o —" -->
+          <div class="relative flex items-center justify-center my-2.5">
+            <div class="flex-grow border-t border-[#33202e]"></div>
+            <span class="flex-shrink mx-3 text-xs text-stone-500 font-semibold tracking-wider select-none">— o —</span>
+            <div class="flex-grow border-t border-[#33202e]"></div>
+          </div>
+
+          <!-- Botón Oficial de Google Identity Services -->
+          <div class="w-full flex justify-center">
+            <div 
+              id="google-login-btn-container" 
+              class="w-full flex justify-center min-h-[44px] transition duration-200"
+              data-theme="filled_black" 
+              data-shape="pill" 
+              data-text="continue_with" 
+              data-locale="es"
+            ></div>
+          </div>
 
           <!-- Alternar a Registro -->
           <p class="text-center text-xs text-stone-400 pt-2">
