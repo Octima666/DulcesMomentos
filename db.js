@@ -53,6 +53,10 @@ async function initTables() {
       );
     `);
 
+    await pool.query(`
+      ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS google_id VARCHAR(100) UNIQUE;
+    `);
+
     // Asegurar columna 'rol' en usuarios
     await pool.query(`
       ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS rol VARCHAR(20) DEFAULT 'cliente';

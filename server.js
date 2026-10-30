@@ -27,7 +27,15 @@ try {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'dulces_momentos_secret_key_2026_super_secure_jwt_token!';
+
+if (!process.env.JWT_SECRET) {
+  console.error(
+    '[FATAL] La variable de entorno JWT_SECRET no está definida.\n' +
+    '        Agrega JWT_SECRET=<clave-larga-aleatoria> en tu archivo .env'
+  );
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // ============================================================================
 // CONFIGURACIÓN CENTRALIZADA DE ADMINISTRADORES

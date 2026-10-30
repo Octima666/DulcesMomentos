@@ -26,5 +26,8 @@
     "whatsapp"
   ],
   "author": "Dulces Momentos",
-  "license": "ISC"
+  "license": "ISC",
+  "engines": {
+    "node": ">=22"
+  }
 }

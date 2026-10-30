@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // https://console.cloud.google.com/apis/credentials
   // ========================================================
   const GOOGLE_CLIENT_ID = (typeof window !== 'undefined' && window.GOOGLE_CLIENT_ID)
-    || '436470325939-98vns2tmbt6i3atu15gil0d78molpeml.apps.googleusercontent.com';
+    || '436470325939-b4k5ffpojij17f2vo4dodppb3o436mfr.apps.googleusercontent.com';
 
   // ========================================================
   // 2. FORMATEO CENTRALIZADO DE MONEDA ($ ARS)
