@@ -826,7 +826,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ====================================================================
-  // 9.1 PAGO CON QR DINÁMICO DE MERCADO PAGO
+  // 9.1 PAGO CON QR DINÁMICO DE MERCADO PAGO (API ÓRDENES)
   // ====================================================================
   const detenerPollingPagoQr = () => {
     if (state.pagoQr.intervaloPolling) {
