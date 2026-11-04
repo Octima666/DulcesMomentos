@@ -103,8 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // URL BASE DEL BACKEND - PRODUCCIÓN DEFINITIVA EN RENDER
   // Conexión HTTPS estricta a Render (.onrender.com) sin referencias locales
   // ========================================================
-  const API_BASE_URL = (typeof window !== 'undefined' && (window.API_BASE_URL || (window.ENV && window.ENV.API_BASE_URL)))
-    || 'https://dulces-momentos-backend.onrender.com';
+    const API_BASE_URL = (typeof window !== 'undefined' && (window.API_BASE_URL || (window.ENV && window.ENV.API_BASE_URL)))
+    || (['localhost', '127.0.0.1'].includes(location.hostname)
+        ? 'http://localhost:3000'
+        : 'https://dulces-momentos-backend.onrender.com');
 
   // ========================================================
   // GOOGLE IDENTITY SERVICES (OAuth 2.0)
