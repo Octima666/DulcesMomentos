@@ -900,10 +900,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const resp = await fetch(`${API_BASE_URL}/api/crear-pago-qr`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, external_reference: `WEB-${Date.now()}` })
-      });
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${state.auth.token}`
+  },
+  body: JSON.stringify({ items, external_reference: `WEB-${Date.now()}` })
+});
       const data = await resp.json();
 
       if (!resp.ok || !data.success) {
