@@ -91,7 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
     COMANDAS: 'dulces_momentos_comandas_kds_v2',
     FAVORITOS: 'dulces_momentos_favoritos_v1',
     TOKEN: 'dulces_momentos_auth_token_v2',
-    USUARIO: 'dulces_momentos_auth_user_v2'
+    USUARIO: 'dulces_momentos_auth_user_v2',
+    CARRITO: 'dulces_momentos_carrito_v2'
   };
 
   // ========================================================
@@ -159,7 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================================
   // 3. CATÁLOGO DE PRODUCTOS (EXACTO AL DISEÑO DE ALTA FIDELIDAD)
   // ========================================================
-  const PRODUCTOS = [
+  const MAPA_PRODUCTO_ID = { 'prod-001':1,'prod-002':2,'prod-003':3,'prod-004':4,'prod-005':5,'prod-006':6 };
+  const MAPA_TOPPING_ID = { 'top-arandanos':101,'top-choco-blanco':102,'top-maracuya':103,'top-frutillas':104,'top-avellanas':105,'top-ddl':106,'top-caja-regalo':107,'top-chocolate':108,'top-tarjeta':109 };
+
+  const PRODUCTOS_FALLBACK_RAW = [
     {
       id: 'prod-001',
       nombre: 'Tarta Frutos del Bosque',
@@ -243,8 +247,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
-  const MAPA_PRODUCTO_ID = { 'prod-001':1,'prod-002':2,'prod-003':3,'prod-004':4,'prod-005':5,'prod-006':6 };
-  const MAPA_TOPPING_ID = { 'top-arandanos':101,'top-choco-blanco':102,'top-maracuya':103,'top-frutillas':104,'top-avellanas':105,'top-ddl':106,'top-caja-regalo':107,'top-chocolate':108,'top-tarjeta':109 };
+  const convertirFallbackAIdsNumericos = (arr) => {
+    return arr.map(p => ({
+      ...p,
+      id: MAPA_PRODUCTO_ID[p.id] !== undefined ? MAPA_PRODUCTO_ID[p.id] : Number(p.id),
+      precio: Number(p.precio),
+      toppings: (p.toppings || []).map(t => ({
+        ...t,
+        id: MAPA_TOPPING_ID[t.id] !== undefined ? MAPA_TOPPING_ID[t.id] : Number(t.id),
+        precio: Number(t.precio)
+      }))
+    }));
+  };
+
+  let PRODUCTOS = convertirFallbackAIdsNumericos(PRODUCTOS_FALLBACK_RAW);
 
   // ========================================================
   // 4. ESTADO GLOBAL
@@ -331,7 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================================
   const cargarEstadoInicial = () => {
     try {
-      state.carrito = [];
+      const carritoGuardado = localStorage.getItem(STORAGE_KEYS.CARRITO);
+      state.carrito = carritoGuardado ? JSON.parse(carritoGuardado) : [];
 
       const comandasGuardadas = localStorage.getItem(STORAGE_KEYS.COMANDAS);
       if (comandasGuardadas) state.comandasCocina = JSON.parse(comandasGuardadas);
@@ -340,7 +357,59 @@ document.addEventListener('DOMContentLoaded', () => {
       if (favoritosGuardados) state.favoritos = new Set(JSON.parse(favoritosGuardados));
     } catch (e) {
       console.warn('Error al cargar datos iniciales:', e);
+      state.carrito = [];
     }
+  };
+
+  const guardarCarritoEnStorage = () => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CARRITO, JSON.stringify(state.carrito));
+    } catch (e) {
+      console.warn('Error al guardar carrito:', e);
+    }
+  };
+
+  const limpiarCarritoItemsInexistentes = () => {
+    if (Array.isArray(state.carrito) && state.carrito.length > 0) {
+      const idsValidos = new Set(PRODUCTOS.map(p => String(p.id)));
+      const inicial = state.carrito.length;
+      state.carrito = state.carrito.filter(item => idsValidos.has(String(item.id)));
+      if (state.carrito.length !== inicial) {
+        guardarCarritoEnStorage();
+        renderizarCarrito();
+        actualizarBadges();
+      }
+    }
+  };
+
+  const cargarProductosDesdeApi = async () => {
+    try {
+      const resp = await fetch(`${API_BASE_URL}/api/productos`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.success && Array.isArray(data.productos) && data.productos.length > 0) {
+          PRODUCTOS = data.productos.map(p => ({
+            ...p,
+            id: Number(p.id),
+            precio: Number(p.precio),
+            toppings: (p.toppings || []).map(t => ({
+              ...t,
+              id: Number(t.id),
+              precio: Number(t.precio)
+            }))
+          }));
+        } else {
+          PRODUCTOS = convertirFallbackAIdsNumericos(PRODUCTOS_FALLBACK_RAW);
+        }
+      } else {
+        PRODUCTOS = convertirFallbackAIdsNumericos(PRODUCTOS_FALLBACK_RAW);
+      }
+    } catch (err) {
+      console.warn('[Productos] Error cargando desde API, usando fallback:', err);
+      PRODUCTOS = convertirFallbackAIdsNumericos(PRODUCTOS_FALLBACK_RAW);
+    }
+    limpiarCarritoItemsInexistentes();
+    renderizarCatalogo();
   };
 
   const guardarComandasEnStorage = () => {
@@ -496,8 +565,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    const esAdmin = Boolean(state.auth?.autenticado && esUsuarioAdmin(state.auth.usuario));
+
     contenedor.innerHTML = productosFiltrados.map(prod => {
-      const esFav = state.favoritos.has(prod.id);
+      const esFav = state.favoritos.has(String(prod.id));
       return `
         <article class="product-card rounded-3xl overflow-hidden shadow-lg flex flex-col group relative">
           
@@ -551,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             ` : ''}
 
-            <!-- Precio y Botón Agregar -->
+            <!-- Precio y Botones -->
             <div class="flex items-center justify-between pt-3 border-t border-[#291c27]">
               <div>
                 <span class="font-serif text-base sm:text-lg font-bold text-white">
@@ -559,21 +630,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 </span>
               </div>
 
-              <button 
-                data-id="${prod.id}" 
-                class="btn-agregar-carrito inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-semibold text-xs shadow-md shadow-brand-600/30 transition-all"
-              >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <span>Agregar</span>
-              </button>
+              <div class="flex items-center gap-2">
+                ${esAdmin ? `
+                  <button 
+                    data-edit-id="${prod.id}" 
+                    class="edit-prod-card-btn"
+                    title="Editar producto"
+                  >
+                    ✏️ Editar
+                  </button>
+                ` : ''}
+
+                <button 
+                  data-id="${prod.id}" 
+                  class="btn-agregar-carrito inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-semibold text-xs shadow-md shadow-brand-600/30 transition-all"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                  <span>Agregar</span>
+                </button>
+              </div>
             </div>
 
           </div>
         </article>
       `;
     }).join('');
+
+    // Listeners para botones de edición de producto (admin)
+    contenedor.querySelectorAll('.edit-prod-card-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const prodId = e.currentTarget.getAttribute('data-edit-id');
+        const prod = PRODUCTOS.find(p => String(p.id) === String(prodId));
+        if (prod) {
+          abrirModalEditarProducto(prod);
+        }
+      });
+    });
 
     // Listeners para botones agregar al carrito con control de autenticación
     contenedor.querySelectorAll('.btn-agregar-carrito').forEach(btn => {
@@ -586,8 +682,8 @@ document.addEventListener('DOMContentLoaded', () => {
           let toppingSeleccionado = null;
 
           if (selectTopping && selectTopping.value) {
-            const prod = PRODUCTOS.find(p => p.id === prodId);
-            const topObj = prod?.toppings?.find(t => t.id === selectTopping.value);
+            const prod = PRODUCTOS.find(p => String(p.id) === String(prodId));
+            const topObj = prod?.toppings?.find(t => String(t.id) === String(selectTopping.value));
             if (topObj) toppingSeleccionado = topObj;
           }
 
@@ -620,7 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
     contenedor.querySelectorAll('.btn-toggle-fav').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
-        const favId = e.currentTarget.getAttribute('data-fav-id');
+        const favId = String(e.currentTarget.getAttribute('data-fav-id'));
         if (state.favoritos.has(favId)) {
           state.favoritos.delete(favId);
           btn.innerHTML = '♡';
@@ -640,14 +736,212 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ========================================================
+  // 7.1 MODAL DE EDICIÓN DE PRODUCTOS (ADMIN)
+  // ========================================================
+  const cerrarModalEditarProducto = () => {
+    const modal = document.getElementById('modal-editar-producto');
+    if (modal) modal.remove();
+    document.body.classList.remove('overflow-hidden');
+    if (window._handlerEscEditarProducto) {
+      window.removeEventListener('keydown', window._handlerEscEditarProducto);
+      window._handlerEscEditarProducto = null;
+    }
+  };
+
+  const abrirModalEditarProducto = (prod) => {
+    cerrarModalEditarProducto();
+
+    const backdrop = document.createElement('div');
+    backdrop.id = 'modal-editar-producto';
+    backdrop.className = 'edit-prod-modal-backdrop';
+
+    backdrop.innerHTML = `
+      <div class="edit-prod-modal-card" role="dialog" aria-modal="true" aria-labelledby="edit-prod-modal-title">
+        <div class="edit-prod-modal-header">
+          <div class="edit-prod-modal-title-wrap">
+            <span class="edit-prod-modal-icon">✏️</span>
+            <div>
+              <h3 id="edit-prod-modal-title" class="edit-prod-modal-title">Editar Producto</h3>
+              <p class="edit-prod-modal-subtitle">ID #${prod.id} &bull; ${escapeHtml(prod.categoria || 'Catálogo')}</p>
+            </div>
+          </div>
+          <button type="button" class="edit-prod-btn-close" aria-label="Cerrar modal">&times;</button>
+        </div>
+
+        <form id="edit-prod-form" class="edit-prod-modal-body">
+          <div class="edit-prod-form-group">
+            <label for="edit-prod-nombre" class="edit-prod-label">Nombre del Producto <span class="edit-prod-req">*</span></label>
+            <input type="text" id="edit-prod-nombre" class="edit-prod-input" required maxlength="200" value="${escapeHtml(prod.nombre)}" />
+          </div>
+
+          <div class="edit-prod-form-group">
+            <label for="edit-prod-precio" class="edit-prod-label">Precio ($ ARS) <span class="edit-prod-req">*</span></label>
+            <input type="number" id="edit-prod-precio" class="edit-prod-input" required min="0" step="any" value="${prod.precio}" />
+          </div>
+
+          <div class="edit-prod-form-group">
+            <label for="edit-prod-descripcion" class="edit-prod-label">Descripción</label>
+            <textarea id="edit-prod-descripcion" class="edit-prod-textarea" rows="3" placeholder="Descripción del producto...">${escapeHtml(prod.descripcion || '')}</textarea>
+          </div>
+
+          <div class="edit-prod-form-group">
+            <label for="edit-prod-imagen" class="edit-prod-label">URL de Imagen (http / https)</label>
+            <input type="url" id="edit-prod-imagen" class="edit-prod-input" placeholder="https://images.unsplash.com/..." value="${escapeHtml(prod.imagen || '')}" />
+          </div>
+
+          <div class="edit-prod-preview-container">
+            <label class="edit-prod-label">Vista Previa</label>
+            <div class="edit-prod-preview-box">
+              <img id="edit-prod-preview-img" src="${escapeHtml(prod.imagen || '')}" alt="Vista previa" class="edit-prod-preview-img" style="${prod.imagen ? 'display:block;' : 'display:none;'}" />
+              <span id="edit-prod-preview-placeholder" class="edit-prod-preview-placeholder" style="${prod.imagen ? 'display:none;' : 'display:flex;'}">
+                Sin imagen seleccionada
+              </span>
+            </div>
+          </div>
+
+          <div class="edit-prod-modal-footer">
+            <button type="button" class="edit-prod-btn-cancel">Cancelar</button>
+            <button type="submit" id="edit-prod-btn-guardar" class="edit-prod-btn-save">
+              <span>Guardar Cambios</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(backdrop);
+    document.body.classList.add('overflow-hidden');
+
+    const form = backdrop.querySelector('#edit-prod-form');
+    const inputNombre = backdrop.querySelector('#edit-prod-nombre');
+    const inputPrecio = backdrop.querySelector('#edit-prod-precio');
+    const inputDesc = backdrop.querySelector('#edit-prod-descripcion');
+    const inputImg = backdrop.querySelector('#edit-prod-imagen');
+    const previewImg = backdrop.querySelector('#edit-prod-preview-img');
+    const previewPlaceholder = backdrop.querySelector('#edit-prod-preview-placeholder');
+    const btnGuardar = backdrop.querySelector('#edit-prod-btn-guardar');
+    const btnCancelar = backdrop.querySelector('.edit-prod-btn-cancel');
+    const btnCerrar = backdrop.querySelector('.edit-prod-btn-close');
+
+    const actualizarPreview = () => {
+      const url = (inputImg.value || '').trim();
+      if (/^https?:\/\/.+/i.test(url)) {
+        previewImg.src = url;
+        previewImg.style.display = 'block';
+        previewPlaceholder.style.display = 'none';
+      } else {
+        previewImg.style.display = 'none';
+        previewPlaceholder.style.display = 'flex';
+      }
+    };
+    inputImg.addEventListener('input', actualizarPreview);
+    previewImg.addEventListener('error', () => {
+      previewImg.style.display = 'none';
+      previewPlaceholder.style.display = 'flex';
+      previewPlaceholder.textContent = 'No se pudo cargar la imagen';
+    });
+
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) cerrarModalEditarProducto();
+    });
+
+    btnCancelar.addEventListener('click', cerrarModalEditarProducto);
+    btnCerrar.addEventListener('click', cerrarModalEditarProducto);
+
+    window._handlerEscEditarProducto = (e) => {
+      if (e.key === 'Escape') cerrarModalEditarProducto();
+    };
+    window.addEventListener('keydown', window._handlerEscEditarProducto);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nuevoNombre = (inputNombre.value || '').trim();
+      const nuevoPrecio = Number(inputPrecio.value);
+      const nuevaDesc = (inputDesc.value || '').trim();
+      const nuevaImg = (inputImg.value || '').trim();
+
+      if (!nuevoNombre) {
+        mostrarToast('El nombre del producto no puede estar vacío.', 'error');
+        inputNombre.focus();
+        return;
+      }
+      if (isNaN(nuevoPrecio) || nuevoPrecio < 0) {
+        mostrarToast('El precio debe ser un número mayor o igual a 0.', 'error');
+        inputPrecio.focus();
+        return;
+      }
+      if (nuevaImg && !/^https?:\/\/.+/i.test(nuevaImg)) {
+        mostrarToast('La URL de imagen debe comenzar con http:// o https://', 'error');
+        inputImg.focus();
+        return;
+      }
+
+      btnGuardar.disabled = true;
+      const textoOriginal = btnGuardar.innerHTML;
+      btnGuardar.innerHTML = '<span>Guardando...</span>';
+
+      try {
+        const resp = await fetch(`${API_BASE_URL}/api/admin/productos/${prod.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${state.auth?.token || ''}`
+          },
+          body: JSON.stringify({
+            nombre: nuevoNombre,
+            precio: nuevoPrecio,
+            descripcion: nuevaDesc,
+            imagen: nuevaImg || null
+          })
+        });
+
+        if (resp.status === 401 || resp.status === 403) {
+          mostrarToast('Tu sesión es inválida o expiró. Iniciá sesión como administrador.', 'error');
+          btnGuardar.disabled = false;
+          btnGuardar.innerHTML = textoOriginal;
+          return;
+        }
+
+        const data = await resp.json().catch(() => ({}));
+
+        if (!resp.ok || !data.success) {
+          mostrarToast(data.error || 'Error al actualizar el producto.', 'error');
+          btnGuardar.disabled = false;
+          btnGuardar.innerHTML = textoOriginal;
+          return;
+        }
+
+        const pEnCatalogo = PRODUCTOS.find(p => String(p.id) === String(prod.id));
+        if (pEnCatalogo) {
+          pEnCatalogo.nombre = data.producto?.nombre || nuevoNombre;
+          pEnCatalogo.precio = Number(data.producto?.precio ?? nuevoPrecio);
+          pEnCatalogo.descripcion = data.producto?.descripcion ?? nuevaDesc;
+          pEnCatalogo.imagen = data.producto?.imagen ?? nuevaImg;
+        }
+
+        cerrarModalEditarProducto();
+        renderizarCatalogo();
+        mostrarToast('Producto actualizado', 'success');
+      } catch (err) {
+        console.error('[Editar Producto] Error:', err);
+        mostrarToast('Error de conexión al guardar el producto.', 'error');
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = textoOriginal;
+      }
+    });
+
+    setTimeout(() => inputNombre.focus(), 100);
+  };
+
+  // ========================================================
   // 8. GESTIÓN DEL CARRITO DE COMPRAS
   // ========================================================
   const agregarProductoAlCarrito = (productoId, topping = null) => {
-    const producto = PRODUCTOS.find(p => p.id === productoId);
+    const producto = PRODUCTOS.find(p => String(p.id) === String(productoId));
     if (!producto) return;
 
-    const toppingId = topping ? topping.id : 'sin-topping';
-    const itemKey = `${productoId}__${toppingId}`;
+    const toppingId = topping ? String(topping.id) : 'sin-topping';
+    const itemKey = `${producto.id}__${toppingId}`;
 
     const itemExistente = state.carrito.find(item => item.itemKey === itemKey);
     const precioUnitario = producto.precio + (topping ? topping.precio : 0);
@@ -670,6 +964,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    guardarCarritoEnStorage();
     renderizarCarrito();
     actualizarBadges();
     mostrarToast(`¡${producto.nombre} agregado al pedido!`, 'success');
@@ -687,6 +982,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.carrito[itemIndex].subtotal = state.carrito[itemIndex].cantidad * state.carrito[itemIndex].precioUnitario;
     }
 
+    guardarCarritoEnStorage();
     renderizarCarrito();
     actualizarBadges();
   };
@@ -910,9 +1206,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const items = [];
       for (const item of state.carrito) {
-        const prodId = MAPA_PRODUCTO_ID[item.id];
-        if (prodId === undefined) {
-          console.error('[generarPagoQr] ID de producto no mapeado:', item.id);
+        const prodId = Number(item.id);
+        if (!Number.isInteger(prodId) || prodId <= 0) {
+          console.error('[generarPagoQr] ID de producto no válido:', item.id);
           mostrarToast('Error interno: producto no reconocido. Contactá soporte.', 'error');
           mostrarEstadoQr('qr-estado-error');
           const errorSpan = document.getElementById('qr-error-texto');
@@ -922,9 +1218,9 @@ document.addEventListener('DOMContentLoaded', () => {
         items.push({ producto_id: prodId, cantidad: item.cantidad });
 
         if (item.topping) {
-          const topId = MAPA_TOPPING_ID[item.topping.id];
-          if (topId === undefined) {
-            console.error('[generarPagoQr] ID de topping no mapeado:', item.topping.id);
+          const topId = Number(item.topping.id);
+          if (!Number.isInteger(topId) || topId <= 0) {
+            console.error('[generarPagoQr] ID de topping no válido:', item.topping.id);
             mostrarToast('Error interno: topping no reconocido. Contactá soporte.', 'error');
             mostrarEstadoQr('qr-estado-error');
             const errorSpan = document.getElementById('qr-error-texto');
@@ -1099,6 +1395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlWhatsApp = `https://wa.me/${CONFIG.telefonoWhatsApp}?text=${encodeURIComponent(mensaje)}`;
 
     state.carrito = [];
+    guardarCarritoEnStorage();
     resetearEstadoPagoQr();
     state.metodoPago = 'efectivo';
     renderizarCarrito();
@@ -2495,6 +2792,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ocultar botones de Cocina y resetear etiquetas a Cliente
     actualizarPermisosAdminUI(false);
+    renderizarCatalogo();
 
     document.body.classList.remove('overflow-hidden');
   };
@@ -2525,6 +2823,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 5. Actualizar permisos de admin en la UI (botón Cocina KDS, badge)
     actualizarPermisosAdminUI(esUsuarioAdmin(usuario));
+    renderizarCatalogo();
 
     // 6. Cerrar el dropdown de usuario si estaba abierto
     const dropdownMenu = document.getElementById('dropdown-user-menu');
@@ -2759,6 +3058,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const esAdmin = esUsuarioAdmin(data.user);
           actualizarPermisosAdminUI(esAdmin);
+          renderizarCatalogo();
 
           const inputNombreCliente = document.getElementById('input-nombre');
           if (inputNombreCliente && !inputNombreCliente.value.trim()) {
@@ -2787,6 +3087,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const esAdmin = esUsuarioAdmin(userObj);
           actualizarPermisosAdminUI(esAdmin);
+          renderizarCatalogo();
 
           verificarRutaCocina();
           return;
@@ -2870,4 +3171,5 @@ document.addEventListener('DOMContentLoaded', () => {
   configurarEventListeners();
   verificarSesionExistente();
   inicializarGoogleSignIn();
+  cargarProductosDesdeApi();
 });
