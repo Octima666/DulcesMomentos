@@ -243,6 +243,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
+  const MAPA_PRODUCTO_ID = { 'prod-001':1,'prod-002':2,'prod-003':3,'prod-004':4,'prod-005':5,'prod-006':6 };
+  const MAPA_TOPPING_ID = { 'top-arandanos':101,'top-choco-blanco':102,'top-maracuya':103,'top-frutillas':104,'top-avellanas':105,'top-ddl':106,'top-caja-regalo':107,'top-chocolate':108,'top-tarjeta':109 };
+
   // ========================================================
   // 4. ESTADO GLOBAL
   // ========================================================
@@ -853,24 +856,36 @@ document.addEventListener('DOMContentLoaded', () => {
     detenerPollingPagoQr();
     state.pagoQr.intervaloPolling = setInterval(async () => {
       try {
-        const resp = await fetch(`${API_BASE_URL}/api/estado-pago-qr/${orderId}`);
+        const resp = await fetch(`${API_BASE_URL}/api/estado-pago-qr/${orderId}`, {
+          headers: { 'Authorization': `Bearer ${state.auth.token}` }
+        });
+        if (resp.status === 401) {
+          detenerPollingPagoQr();
+          mostrarEstadoQr('qr-estado-error');
+          const errorSpan = document.getElementById('qr-error-texto');
+          if (errorSpan) errorSpan.textContent = 'Tu sesión expiró. Iniciá sesión de nuevo.';
+          mostrarToast('Tu sesión expiró. Iniciá sesión de nuevo.', 'error');
+          actualizarBotonCheckoutUI();
+          return;
+        }
         const data = await resp.json();
         if (!resp.ok) return;
 
-        if (data.status === 'processed') {
-          // La orden fue pagada y acreditada
+        if (data.estado === 'pagado' || data.mp_status === 'processed') {
           state.pagoQr.confirmado = true;
           detenerPollingPagoQr();
           mostrarEstadoQr('qr-estado-confirmado');
           mostrarToast('¡Pago recibido! Ya podés confirmar tu pedido.', 'success');
           actualizarBotonCheckoutUI();
-        } else if (data.status === 'expired' || data.status === 'canceled') {
+        } else if (data.estado === 'cancelado' || data.mp_status === 'expired' || data.mp_status === 'canceled') {
           detenerPollingPagoQr();
           mostrarEstadoQr('qr-estado-error');
+          const errorSpan = document.getElementById('qr-error-texto');
+          if (errorSpan) errorSpan.textContent = 'El QR expiró o el pago fue cancelado. Generá uno nuevo.';
           mostrarToast('El QR expiró o el pago fue cancelado. Generá uno nuevo.', 'error');
           actualizarBotonCheckoutUI();
         }
-        // Si status === 'created', seguimos esperando sin hacer nada.
+        // Si estado === 'pendiente', seguimos esperando.
       } catch (err) {
         console.error('[Polling Pago QR] Error:', err);
       }
@@ -878,36 +893,65 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const generarPagoQr = async () => {
-    const subtotal = state.carrito.reduce((acc, item) => acc + item.subtotal, 0);
-    const costoEnvio = state.tipoEntrega === 'delivery' ? CONFIG.costoEnvioFijo : 0;
-    const total = subtotal + costoEnvio;
-
-    if (state.carrito.length === 0 || total <= 0) return;
+    if (state.carrito.length === 0) return;
 
     resetearEstadoPagoQr();
     mostrarEstadoQr('qr-estado-cargando');
     actualizarBotonCheckoutUI();
 
     try {
-      const items = state.carrito.map((item) => ({
-        title: item.nombre,
-        unit_price: Math.round(item.subtotal / item.cantidad),
-        quantity: item.cantidad
-      }));
+      if (!state.auth?.token) {
+        mostrarToast('Iniciá sesión para pagar con QR.', 'error');
+        mostrarEstadoQr('qr-estado-error');
+        const errorSpan = document.getElementById('qr-error-texto');
+        if (errorSpan) errorSpan.textContent = 'Iniciá sesión para pagar con QR.';
+        return;
+      }
 
-      if (costoEnvio > 0) {
-        items.push({ title: 'Envío a domicilio', unit_price: costoEnvio, quantity: 1 });
+      const items = [];
+      for (const item of state.carrito) {
+        const prodId = MAPA_PRODUCTO_ID[item.id];
+        if (prodId === undefined) {
+          console.error('[generarPagoQr] ID de producto no mapeado:', item.id);
+          mostrarToast('Error interno: producto no reconocido. Contactá soporte.', 'error');
+          mostrarEstadoQr('qr-estado-error');
+          const errorSpan = document.getElementById('qr-error-texto');
+          if (errorSpan) errorSpan.textContent = 'Producto no reconocido: ' + item.id;
+          return;
+        }
+        items.push({ producto_id: prodId, cantidad: item.cantidad });
+
+        if (item.topping) {
+          const topId = MAPA_TOPPING_ID[item.topping.id];
+          if (topId === undefined) {
+            console.error('[generarPagoQr] ID de topping no mapeado:', item.topping.id);
+            mostrarToast('Error interno: topping no reconocido. Contactá soporte.', 'error');
+            mostrarEstadoQr('qr-estado-error');
+            const errorSpan = document.getElementById('qr-error-texto');
+            if (errorSpan) errorSpan.textContent = 'Topping no reconocido: ' + item.topping.id;
+            return;
+          }
+          items.push({ producto_id: topId, cantidad: item.cantidad });
+        }
       }
 
       const resp = await fetch(`${API_BASE_URL}/api/crear-pago-qr`, {
-  method: 'POST',
-  headers: { 
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${state.auth.token}`
-  },
-  body: JSON.stringify({ items, external_reference: `WEB-${Date.now()}` })
-});
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${state.auth.token}`
+        },
+        body: JSON.stringify({ items, delivery: state.tipoEntrega === 'delivery' })
+      });
       const data = await resp.json();
+
+      if (resp.status === 401) {
+        mostrarToast('Tu sesión expiró. Iniciá sesión de nuevo.', 'error');
+        mostrarEstadoQr('qr-estado-error');
+        const errorSpan = document.getElementById('qr-error-texto');
+        if (errorSpan) errorSpan.textContent = 'Tu sesión expiró. Iniciá sesión de nuevo.';
+        return;
+      }
 
       if (!resp.ok || !data.success) {
         throw new Error(data.error || 'No se pudo generar el QR.');
@@ -918,14 +962,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const imgQr = document.getElementById('qr-imagen-dinamica');
       const montoTexto = document.getElementById('qr-monto-texto');
       if (imgQr) imgQr.src = data.qr_image;
-      if (montoTexto) montoTexto.textContent = formatearMoneda(total);
+      if (montoTexto) montoTexto.textContent = formatearMoneda(data.total);
 
       mostrarEstadoQr('qr-estado-esperando');
       iniciarPollingPagoQr(data.order_id);
     } catch (err) {
       console.error('[generarPagoQr] Error:', err);
       mostrarEstadoQr('qr-estado-error');
-      mostrarToast('No pudimos generar el QR de pago. Probá de nuevo.', 'error');
+      const errorSpan = document.getElementById('qr-error-texto');
+      if (errorSpan) errorSpan.textContent = err.message || 'No pudimos generar el QR de pago.';
+      mostrarToast(err.message || 'No pudimos generar el QR de pago. Probá de nuevo.', 'error');
     } finally {
       actualizarBotonCheckoutUI();
     }
