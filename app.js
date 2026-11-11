@@ -481,6 +481,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchResultsBar = document.getElementById('search-results-bar');
     const searchResultsText = document.getElementById('search-results-text');
 
+    const esAdmin = Boolean(state.auth?.autenticado && esUsuarioAdmin(state.auth.usuario));
+
+    // Barra superior de administración (botón "+ Nuevo producto")
+    let barraAdmin = document.getElementById('admin-productos-barra');
+    if (!barraAdmin && contenedor.parentNode) {
+      barraAdmin = document.createElement('div');
+      barraAdmin.id = 'admin-productos-barra';
+      barraAdmin.className = 'mb-6 flex justify-end';
+      contenedor.parentNode.insertBefore(barraAdmin, contenedor);
+    }
+    if (barraAdmin) {
+      barraAdmin.style.display = esAdmin ? 'flex' : 'none';
+      barraAdmin.innerHTML = esAdmin ? `
+        <button id="btn-nuevo-producto" type="button" class="edit-prod-btn-new">
+          <span>+ Nuevo producto</span>
+        </button>
+      ` : '';
+      const btnNuevo = barraAdmin.querySelector('#btn-nuevo-producto');
+      if (btnNuevo) {
+        btnNuevo.onclick = (e) => {
+          e.preventDefault();
+          abrirModalEditarProducto(null);
+        };
+      }
+    }
+
     // Filtrar primero por categoria (si no es 'todos')
     let productosFiltrados = state.categoriaSeleccionada === 'todos'
       ? PRODUCTOS
@@ -748,9 +774,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const abrirModalEditarProducto = (prod) => {
+  const abrirModalEditarProducto = (prod = null) => {
     cerrarModalEditarProducto();
 
+    const esNuevo = !prod;
     const backdrop = document.createElement('div');
     backdrop.id = 'modal-editar-producto';
     backdrop.className = 'edit-prod-modal-backdrop';
@@ -759,41 +786,55 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="edit-prod-modal-card" role="dialog" aria-modal="true" aria-labelledby="edit-prod-modal-title">
         <div class="edit-prod-modal-header">
           <div class="edit-prod-modal-title-wrap">
-            <span class="edit-prod-modal-icon">✏️</span>
+            <span class="edit-prod-modal-icon">${esNuevo ? '✨' : '✏️'}</span>
             <div>
-              <h3 id="edit-prod-modal-title" class="edit-prod-modal-title">Editar Producto</h3>
-              <p class="edit-prod-modal-subtitle">ID #${prod.id} &bull; ${escapeHtml(prod.categoria || 'Catálogo')}</p>
+              <h3 id="edit-prod-modal-title" class="edit-prod-modal-title">${esNuevo ? 'Nuevo Producto' : 'Editar Producto'}</h3>
+              <p class="edit-prod-modal-subtitle">${esNuevo ? 'Completá los datos para agregar al catálogo' : `ID #${prod.id} &bull; ${escapeHtml(prod.categoria || 'Catálogo')}`}</p>
             </div>
           </div>
           <button type="button" class="edit-prod-btn-close" aria-label="Cerrar modal">&times;</button>
         </div>
 
         <form id="edit-prod-form" class="edit-prod-modal-body">
+          <div id="edit-prod-error-box" class="edit-prod-error-box hidden"></div>
+
           <div class="edit-prod-form-group">
             <label for="edit-prod-nombre" class="edit-prod-label">Nombre del Producto <span class="edit-prod-req">*</span></label>
-            <input type="text" id="edit-prod-nombre" class="edit-prod-input" required maxlength="200" value="${escapeHtml(prod.nombre)}" />
+            <input type="text" id="edit-prod-nombre" class="edit-prod-input" required maxlength="200" value="${escapeHtml(prod?.nombre || '')}" placeholder="Ej. Tarta de Frutillas" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="edit-prod-form-group">
+              <label for="edit-prod-precio" class="edit-prod-label">Precio ($ ARS) <span class="edit-prod-req">*</span></label>
+              <input type="number" id="edit-prod-precio" class="edit-prod-input" required min="0" step="any" value="${prod?.precio !== undefined ? prod.precio : ''}" placeholder="0" />
+            </div>
+
+            <div class="edit-prod-form-group">
+              <label for="edit-prod-categoria" class="edit-prod-label">Categoría</label>
+              <input type="text" id="edit-prod-categoria" class="edit-prod-input" maxlength="50" value="${escapeHtml(prod?.categoria || '')}" placeholder="Tortas, Postres, etc." />
+            </div>
           </div>
 
           <div class="edit-prod-form-group">
-            <label for="edit-prod-precio" class="edit-prod-label">Precio ($ ARS) <span class="edit-prod-req">*</span></label>
-            <input type="number" id="edit-prod-precio" class="edit-prod-input" required min="0" step="any" value="${prod.precio}" />
+            <label for="edit-prod-badge" class="edit-prod-label">Badge / Etiqueta destacada</label>
+            <input type="text" id="edit-prod-badge" class="edit-prod-input" maxlength="30" value="${escapeHtml(prod?.badge || '')}" placeholder="MÁS VENDIDO, GOURMET, etc." />
           </div>
 
           <div class="edit-prod-form-group">
             <label for="edit-prod-descripcion" class="edit-prod-label">Descripción</label>
-            <textarea id="edit-prod-descripcion" class="edit-prod-textarea" rows="3" placeholder="Descripción del producto...">${escapeHtml(prod.descripcion || '')}</textarea>
+            <textarea id="edit-prod-descripcion" class="edit-prod-textarea" rows="3" placeholder="Descripción detallada del producto...">${escapeHtml(prod?.descripcion || '')}</textarea>
           </div>
 
           <div class="edit-prod-form-group">
             <label for="edit-prod-imagen" class="edit-prod-label">URL de Imagen (http / https)</label>
-            <input type="url" id="edit-prod-imagen" class="edit-prod-input" placeholder="https://images.unsplash.com/..." value="${escapeHtml(prod.imagen || '')}" />
+            <input type="url" id="edit-prod-imagen" class="edit-prod-input" placeholder="https://images.unsplash.com/..." value="${escapeHtml(prod?.imagen || '')}" />
           </div>
 
           <div class="edit-prod-preview-container">
             <label class="edit-prod-label">Vista Previa</label>
             <div class="edit-prod-preview-box">
-              <img id="edit-prod-preview-img" src="${escapeHtml(prod.imagen || '')}" alt="Vista previa" class="edit-prod-preview-img" style="${prod.imagen ? 'display:block;' : 'display:none;'}" />
-              <span id="edit-prod-preview-placeholder" class="edit-prod-preview-placeholder" style="${prod.imagen ? 'display:none;' : 'display:flex;'}">
+              <img id="edit-prod-preview-img" src="${escapeHtml(prod?.imagen || '')}" alt="Vista previa" class="edit-prod-preview-img" style="${prod?.imagen ? 'display:block;' : 'display:none;'}" />
+              <span id="edit-prod-preview-placeholder" class="edit-prod-preview-placeholder" style="${prod?.imagen ? 'display:none;' : 'display:flex;'}">
                 Sin imagen seleccionada
               </span>
             </div>
@@ -802,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="edit-prod-modal-footer">
             <button type="button" class="edit-prod-btn-cancel">Cancelar</button>
             <button type="submit" id="edit-prod-btn-guardar" class="edit-prod-btn-save">
-              <span>Guardar Cambios</span>
+              <span>${esNuevo ? 'Crear Producto' : 'Guardar Cambios'}</span>
             </button>
           </div>
         </form>
@@ -815,6 +856,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = backdrop.querySelector('#edit-prod-form');
     const inputNombre = backdrop.querySelector('#edit-prod-nombre');
     const inputPrecio = backdrop.querySelector('#edit-prod-precio');
+    const inputCategoria = backdrop.querySelector('#edit-prod-categoria');
+    const inputBadge = backdrop.querySelector('#edit-prod-badge');
     const inputDesc = backdrop.querySelector('#edit-prod-descripcion');
     const inputImg = backdrop.querySelector('#edit-prod-imagen');
     const previewImg = backdrop.querySelector('#edit-prod-preview-img');
@@ -822,6 +865,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGuardar = backdrop.querySelector('#edit-prod-btn-guardar');
     const btnCancelar = backdrop.querySelector('.edit-prod-btn-cancel');
     const btnCerrar = backdrop.querySelector('.edit-prod-btn-close');
+    const errorBox = backdrop.querySelector('#edit-prod-error-box');
+
+    const mostrarErrorEnModal = (mensaje) => {
+      if (errorBox) {
+        errorBox.textContent = mensaje;
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      mostrarToast(mensaje, 'error');
+    };
+
+    const limpiarErrorEnModal = () => {
+      if (errorBox) {
+        errorBox.textContent = '';
+        errorBox.classList.add('hidden');
+      }
+    };
+
+    form.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', limpiarErrorEnModal));
 
     const actualizarPreview = () => {
       const url = (inputImg.value || '').trim();
@@ -855,23 +917,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      limpiarErrorEnModal();
+
       const nuevoNombre = (inputNombre.value || '').trim();
       const nuevoPrecio = Number(inputPrecio.value);
+      const nuevaCategoria = (inputCategoria.value || '').trim();
+      const nuevoBadge = (inputBadge.value || '').trim();
       const nuevaDesc = (inputDesc.value || '').trim();
       const nuevaImg = (inputImg.value || '').trim();
 
       if (!nuevoNombre) {
-        mostrarToast('El nombre del producto no puede estar vacío.', 'error');
+        mostrarErrorEnModal('El nombre del producto no puede estar vacío.');
         inputNombre.focus();
         return;
       }
       if (isNaN(nuevoPrecio) || nuevoPrecio < 0) {
-        mostrarToast('El precio debe ser un número mayor o igual a 0.', 'error');
+        mostrarErrorEnModal('El precio debe ser un número mayor o igual a 0.');
         inputPrecio.focus();
         return;
       }
       if (nuevaImg && !/^https?:\/\/.+/i.test(nuevaImg)) {
-        mostrarToast('La URL de imagen debe comenzar con http:// o https://', 'error');
+        mostrarErrorEnModal('La URL de imagen debe comenzar con http:// o https://');
         inputImg.focus();
         return;
       }
@@ -881,22 +947,43 @@ document.addEventListener('DOMContentLoaded', () => {
       btnGuardar.innerHTML = '<span>Guardando...</span>';
 
       try {
-        const resp = await fetch(`${API_BASE_URL}/api/admin/productos/${prod.id}`, {
-          method: 'PUT',
+        const urlEndpoint = esNuevo
+          ? `${API_BASE_URL}/api/admin/productos`
+          : `${API_BASE_URL}/api/admin/productos/${prod.id}`;
+
+        const method = esNuevo ? 'POST' : 'PUT';
+
+        const payload = esNuevo
+          ? {
+              nombre: nuevoNombre,
+              precio: nuevoPrecio,
+              descripcion: nuevaDesc || null,
+              imagen: nuevaImg || null,
+              categoria: nuevaCategoria || null,
+              badge: nuevoBadge || null,
+              tipo: 'producto',
+              activo: true
+            }
+          : {
+              nombre: nuevoNombre,
+              precio: nuevoPrecio,
+              descripcion: nuevaDesc || null,
+              imagen: nuevaImg || null,
+              categoria: nuevaCategoria || null,
+              badge: nuevoBadge || null
+            };
+
+        const resp = await fetch(urlEndpoint, {
+          method,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${state.auth?.token || ''}`
           },
-          body: JSON.stringify({
-            nombre: nuevoNombre,
-            precio: nuevoPrecio,
-            descripcion: nuevaDesc,
-            imagen: nuevaImg || null
-          })
+          body: JSON.stringify(payload)
         });
 
         if (resp.status === 401 || resp.status === 403) {
-          mostrarToast('Tu sesión es inválida o expiró. Iniciá sesión como administrador.', 'error');
+          mostrarErrorEnModal('Tu sesión es inválida o expiró. Iniciá sesión como administrador.');
           btnGuardar.disabled = false;
           btnGuardar.innerHTML = textoOriginal;
           return;
@@ -905,26 +992,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await resp.json().catch(() => ({}));
 
         if (!resp.ok || !data.success) {
-          mostrarToast(data.error || 'Error al actualizar el producto.', 'error');
+          mostrarErrorEnModal(data.error || 'Error al guardar el producto.');
           btnGuardar.disabled = false;
           btnGuardar.innerHTML = textoOriginal;
           return;
         }
 
-        const pEnCatalogo = PRODUCTOS.find(p => String(p.id) === String(prod.id));
-        if (pEnCatalogo) {
-          pEnCatalogo.nombre = data.producto?.nombre || nuevoNombre;
-          pEnCatalogo.precio = Number(data.producto?.precio ?? nuevoPrecio);
-          pEnCatalogo.descripcion = data.producto?.descripcion ?? nuevaDesc;
-          pEnCatalogo.imagen = data.producto?.imagen ?? nuevaImg;
-        }
-
         cerrarModalEditarProducto();
-        renderizarCatalogo();
-        mostrarToast('Producto actualizado', 'success');
+        await cargarProductosDesdeApi();
+        mostrarToast(esNuevo ? 'Producto creado con éxito' : 'Producto actualizado', 'success');
       } catch (err) {
-        console.error('[Editar Producto] Error:', err);
-        mostrarToast('Error de conexión al guardar el producto.', 'error');
+        console.error('[Guardar Producto] Error:', err);
+        mostrarErrorEnModal('Error de conexión al guardar el producto.');
         btnGuardar.disabled = false;
         btnGuardar.innerHTML = textoOriginal;
       }

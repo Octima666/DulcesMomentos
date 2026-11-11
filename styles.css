@@ -1572,3 +1572,39 @@ body:not(.is-logged-in):not(.user-logged-in) #nav-user-container {
     height: 110px;
   }
 }
+
+.edit-prod-btn-new {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-pink-hover) 100%);
+  color: #fff;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px -3px rgba(224, 58, 108, 0.45);
+  transition: all 0.2s ease;
+}
+
+.edit-prod-btn-new:hover {
+  opacity: 0.92;
+  box-shadow: 0 6px 20px -3px rgba(224, 58, 108, 0.6);
+  transform: translateY(-1px);
+}
+
+.edit-prod-btn-new:active {
+  transform: scale(0.97);
+}
+
+.edit-prod-error-box {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
