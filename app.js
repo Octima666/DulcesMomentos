@@ -3030,13 +3030,28 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Pre-activar visualmente si hay usuario en caché para evitar cualquier parpadeo
+    // Si hay token y usuario guardado en localStorage (y el JSON es válido),
+    // setear state.auth de inmediato para evitar que fallen acciones mientras despierta el backend
+    let userObjInicial = null;
     const userGuardadoInicial = localStorage.getItem(STORAGE_KEYS.USUARIO);
     if (userGuardadoInicial) {
       try {
-        const userObjInicial = JSON.parse(userGuardadoInicial);
-        actualizarRenderizadoAuthNav(true, userObjInicial);
-      } catch (e) {}
+        const parsed = JSON.parse(userGuardadoInicial);
+        if (parsed && typeof parsed === 'object') {
+          userObjInicial = parsed;
+          state.auth = { token, usuario: userObjInicial, autenticado: true };
+          actualizarRenderizadoAuthNav(true, userObjInicial);
+          actualizarPermisosAdminUI(esUsuarioAdmin(userObjInicial));
+          renderizarCatalogo();
+
+          const inputNombreCliente = document.getElementById('input-nombre');
+          if (inputNombreCliente && !inputNombreCliente.value.trim()) {
+            inputNombreCliente.value = `${userObjInicial.nombre || ''} ${userObjInicial.apellido || ''}`.trim();
+          }
+        }
+      } catch (e) {
+        userObjInicial = null;
+      }
     }
 
     try {
@@ -3049,7 +3064,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.user) {
-          // Sesión válida: aplicar sin abrir modal ni ejecutar acción pendiente
+          // Sesión válida en backend: sincronizar datos
           state.auth = { token, usuario: data.user, autenticado: true };
           localStorage.setItem(STORAGE_KEYS.TOKEN, token);
           localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(data.user));
@@ -3070,31 +3085,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Token inválido: limpiar, dejar como anónimo (sin abrir modal)
-      localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.USUARIO);
-      bloquearVistaYMostrarAuth();
+      // Solo si responde 401 o 403, cerrar la sesión (token revocado o expirado)
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USUARIO);
+        bloquearVistaYMostrarAuth();
+        verificarRutaCocina();
+        return;
+      }
+
+      // Si responde cualquier otro error (500, 502, 503, 504):
+      // Si había usuario local, se mantiene la sesión. Si no había, se limpia.
+      if (!userObjInicial) {
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USUARIO);
+        bloquearVistaYMostrarAuth();
+      }
       verificarRutaCocina();
     } catch (error) {
       console.warn('Error al verificar sesión en backend:', error);
-      const userGuardado = localStorage.getItem(STORAGE_KEYS.USUARIO);
-      if (userGuardado) {
-        try {
-          const userObj = JSON.parse(userGuardado);
-          // Sesión local como fallback offline (sin abrir modal)
-          state.auth = { token, usuario: userObj, autenticado: true };
-          actualizarRenderizadoAuthNav(true, userObj);
-
-          const esAdmin = esUsuarioAdmin(userObj);
-          actualizarPermisosAdminUI(esAdmin);
-          renderizarCatalogo();
-
-          verificarRutaCocina();
-          return;
-        } catch (e) {}
+      // Falla de red: mantener la sesión local si existe; si no había usuario, limpiar
+      if (!userObjInicial) {
+        bloquearVistaYMostrarAuth();
       }
-      // Error de red sin datos locales: dejar como anónimo (sin abrir modal)
-      bloquearVistaYMostrarAuth();
       verificarRutaCocina();
     }
   };
