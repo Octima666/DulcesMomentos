@@ -2291,7 +2291,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let sesion2FAPendiente = {
       email: '',
       origen: 'login', // 'login' | 'register'
-      datos: null
+      datos: null,
+      password: '',
+      tempUserData: null
     };
 
     // Referencias UI Formulario 3 (Verificación PIN)
@@ -2326,6 +2328,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const ocultarPantallaPIN = () => {
+      delete sesion2FAPendiente.password;
+      delete sesion2FAPendiente.tempUserData;
       if (formVerifyPin) formVerifyPin.classList.add('hidden');
       if (sesion2FAPendiente.origen === 'register') {
         activarPestanaAuth('register');
@@ -2346,13 +2350,17 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
 
       const correo = (inputLoginCorreo?.value || '').trim();
+      const password = (inputLoginPassword?.value || document.getElementById('login-password')?.value || '').trim();
 
-      if (!correo) {
+      if (!correo || !password) {
         if (alertaLogin && alertaLoginTexto) {
-          alertaLoginTexto.textContent = 'Por favor, ingresá tu correo electrónico.';
+          alertaLoginTexto.textContent = !correo
+            ? 'Por favor, ingresá tu correo electrónico.'
+            : 'Por favor, ingresá tu contraseña.';
           alertaLogin.classList.remove('hidden');
         }
-        inputLoginCorreo?.focus();
+        if (!correo) inputLoginCorreo?.focus();
+        else (inputLoginPassword || document.getElementById('login-password'))?.focus();
         return;
       }
 
@@ -2375,20 +2383,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch(`${API_BASE_URL}/api/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: correo })
+          body: JSON.stringify({ email: correo, password })
         });
 
         const data = await response.json();
 
         if (response.ok && data.requires2FA) {
+          sesion2FAPendiente.password = password;
           mostrarPantallaPIN(correo, 'login', data.message);
         } else {
+          delete sesion2FAPendiente.password;
           if (alertaLogin && alertaLoginTexto) {
-            alertaLoginTexto.textContent = data.error || 'No se pudo enviar el código. Verificá el correo ingresado.';
+            alertaLoginTexto.textContent = data.error || 'No se pudo enviar el código. Verificá los datos ingresados.';
             alertaLogin.classList.remove('hidden');
           }
         }
       } catch (err) {
+        delete sesion2FAPendiente.password;
         console.error('Error en login 2FA:', err);
         if (alertaLogin && alertaLoginTexto) {
           alertaLoginTexto.textContent = `Error de conexión con el backend en ${API_BASE_URL}. Asegúrate de que el servidor esté activo.`;
@@ -2466,6 +2477,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (response.ok && data.requires2FA) {
           sesion2FAPendiente.datos = { nombre, apellido, correo, password };
+          sesion2FAPendiente.tempUserData = data.tempUserData || null;
           mostrarPantallaPIN(correo, 'register', data.message);
         } else {
           if (alertaRegister && alertaRegisterTexto) {
@@ -2516,15 +2528,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (alertaPin) alertaPin.classList.add('hidden');
 
       try {
+        const payload = sesion2FAPendiente.origen === 'register'
+          ? { email, code, isRegister: true, userData: sesion2FAPendiente.tempUserData }
+          : { email, code };
+
         const response = await fetch(`${API_BASE_URL}/api/verify-code`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, code })
+          body: JSON.stringify(payload)
         });
 
         const data = await response.json();
 
         if (response.ok && data.success) {
+          delete sesion2FAPendiente.password;
+          delete sesion2FAPendiente.tempUserData;
           // Éxito: dar acceso al usuario
           if (formVerifyPin) formVerifyPin.classList.add('hidden');
           if (formLogin) formLogin.reset();
@@ -2570,7 +2588,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const endpoint = sesion2FAPendiente.origen === 'register' ? '/api/register' : '/api/login';
         const payload = sesion2FAPendiente.origen === 'register' && sesion2FAPendiente.datos
           ? sesion2FAPendiente.datos
-          : { email };
+          : { email, password: sesion2FAPendiente.password };
 
         const res = await fetch(`${API_BASE_URL}${endpoint}`, {
           method: 'POST',
@@ -2580,6 +2598,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const resData = await res.json();
 
         if (res.ok && resData.requires2FA) {
+          if (sesion2FAPendiente.origen === 'register' && resData.tempUserData) {
+            sesion2FAPendiente.tempUserData = resData.tempUserData;
+          }
           if (inputCodigoPin) {
             inputCodigoPin.value = '';
             inputCodigoPin.focus();
