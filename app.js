@@ -589,9 +589,6 @@ document.addEventListener('DOMContentLoaded', () => {
               src="${prod.imagen}" 
               alt="${prod.nombre}" 
               loading="lazy"
-              decoding="async"
-              width="400"
-              height="300"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             >
             
@@ -2991,18 +2988,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /**
    * Inicializa Google Identity Services y renderiza el botón oficial en el contenedor del modal
    */
-  const cargarScriptGoogleGsi = () => {
-    if (typeof window.google !== 'undefined' && window.google?.accounts?.id) return;
-    if (document.querySelector('script[src*="accounts.google.com/gsi/client"]')) return;
-    const s = document.createElement('script');
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.async = true;
-    s.defer = true;
-    document.head.appendChild(s);
-  };
-
   const inicializarGoogleSignIn = () => {
-    cargarScriptGoogleGsi();
     const contenedor = document.getElementById('google-login-btn-container');
     if (!contenedor) return;
 
@@ -3267,15 +3253,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (elYear) elYear.textContent = new Date().getFullYear();
 
   cargarEstadoInicial();
-  // Evitar doble render visible: cargarProductosDesdeApi() ya llama a renderizarCatalogo()
+  renderizarCatalogo();
   actualizarBadges();
   configurarEventListeners();
   verificarSesionExistente();
-  // Carga Google GSI en idle para no bloquear la inicialización en móviles lentos
-  if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(() => inicializarGoogleSignIn(), { timeout: 3500 });
-  } else {
-    setTimeout(inicializarGoogleSignIn, 2500);
-  }
+  inicializarGoogleSignIn();
   cargarProductosDesdeApi();
 });

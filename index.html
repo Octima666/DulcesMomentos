@@ -6,21 +6,55 @@
   <title>Dulces Momentos | Pastelería Artesanal Boutique</title>
   <meta name="description" content="Dulces Momentos - Pastelería artesanal gourmet en Puerto Iguazú. Creaciones de autor, tortas personalizadas y pedidos online.">
 
-  <!-- Preconnect & Fuentes Asíncronas (No bloqueantes) -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" media="print" onload="this.media='all'">
-  <noscript>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
-  </noscript>
-
-  <!-- Preload de imagen LCP (Hero) -->
-  <link rel="preload" as="image" href="hero-mobile.webp" type="image/webp" media="(max-width: 640px)" fetchpriority="high">
-  <link rel="preload" as="image" href="hero.webp" type="image/webp" media="(min-width: 641px)" fetchpriority="high">
-
-  <!-- Hojas de estilo locales compiladas -->
-  <link rel="stylesheet" href="tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e03a6c', // Rosa / Magenta primario del diseño
+              700: '#be123c',
+              800: '#9f1239',
+              900: '#881337',
+              950: '#4c0519',
+            },
+            dark: {
+              bg: '#0c090c',
+              surface: '#140f13',
+              card: '#181317',
+              border: '#2a1e27',
+              borderLight: '#382534'
+            }
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            script: ['"Alex Brush"', 'cursive'],
+            handwriting: ['"Caveat"', 'cursive'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"Space Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Google Identity Services (Sign In with Google) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <!-- Favicon / ícono de pestaña y de "agregar a pantalla de inicio" -->
   <link rel="icon" type="image/jpeg" href="logo.jpeg">
@@ -55,7 +89,7 @@
       <!-- ── LOGO ──────────────────────────────────────── -->
       <a href="#catalogo" class="flex items-center gap-2 sm:gap-2.5 shrink-0 min-w-0">
         <div class="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full overflow-hidden shadow-lg shadow-brand-600/30 shrink-0 bg-white">
-          <img src="logo.webp" alt="Dulces Momentos" width="40" height="40" decoding="async" class="w-full h-full object-cover">
+          <img src="logo.jpeg" alt="Dulces Momentos" class="w-full h-full object-cover">
         </div>
         <div class="min-w-0">
           <span class="font-serif text-sm sm:text-lg lg:text-xl font-bold tracking-tight text-white block leading-tight truncate">Dulces Momentos</span>
@@ -377,7 +411,7 @@
         <!-- Encabezado del Portal -->
         <div class="text-center mb-6">
           <div class="w-14 h-14 mx-auto mb-3 rounded-full overflow-hidden shadow-lg shadow-brand-600/30 transform hover:scale-105 transition-transform bg-white">
-  <img src="logo.webp" alt="Dulces Momentos" width="56" height="56" loading="lazy" decoding="async" class="w-full h-full object-cover">
+  <img src="logo.jpeg" alt="Dulces Momentos" class="w-full h-full object-cover">
 </div>
           <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">Dulces Momentos</h2>
           <p id="auth-modal-subtitulo" class="text-xs text-stone-400 mt-1">Iniciá sesión o registrate para acceder a nuestra carta exclusiva y realizar pedidos.</p>
@@ -786,18 +820,11 @@
           <div class="relative w-full max-w-md group">
             <!-- Imagen Hero -->
             <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-[#382232] bg-[#140e13]">
-              <picture>
-                <source srcset="hero-mobile.webp" media="(max-width: 640px)" type="image/webp">
-                <source srcset="hero.webp" type="image/webp">
-                <img
-                  src="hero.webp"
-                  alt="Porción de torta de chocolate gourmet con frutillas - Dulces Momentos"
-                  fetchpriority="high"
-                  width="800"
-                  height="533"
-                  class="w-full h-[240px] sm:h-[320px] lg:h-[380px] object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
-                >
-              </picture>
+              <img
+                src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1000&q=85"
+                alt="Porción de torta de chocolate gourmet con frutillas - Dulces Momentos"
+                class="w-full h-[240px] sm:h-[320px] lg:h-[380px] object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
+              >
               <div class="absolute inset-0 bg-gradient-to-t from-[#0c090c]/80 via-transparent to-transparent"></div>
             </div>
 
@@ -1336,6 +1363,6 @@
   </a>
 
   <!-- Script Principal -->
-  <script src="app.js" defer></script>
+  <script src="app.js"></script>
 </body>
 </html>
