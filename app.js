@@ -589,6 +589,9 @@ document.addEventListener('DOMContentLoaded', () => {
               src="${prod.imagen}" 
               alt="${prod.nombre}" 
               loading="lazy"
+              decoding="async"
+              width="400"
+              height="300"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             >
             
