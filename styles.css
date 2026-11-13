@@ -3,7 +3,7 @@
 /* Pastelería Boutique "Dulces Momentos"                     */
 /* ======================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+/* Google Fonts cargado asincronicamente desde index.html */
 
 /* ── BASE RESET (Mobile-first) ─────────────────────────── */
 /* box-sizing global, sin afectar los fixed-size de WA/carrito */
@@ -1608,4 +1608,51 @@ body:not(.is-logged-in):not(.user-logged-in) #nav-user-container {
   color: #fca5a5;
   font-size: 0.8rem;
   line-height: 1.4;
+}
+
+
+/* ======================================================== */
+/* OPTIMIZACIONES DE RENDIMIENTO MÓVIL Y ACCESIBILIDAD      */
+/* ======================================================== */
+#catalogo-productos {
+  min-height: 520px;
+}
+
+@media (max-width: 768px) {
+  /* Evitar compositing y repaints continuos en GPU/CPU de gama media/baja */
+  .whatsapp-flotante {
+    animation: none !important;
+  }
+  
+  .filter.blur-2xl,
+  .filter.blur-xl {
+    filter: none !important;
+  }
+
+  header {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: #0c090c !important;
+  }
+
+  .hero-tag-decorativo {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: rgba(24, 19, 24, 0.98) !important;
+  }
+
+  .product-card span,
+  .product-card button {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
